@@ -6,8 +6,8 @@ import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
 @EnableScheduling
-class OnionDddApplication
+class PreCrimeApplication
 
 fun main(args: Array<String>) {
-    runApplication<OnionDddApplication>(*args)
+    runApplication<PreCrimeApplication>(*args)
 }

@@ -1,4 +1,4 @@
-package ch.ejpd.example.precrime.infrastructure.integration.messaging
+package ch.ejpd.example.precrime.infrastructure.integration.event
 
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.field

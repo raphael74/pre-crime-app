@@ -1,4 +1,4 @@
-package ch.ejpd.example.precrime.infrastructure.integration.messaging
+package ch.ejpd.example.precrime.infrastructure.integration.event
 
 import ch.ejpd.example.precrime.application.event.DomainEventPublisher
 import org.jooq.DSLContext

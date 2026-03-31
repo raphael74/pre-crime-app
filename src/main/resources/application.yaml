@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: onion-ddd
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  datasource:
+    url: jdbc:postgresql://localhost:5432/precrime
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    baseline-on-migrate: true
+    clean-disabled: false
+jooq:
+  sql-dialect: postgres
+precrime:
+  flyway:
+    clean-on-validation-error: true
+logging:
+  level:
+    org.jooq: DEBUG
+    org.flywaydb: INFO

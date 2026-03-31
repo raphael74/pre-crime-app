@@ -1,12 +1,11 @@
 package ch.ejpd.example.precrime.application
 
+import ch.ejpd.example.precrime.application.event.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecuted
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseen
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
 import org.slf4j.LoggerFactory
-import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class PreCrimeApplicationService(
     private val precogRepository: PrecogDivisionRepository,
     private val enforcementRepository: LawEnforcementRepository,
-    private val eventPublisher: ApplicationEventPublisher
+    private val domainEventPublisher: DomainEventPublisher
 ) {
     val logger = LoggerFactory.getLogger(javaClass)
 
@@ -25,20 +24,18 @@ class PreCrimeApplicationService(
         val event = division.foreseeCrime(perpetrator, crimeType)
         precogRepository.save(division)
         logger.info("🔮 [PrecogDivision] Foresee: $perpetrator will commit $crimeType! Publishing event...")
-        eventPublisher.publishEvent(event)
+        domainEventPublisher.publish(event)
     }
 
-    @EventListener
     @Transactional
     fun onCrimeForeseen(event: CrimeForeseen) {
         logger.info("🚓 [LawEnforcement] Received vision: ${event.perpetrator} planning ${event.crimeType}. Deploying jetpacks!")
         val unit = enforcementRepository.findSingleton()
         val arrestEvent = unit.executePreArrest(event.visionId, event.perpetrator)
         enforcementRepository.save(unit)
-        eventPublisher.publishEvent(arrestEvent)
+        domainEventPublisher.publish(arrestEvent)
     }
 
-    @EventListener
     @Transactional
     fun onPreArrestExecuted(event: PreArrestExecuted) {
         logger.info("✅ [PrecogDivision] Received pre-arrest confirmation for ${event.perpetrator}. Updating stats.")

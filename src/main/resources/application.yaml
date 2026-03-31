@@ -1,7 +1,8 @@
 spring:
   application:
-    name: onion-ddd
+    name: pre-crime-app
   kafka:
+    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -20,5 +21,5 @@ precrime:
     clean-on-validation-error: true
 logging:
   level:
-    org.jooq: DEBUG
+    org.jooq: INFO
     org.flywaydb: INFO

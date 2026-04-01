@@ -39,10 +39,10 @@ jobs:
         mkdir -p src/main/resources/static
         cp -r ui/dist/precrime-ui/* src/main/resources/static/
 
-    - name: Build Backend with Maven
+    - name: Build Backend and Run Tests
       run: |
         chmod +x mvnw
-        ./mvnw clean package -DskipTests
+        ./mvnw clean package
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4

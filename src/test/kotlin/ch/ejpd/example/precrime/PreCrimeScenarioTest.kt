@@ -7,12 +7,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.TestPropertySource
 import java.util.concurrent.TimeUnit
 
 @SpringBootTest
 @EmbeddedKafka(partitions = 1)
 @TestPropertySource("/application-test.properties")
+@DirtiesContext
 class PreCrimeScenarioTest {
 
     @Autowired
@@ -33,6 +35,5 @@ class PreCrimeScenarioTest {
             val updatedCrimeCount = applicationService.getPreventedCrimesCount()
             assertThat(updatedCrimeCount).isEqualTo(initialCrimeCount + 1)
         }
-
     }
 }

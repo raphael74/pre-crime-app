@@ -6,13 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.client.RestTestClient
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureRestTestClient
 @AutoConfigureMockMvc
 @TestPropertySource("/application-test.properties")
+@Transactional
+@DirtiesContext
 class PreCrimeControllerSecurityTest(@Autowired private val restTestClient: RestTestClient) {
 
     @Test

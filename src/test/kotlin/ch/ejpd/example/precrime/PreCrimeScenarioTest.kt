@@ -1,29 +1,27 @@
 package ch.ejpd.example.precrime
 
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
-import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.TestPropertySource
-import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.TimeUnit
 
 @SpringBootTest
+@EmbeddedKafka(partitions = 1)
 @TestPropertySource("/application-test.properties")
 class PreCrimeScenarioTest {
 
     @Autowired
     private lateinit var applicationService: PreCrimeApplicationService
 
-    @Autowired
-    private lateinit var precogRepository: PrecogDivisionRepository
-
     @Test
-    @Transactional
     fun `a future crime foreseen results in a pre-arrest and updated stats`() {
         // GIVEN: The department is operational
-        val initialStats = precogRepository.findSingleton().totalCrimesPrevented
+        val initialCrimeCount = applicationService.getPreventedCrimesCount()
 
         // WHEN: Precogs foresee a crime
         val perpetrator = "John Anderton"
@@ -31,8 +29,10 @@ class PreCrimeScenarioTest {
         applicationService.triggerVision(perpetrator, crimeType)
 
         // THEN: The statistics should be updated via the bidirectional event flow
-        val updatedStats = precogRepository.findSingleton().totalCrimesPrevented
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted {
+            val updatedCrimeCount = applicationService.getPreventedCrimesCount()
+            assertThat(updatedCrimeCount).isEqualTo(initialCrimeCount + 1)
+        }
 
-        assertThat(updatedStats).isEqualTo(initialStats + 1)
     }
 }

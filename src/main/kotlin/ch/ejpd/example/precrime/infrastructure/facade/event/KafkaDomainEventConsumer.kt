@@ -1,4 +1,4 @@
-package ch.ejpd.example.precrime.infrastructure.integration.event
+package ch.ejpd.example.precrime.infrastructure.facade.event
 
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecuted

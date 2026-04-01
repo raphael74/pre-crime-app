@@ -11,13 +11,13 @@
     <aside class="panel">
         <div class="scanner"></div>
         <h2>Precog Input</h2>
-        <div class="vision-form">
+        <form #visionForm="ngForm" (ngSubmit)="triggerVision()" class="vision-form">
             <label>Target Perpetrator</label>
-            <input [(ngModel)]="perpetrator" placeholder="NAME...">
+            <input [(ngModel)]="perpetrator" name="perpetrator" placeholder="NAME..." required>
             <label>Projected Crime</label>
-            <input [(ngModel)]="crimeType" placeholder="CRIME TYPE...">
-            <button (click)="triggerVision()">Submit to Precogs</button>
-        </div>
+            <input [(ngModel)]="crimeType" name="crimeType" placeholder="CRIME TYPE..." required>
+            <button [disabled]="visionForm.invalid" type="submit">Submit to Precogs</button>
+        </form>
     </aside>
 
     <main class="panel">

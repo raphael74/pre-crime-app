@@ -1,42 +1,28 @@
 package ch.ejpd.example.precrime.infrastructure.integration.event
 
-import org.jooq.DSLContext
-import org.jooq.impl.DSL.field
-import org.jooq.impl.DSL.table
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqOutboxRepository
+import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.OffsetDateTime
-import java.util.*
 
 @Component
 class TransactionalOutboxProcessor(
-    private val dsl: DSLContext,
+    private val outboxRepository: JooqOutboxRepository,
     private val kafkaTemplate: KafkaTemplate<String, String>
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(fixedDelay = 1000)
     @Transactional
     fun processOutbox() {
-        val records = dsl.selectFrom(table("outbox"))
-            .where(field("status").eq("PENDING"))
-            .forUpdate()
-            .skipLocked()
-            .fetch()
+        val outboxRecords = outboxRepository.findPendingForUpdate()
+        logger.info("Found ${outboxRecords.size} events to process")
 
-        records.forEach { record ->
-            val id = record.get("id", UUID::class.java)
-            val eventType = record.get("event_type", String::class.java)
-            val payload = record.get("payload", String::class.java)
-
-            sendKafkaEvent(eventType, payload)
-
-            dsl.update(table("outbox"))
-                .set(field("status", String::class.java), "PROCESSED")
-                .set(field("processed_at", OffsetDateTime::class.java), OffsetDateTime.now())
-                .where(field("id").eq(id))
-                .execute()
+        outboxRecords.forEach { outboxRecord ->
+            sendKafkaEvent(outboxRecord.eventType, outboxRecord.payload)
+            outboxRepository.markAsProcessed(outboxRecord.id)
         }
     }
 

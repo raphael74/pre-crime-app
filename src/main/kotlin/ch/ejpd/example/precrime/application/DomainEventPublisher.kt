@@ -1,4 +1,4 @@
-package ch.ejpd.example.precrime.application.event
+package ch.ejpd.example.precrime.application
 
 interface DomainEventPublisher {
     /**

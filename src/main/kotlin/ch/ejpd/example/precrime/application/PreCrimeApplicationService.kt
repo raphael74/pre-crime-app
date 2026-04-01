@@ -1,6 +1,5 @@
 package ch.ejpd.example.precrime.application
 
-import ch.ejpd.example.precrime.application.event.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecuted
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseen
@@ -17,6 +16,11 @@ class PreCrimeApplicationService(
     private val domainEventPublisher: DomainEventPublisher
 ) {
     val logger = LoggerFactory.getLogger(javaClass)
+
+    @Transactional(readOnly = true)
+    fun getPreventedCrimesCount(): Int {
+        return precogRepository.findSingleton().totalCrimesPrevented
+    }
 
     @Transactional
     fun triggerVision(perpetrator: String, crimeType: String) {

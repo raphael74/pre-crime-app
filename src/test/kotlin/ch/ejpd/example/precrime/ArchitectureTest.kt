@@ -8,7 +8,7 @@ import org.jmolecules.archunit.JMoleculesArchitectureRules
 import org.jmolecules.archunit.JMoleculesDddRules
 
 @AnalyzeClasses(
-    packages = ["ch.ejpd.example.onionddd"],
+    packages = ["ch.ejpd.example.precrime"],
     importOptions = [ImportOption.DoNotIncludeTests::class]
 )
 internal class ArchitectureTest {

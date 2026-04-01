@@ -1,18 +1,17 @@
 package ch.ejpd.example.precrime.infrastructure.integration.event
 
-import ch.ejpd.example.precrime.application.event.DomainEventPublisher
-import org.jooq.DSLContext
-import org.jooq.impl.DSL.field
-import org.jooq.impl.DSL.table
+import ch.ejpd.example.precrime.application.DomainEventPublisher
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqOutboxRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
-import java.util.*
 
 @Component
 class TransactionalOutboxPublisher(
-    private val dsl: DSLContext,
+    private val outboxRepository: JooqOutboxRepository,
     private val objectMapper: ObjectMapper
 ) : DomainEventPublisher {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @org.jmolecules.event.annotation.DomainEventPublisher
     override fun publish(event: Any) {
@@ -27,11 +26,7 @@ class TransactionalOutboxPublisher(
         val payload = objectMapper.writeValueAsString(event)
         val eventType = event::class.java.name
 
-        dsl.insertInto(table("outbox"))
-            .set(field("id", UUID::class.java), UUID.randomUUID())
-            .set(field("event_type", String::class.java), eventType)
-            .set(field("payload", String::class.java), payload)
-            .set(field("status", String::class.java), "PENDING")
-            .execute()
+        logger.info("Adding event $eventType to Outbox")
+        outboxRepository.create(eventType, payload)
     }
 }

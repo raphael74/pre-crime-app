@@ -15,6 +15,7 @@ class JooqLawEnforcementRepository(
     private val dsl: DSLContext,
     private val publisher: DomainEventPublisher
 ) : LawEnforcementRepository {
+
     private val UNIT_TABLE = table("law_enforcement_unit")
     private val ARREST_TABLE = table("pre_arrest")
     private val ID_COL = field("id", UUID::class.java)

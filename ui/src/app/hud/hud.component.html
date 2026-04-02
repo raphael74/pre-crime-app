@@ -13,9 +13,11 @@
         <h2>Precog Input</h2>
         <form #visionForm="ngForm" (ngSubmit)="triggerVision()" class="vision-form">
             <label>Target Perpetrator</label>
-            <input [ngModel]="perpetrator()" (ngModelChange)="perpetrator.set($event)" name="perpetrator" placeholder="NAME..." required>
+            <input (ngModelChange)="perpetrator.set($event)" [ngModel]="perpetrator()" name="perpetrator"
+                   placeholder="NAME..." required>
             <label>Projected Crime</label>
-            <input [ngModel]="crimeType()" (ngModelChange)="crimeType.set($event)" name="crimeType" placeholder="CRIME TYPE..." required>
+            <input (ngModelChange)="crimeType.set($event)" [ngModel]="crimeType()" name="crimeType"
+                   placeholder="CRIME TYPE..." required>
             <button [disabled]="visionForm.invalid" type="submit">Submit to Precogs</button>
         </form>
     </aside>
@@ -24,7 +26,7 @@
         <h2>Live Surveillance Feed</h2>
         <div class="log-feed">
             <div *ngFor="let log of logs()" class="log-entry">
-                [{{log.time}}] >> {{log.message}}
+                [{{ log.time }}] >> {{ log.message }}
             </div>
         </div>
     </main>
@@ -32,7 +34,7 @@
     <aside class="panel">
         <h2>Statistics</h2>
         <div style="font-size: 3em; text-align: center; margin-top: 20px;">
-            {{crimesPrevented()}}
+            {{ crimesPrevented() }}
         </div>
         <div style="text-align: center;">Crimes Prevented</div>
     </aside>

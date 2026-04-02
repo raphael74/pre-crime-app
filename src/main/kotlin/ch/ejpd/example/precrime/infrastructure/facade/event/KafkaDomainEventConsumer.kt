@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.facade.event
 
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecuted
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseen
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -25,7 +25,7 @@ class KafkaDomainEventConsumer(
     @KafkaListener(topics = ["pre-arrest-executed"], groupId = "pre-crime-group")
     fun onPreArrestExecuted(payload: String) {
         logger.info("📥 Received PreArrestExecuted from Kafka")
-        val event = objectMapper.readValue(payload, PreArrestExecuted::class.java)
+        val event = objectMapper.readValue(payload, PreArrestExecutedEvent::class.java)
         applicationService.onPreArrestExecuted(event)
     }
 }

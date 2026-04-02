@@ -1,22 +1,16 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
+import ch.ejpd.example.precrime.IntegrationTest
 import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.client.RestTestClient
-import org.springframework.transaction.annotation.Transactional
 
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureRestTestClient
 @AutoConfigureMockMvc
-@TestPropertySource("/application-test.properties")
-@Transactional
-@DirtiesContext
 class PreCrimeControllerSecurityTest(@Autowired private val restTestClient: RestTestClient) {
 
     @Test

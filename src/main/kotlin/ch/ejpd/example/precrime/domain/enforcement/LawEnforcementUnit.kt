@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.domain.enforcement
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
+import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.types.Identifier
@@ -9,35 +10,39 @@ import java.util.*
 
 @AggregateRoot
 class LawEnforcementUnit(
-    @Identity val id: EnforcementUnitId = EnforcementUnitId(UUID.randomUUID()),
+    @Identity val id: EnforcementUnitId = EnforcementUnitId(),
     val unitName: String = "Pre-Crime Response Team Alpha"
 ) {
-    private val activeArrests = mutableSetOf<PreArrest>()
+    private val preArrests = mutableSetOf<PreArrest>()
     private var publisher: DomainEventPublisher? = null
 
     fun register(publisher: DomainEventPublisher) {
         this.publisher = publisher
     }
 
-    fun executePreArrest(visionId: UUID, perpetrator: String): PreArrestExecuted {
-        activeArrests.add(PreArrest(UUID.randomUUID(), visionId, perpetrator, "ARRESTED_BEFORE_CRIME"))
-        val event = PreArrestExecuted(visionId, perpetrator)
+    fun executePreArrest(visionId: VisionId, perpetrator: String): PreArrestExecutedEvent {
+        preArrests.add(PreArrest(PreArrestId(), visionId, perpetrator, "ARRESTED_BEFORE_CRIME"))
+        val event = PreArrestExecutedEvent(visionId, perpetrator)
         publisher?.publish(event)
         return event
     }
 }
 
-data class EnforcementUnitId(val value: UUID) : Identifier
+//@JvmInline
+data class EnforcementUnitId(val value: UUID = UUID.randomUUID()) : Identifier
+
+@JvmInline
+value class PreArrestId(val value: UUID = UUID.randomUUID()) : Identifier
 
 data class PreArrest(
-    val id: UUID,
-    val visionId: UUID,
+    val id: PreArrestId,
+    val visionId: VisionId,
     val perpetrator: String,
     val status: String
 )
 
 @DomainEvent
-data class PreArrestExecuted(
-    val visionId: UUID,
+data class PreArrestExecutedEvent(
+    val visionId: VisionId,
     val perpetrator: String
 )

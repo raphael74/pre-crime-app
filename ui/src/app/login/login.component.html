@@ -8,12 +8,13 @@
         <h1 style="text-align: center; margin-bottom: 30px;">AUTH ACCESS</h1>
         <div class="vision-form">
             <label>Division ID</label>
-            <input [ngModel]="username()" (ngModelChange)="username.set($event)" placeholder="USERNAME..." type="text">
+            <input (ngModelChange)="username.set($event)" [ngModel]="username()" placeholder="USERNAME..." type="text">
             <label>Access Key</label>
-            <input [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="PASSWORD..." type="password">
+            <input (ngModelChange)="password.set($event)" [ngModel]="password()" placeholder="PASSWORD..."
+                   type="password">
             <button (click)="onLogin()">AUTHORIZE</button>
             <div *ngIf="error()" style="color: #ff4d4d; margin-top: 10px; text-align: center; font-size: 0.8em;">
-                ERROR: {{error()}}
+                ERROR: {{ error() }}
             </div>
         </div>
         <div style="margin-top: 30px; font-size: 0.7em; color: rgba(0, 242, 255, 0.5); text-align: center;">

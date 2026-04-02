@@ -5,22 +5,17 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.TestPropertySource
+import org.springframework.test.annotation.Rollback
 import java.util.concurrent.TimeUnit
 
-@SpringBootTest
-@EmbeddedKafka(partitions = 1)
-@TestPropertySource("/application-test.properties")
-@DirtiesContext
+@IntegrationTest
 class PreCrimeScenarioTest {
 
     @Autowired
     private lateinit var applicationService: PreCrimeApplicationService
 
     @Test
+    @Rollback(false)
     fun `a future crime foreseen results in a pre-arrest and updated stats`() {
         // GIVEN: The department is operational
         val initialCrimeCount = applicationService.getPreventedCrimesCount()
@@ -31,7 +26,7 @@ class PreCrimeScenarioTest {
         applicationService.triggerVision(perpetrator, crimeType)
 
         // THEN: The statistics should be updated via the bidirectional event flow
-        await().atMost(20, TimeUnit.SECONDS).untilAsserted {
+        await().pollInterval(1, TimeUnit.SECONDS).atMost(10, TimeUnit.SECONDS).untilAsserted {
             val updatedCrimeCount = applicationService.getPreventedCrimesCount()
             assertThat(updatedCrimeCount).isEqualTo(initialCrimeCount + 1)
         }

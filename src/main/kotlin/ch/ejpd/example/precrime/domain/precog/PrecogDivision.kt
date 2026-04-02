@@ -19,15 +19,16 @@ class PrecogDivision(
         this.publisher = publisher
     }
 
-    fun foreseeCrime(perpetrator: String, crimeType: String): CrimeForeseen {
+    fun foreseeCrime(perpetrator: String, crimeType: String): VisionId {
+        val visionId = VisionId()
         val event = CrimeForeseen(
-            visionId = UUID.randomUUID(),
+            visionId = visionId,
             perpetrator = perpetrator,
             crimeType = crimeType,
             foreseenAt = LocalDateTime.now().plusHours(2)
         )
         publisher?.publish(event)
-        return event
+        return visionId
     }
 
     fun recordPrevention() {
@@ -37,9 +38,13 @@ class PrecogDivision(
 
 data class PrecogDivisionId(val value: UUID) : Identifier
 
+
+@JvmInline
+value class VisionId(val value: UUID = UUID.randomUUID()) : Identifier
+
 @DomainEvent
 data class CrimeForeseen(
-    val visionId: UUID,
+    val visionId: VisionId,
     val perpetrator: String,
     val crimeType: String,
     val foreseenAt: LocalDateTime

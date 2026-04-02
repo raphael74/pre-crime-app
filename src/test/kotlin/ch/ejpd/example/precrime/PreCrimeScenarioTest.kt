@@ -26,7 +26,7 @@ class PreCrimeScenarioTest {
         val initialCrimeCount = applicationService.getPreventedCrimesCount()
 
         // WHEN: Precogs foresee a crime
-        val perpetrator = "John Anderton"
+        val perpetrator = "John Doe"
         val crimeType = "Future Murder"
         applicationService.triggerVision(perpetrator, crimeType)
 

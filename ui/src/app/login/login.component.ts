@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
@@ -11,18 +11,18 @@ import {AuthService} from '../auth.service';
     templateUrl: './login.component.html'
 })
 export class LoginComponent {
-    username = '';
-    password = '';
-    error = '';
+    username = signal('');
+    password = signal('');
+    error = signal('');
 
     constructor(private authService: AuthService, private router: Router) {
     }
 
     onLogin() {
-        if (this.authService.login(this.username, this.password)) {
+        if (this.authService.login(this.username(), this.password())) {
             this.router.navigate(['/']);
         } else {
-            this.error = 'Invalid credentials';
+            this.error.set('Invalid credentials');
         }
     }
 }

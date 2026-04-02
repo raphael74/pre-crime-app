@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.precog.PrecogDivision
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionId
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
@@ -10,7 +11,10 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class JooqPrecogDivisionRepository(private val dsl: DSLContext) : PrecogDivisionRepository {
+class JooqPrecogDivisionRepository(
+    private val dsl: DSLContext,
+    private val publisher: DomainEventPublisher
+) : PrecogDivisionRepository {
     private val PRECOG_TABLE = table("precog_division")
     private val ID_COL = field("id", UUID::class.java)
     private val STATS_COL = field("total_crimes_prevented", Int::class.java)
@@ -21,7 +25,9 @@ class JooqPrecogDivisionRepository(private val dsl: DSLContext) : PrecogDivision
             .where(ID_COL.eq(id.value))
             .fetchOne() ?: return null
 
-        return PrecogDivision(PrecogDivisionId(record.get(ID_COL)), record.get(STATS_COL))
+        val division = PrecogDivision(PrecogDivisionId(record.get(ID_COL)), record.get(STATS_COL))
+        division.register(publisher)
+        return division
     }
 
     override fun save(division: PrecogDivision) {

@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.domain.precog
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.types.Identifier
@@ -12,13 +13,21 @@ class PrecogDivision(
     @Identity val id: PrecogDivisionId = PrecogDivisionId(UUID.randomUUID()),
     var totalCrimesPrevented: Int = 0
 ) {
+    private var publisher: DomainEventPublisher? = null
+
+    fun register(publisher: DomainEventPublisher) {
+        this.publisher = publisher
+    }
+
     fun foreseeCrime(perpetrator: String, crimeType: String): CrimeForeseen {
-        return CrimeForeseen(
+        val event = CrimeForeseen(
             visionId = UUID.randomUUID(),
             perpetrator = perpetrator,
             crimeType = crimeType,
             foreseenAt = LocalDateTime.now().plusHours(2)
         )
+        publisher?.publish(event)
+        return event
     }
 
     fun recordPrevention() {

@@ -12,8 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class PreCrimeApplicationService(
     private val precogRepository: PrecogDivisionRepository,
-    private val enforcementRepository: LawEnforcementRepository,
-    private val domainEventPublisher: DomainEventPublisher
+    private val enforcementRepository: LawEnforcementRepository
 ) {
     val logger = LoggerFactory.getLogger(javaClass)
 
@@ -25,19 +24,17 @@ class PreCrimeApplicationService(
     @Transactional
     fun triggerVision(perpetrator: String, crimeType: String) {
         val division = precogRepository.findSingleton()
-        val event = division.foreseeCrime(perpetrator, crimeType)
+        division.foreseeCrime(perpetrator, crimeType)
         precogRepository.save(division)
-        logger.info("🔮 [PrecogDivision] Foresee: $perpetrator will commit $crimeType! Publishing event...")
-        domainEventPublisher.publish(event)
+        logger.info("🔮 [PrecogDivision] Foresee: $perpetrator will commit $crimeType! Aggregate published event.")
     }
 
     @Transactional
     fun onCrimeForeseen(event: CrimeForeseen) {
         logger.info("🚓 [LawEnforcement] Received vision: ${event.perpetrator} planning ${event.crimeType}. Deploying jetpacks!")
         val unit = enforcementRepository.findSingleton()
-        val arrestEvent = unit.executePreArrest(event.visionId, event.perpetrator)
+        unit.executePreArrest(event.visionId, event.perpetrator)
         enforcementRepository.save(unit)
-        domainEventPublisher.publish(arrestEvent)
     }
 
     @Transactional

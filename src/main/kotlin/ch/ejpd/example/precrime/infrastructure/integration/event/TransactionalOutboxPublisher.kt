@@ -1,6 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.integration.event
 
-import ch.ejpd.example.precrime.application.DomainEventPublisher
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqOutboxRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

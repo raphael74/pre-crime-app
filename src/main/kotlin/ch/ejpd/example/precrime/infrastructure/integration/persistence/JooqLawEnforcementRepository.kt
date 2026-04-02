@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.enforcement.EnforcementUnitId
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
@@ -10,7 +11,10 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class JooqLawEnforcementRepository(private val dsl: DSLContext) : LawEnforcementRepository {
+class JooqLawEnforcementRepository(
+    private val dsl: DSLContext,
+    private val publisher: DomainEventPublisher
+) : LawEnforcementRepository {
     private val UNIT_TABLE = table("law_enforcement_unit")
     private val ARREST_TABLE = table("pre_arrest")
     private val ID_COL = field("id", UUID::class.java)
@@ -27,9 +31,9 @@ class JooqLawEnforcementRepository(private val dsl: DSLContext) : LawEnforcement
             .where(ID_COL.eq(id.value))
             .fetchOne() ?: return null
 
-        // Note: LawEnforcementUnit currently handles pre-arrests in memory for the aggregate.
-        // In a full DDD/jOOQ setup, we'd load the child collection here.
-        return LawEnforcementUnit(EnforcementUnitId(record.get(ID_COL)), record.get(NAME_COL))
+        val unit = LawEnforcementUnit(EnforcementUnitId(record.get(ID_COL)), record.get(NAME_COL))
+        unit.register(publisher)
+        return unit
     }
 
     override fun save(unit: LawEnforcementUnit) {

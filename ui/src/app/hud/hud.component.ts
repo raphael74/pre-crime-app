@@ -1,9 +1,9 @@
 import {Component, signal} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {interval, switchMap} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {PreCrimeService} from '../pre-crime.service';
 
 @Component({
     selector: 'app-hud',
@@ -18,12 +18,12 @@ export class HudComponent {
 
     crimesPrevented = toSignal(
         interval(1000).pipe(
-            switchMap(() => this.http.get<number>('/api/pre-crime/stats'))
+            switchMap(() => this.service.getStats())
         ),
         {initialValue: 0}
     );
 
-    constructor(private http: HttpClient) {
+    constructor(private service: PreCrimeService) {
     }
 
     triggerVision() {
@@ -36,8 +36,7 @@ export class HudComponent {
             message: `Vision detected: ${perp} will commit ${type}`
         }, ...logs]);
 
-        const url = `/api/pre-crime/vision?perpetrator=${perp}&crimeType=${type}`;
-        this.http.post(url, {}, {responseType: 'text'}).subscribe({
+        this.service.triggerVision(perp, type).subscribe({
             next: (res) => {
                 this.logs.update(logs => [{
                     time: new Date().toLocaleTimeString(),

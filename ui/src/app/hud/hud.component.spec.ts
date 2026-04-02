@@ -1,97 +1,100 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
 import { HudComponent } from './hud.component';
-import { HttpClient } from '@angular/common/http';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Subject } from 'rxjs';
+import { PreCrimeService } from '../pre-crime.service';
 
 describe('HudComponent', () => {
   let component: HudComponent;
   let fixture: ComponentFixture<HudComponent>;
-  let httpMock: HttpTestingController;
+  let serviceMock: jasmine.SpyObj<PreCrimeService>;
+  let statsSubject: Subject<number>;
 
   beforeEach(async () => {
+    statsSubject = new Subject<number>();
+    serviceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'triggerVision']);
+    serviceMock.getStats.and.returnValue(statsSubject.asObservable());
+
     await TestBed.configureTestingModule({
       imports: [HudComponent, FormsModule],
       providers: [
-        provideHttpClient(),
-        provideHttpClientTesting()
+        { provide: PreCrimeService, useValue: serviceMock }
       ]
     }).compileComponents();
+  });
 
+  it('should create', fakeAsync(() => {
     fixture = TestBed.createComponent(HudComponent);
     component = fixture.componentInstance;
-    httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-  });
-
-  it('should create', () => {
     expect(component).toBeTruthy();
-  });
+    discardPeriodicTasks();
+  }));
 
-  it('should initialize with default values', () => {
+  it('should initialize with default values', fakeAsync(() => {
+    fixture = TestBed.createComponent(HudComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
     expect(component.perpetrator()).toBe('');
     expect(component.crimeType()).toBe('');
     expect(component.logs()).toEqual([]);
     expect(component.crimesPrevented()).toBe(0);
-  });
+    discardPeriodicTasks();
+  }));
 
   it('should update stats periodically', fakeAsync(() => {
-    // Initial request from toSignal (via interval(1000) - wait, interval emits after period)
-    // Actually, interval(1000) will emit first value after 1000ms.
-    
-    tick(1100);
-    const req = httpMock.expectOne('/api/pre-crime/stats');
-    expect(req.request.method).toBe('GET');
-    req.flush(42);
+    fixture = TestBed.createComponent(HudComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
 
+    tick(1000);
+    statsSubject.next(42);
     expect(component.crimesPrevented()).toBe(42);
     
     tick(1000);
-    const req2 = httpMock.expectOne('/api/pre-crime/stats');
-    req2.flush(43);
+    statsSubject.next(43);
     expect(component.crimesPrevented()).toBe(43);
-    
-    httpMock.verify();
+    discardPeriodicTasks();
   }));
 
-  it('should trigger vision and handle success', () => {
+  it('should trigger vision and handle success', fakeAsync(() => {
+    fixture = TestBed.createComponent(HudComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
     component.perpetrator.set('John Doe');
     component.crimeType.set('Murder');
     
+    serviceMock.triggerVision.and.returnValue(of('Success'));
+    
     component.triggerVision();
     
-    expect(component.logs().length).toBe(1);
-    expect(component.logs()[0].message).toContain('Vision detected: John Doe');
-
-    const req = httpMock.expectOne(req => req.url.includes('/api/pre-crime/vision'));
-    expect(req.request.method).toBe('POST');
-    expect(req.request.params.get('perpetrator')).toBe('John Doe');
-    expect(req.request.params.get('crimeType')).toBe('Murder');
-    
-    req.flush('Success', { status: 200, statusText: 'OK' });
-
+    // Since of('Success') is synchronous, both logs are added immediately
     expect(component.logs().length).toBe(2);
+    expect(component.logs()[1].message).toContain('Vision detected: John Doe');
     expect(component.logs()[0].message).toContain('Arrest warrant issued');
+
+    expect(serviceMock.triggerVision).toHaveBeenCalledWith('John Doe', 'Murder');
+    
     expect(component.perpetrator()).toBe('');
     expect(component.crimeType()).toBe('');
-  });
+    discardPeriodicTasks();
+  }));
 
-  it('should handle error when trigger vision fails', () => {
+  it('should handle error when trigger vision fails', fakeAsync(() => {
+    fixture = TestBed.createComponent(HudComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
     component.perpetrator.set('John Doe');
     component.crimeType.set('Murder');
     
+    serviceMock.triggerVision.and.returnValue(throwError(() => new Error('Error')));
+    
     component.triggerVision();
     
-    const req = httpMock.expectOne(req => req.url.includes('/api/pre-crime/vision'));
-    req.error(new ProgressEvent('error'));
-
     expect(component.logs().length).toBe(2);
     expect(component.logs()[0].message).toContain('ERROR: Temporal paradox detected');
-  });
+    discardPeriodicTasks();
+  }));
 });

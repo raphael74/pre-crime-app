@@ -11,25 +11,24 @@ import java.util.*
 @AggregateRoot
 class LawEnforcementUnit(
     @Identity val id: EnforcementUnitId = EnforcementUnitId(),
-    val unitName: String = "Pre-Crime Response Team Alpha"
+    val unitName: String = "Pre-Crime Response Team Alpha",
+    val preArrests: MutableSet<PreArrest> = mutableSetOf()
 ) {
-    private val preArrests = mutableSetOf<PreArrest>()
     private var publisher: DomainEventPublisher? = null
 
     fun register(publisher: DomainEventPublisher) {
         this.publisher = publisher
     }
 
-    fun executePreArrest(visionId: VisionId, perpetrator: String): PreArrestExecutedEvent {
+    fun executePreArrest(visionId: VisionId, perpetrator: String) {
         preArrests.add(PreArrest(PreArrestId(), visionId, perpetrator, "ARRESTED_BEFORE_CRIME"))
         val event = PreArrestExecutedEvent(visionId, perpetrator)
         publisher?.publish(event)
-        return event
     }
 }
 
-//@JvmInline
-data class EnforcementUnitId(val value: UUID = UUID.randomUUID()) : Identifier
+@JvmInline
+value class EnforcementUnitId(val value: UUID = UUID.randomUUID()) : Identifier
 
 @JvmInline
 value class PreArrestId(val value: UUID = UUID.randomUUID()) : Identifier

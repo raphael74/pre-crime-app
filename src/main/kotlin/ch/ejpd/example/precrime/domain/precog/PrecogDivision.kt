@@ -10,7 +10,7 @@ import java.util.*
 
 @AggregateRoot
 class PrecogDivision(
-    @Identity val id: PrecogDivisionId = PrecogDivisionId(UUID.randomUUID()),
+    @Identity val id: PrecogDivisionId = PrecogDivisionId(),
     var totalCrimesPrevented: Int = 0
 ) {
     private var publisher: DomainEventPublisher? = null
@@ -21,7 +21,7 @@ class PrecogDivision(
 
     fun foreseeCrime(perpetrator: String, crimeType: String): VisionId {
         val visionId = VisionId()
-        val event = CrimeForeseen(
+        val event = CrimeForeseenEvent(
             visionId = visionId,
             perpetrator = perpetrator,
             crimeType = crimeType,
@@ -36,14 +36,14 @@ class PrecogDivision(
     }
 }
 
-data class PrecogDivisionId(val value: UUID) : Identifier
-
+@JvmInline
+value class PrecogDivisionId(val value: UUID = UUID.randomUUID()) : Identifier
 
 @JvmInline
 value class VisionId(val value: UUID = UUID.randomUUID()) : Identifier
 
 @DomainEvent
-data class CrimeForeseen(
+data class CrimeForeseenEvent(
     val visionId: VisionId,
     val perpetrator: String,
     val crimeType: String,

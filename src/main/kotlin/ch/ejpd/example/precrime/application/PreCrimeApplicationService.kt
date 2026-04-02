@@ -2,7 +2,7 @@ package ch.ejpd.example.precrime.application
 
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
-import ch.ejpd.example.precrime.domain.precog.CrimeForeseen
+import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -30,7 +30,7 @@ class PreCrimeApplicationService(
         logger.info("🔮 [PrecogDivision] Foresee: $perpetrator will commit $crimeType! Aggregate published event.")
     }
 
-    fun onCrimeForeseen(event: CrimeForeseen) {
+    fun onCrimeForeseen(event: CrimeForeseenEvent) {
         logger.info("🚓 [LawEnforcement] Received vision: ${event.perpetrator} planning ${event.crimeType}. Deploying jetpacks!")
         val unit = enforcementRepository.findSingleton()
         unit.executePreArrest(event.visionId, event.perpetrator)

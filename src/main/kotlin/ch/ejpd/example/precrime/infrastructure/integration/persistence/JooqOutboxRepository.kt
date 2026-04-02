@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import org.jooq.DSLContext
+import org.jooq.JSON
 import org.jooq.Record
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Component
@@ -12,7 +13,7 @@ class JooqOutboxRepository(private val dsl: DSLContext) {
     private val OUTBOX_TABLE = DSL.table("outbox")
     private val ID = DSL.field("id", UUID::class.java)
     private val EVENT_TYPE = DSL.field("event_type", String::class.java)
-    private val PAYLOAD = DSL.field("payload", String::class.java)
+    private val PAYLOAD = DSL.field("payload", JSON::class.java)
     private val STATUS = DSL.field("status", String::class.java)
     private val CREATED_AT = DSL.field("created_at", OffsetDateTime::class.java)
     private val PROCESSED_AT = DSL.field("processed_at", OffsetDateTime::class.java)
@@ -22,7 +23,7 @@ class JooqOutboxRepository(private val dsl: DSLContext) {
         dsl.insertInto(OUTBOX_TABLE)
             .set(ID, id)
             .set(EVENT_TYPE, eventType)
-            .set(PAYLOAD, payload)
+            .set(PAYLOAD, JSON.json(payload))
             .set(STATUS, "PENDING")
             .execute()
         return id
@@ -55,7 +56,7 @@ class JooqOutboxRepository(private val dsl: DSLContext) {
     private fun Record.toOutboxRecord() = OutboxRecord(
         id = get(ID),
         eventType = get(EVENT_TYPE),
-        payload = get(PAYLOAD)
+        payload = get(PAYLOAD).data()
     )
 }
 

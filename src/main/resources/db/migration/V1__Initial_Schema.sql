@@ -7,24 +7,24 @@ CREATE TABLE precog_division
 CREATE TABLE law_enforcement_unit
 (
     id        UUID PRIMARY KEY,
-    unit_name VARCHAR(255) NOT NULL
+    unit_name TEXT NOT NULL
 );
 
 CREATE TABLE pre_arrest
 (
     id                  UUID PRIMARY KEY,
-    enforcement_unit_id UUID         NOT NULL REFERENCES law_enforcement_unit (id),
-    vision_id           UUID         NOT NULL,
-    perpetrator         VARCHAR(255) NOT NULL,
-    status              VARCHAR(50)  NOT NULL
+    enforcement_unit_id UUID NOT NULL REFERENCES law_enforcement_unit (id),
+    vision_id           UUID NOT NULL,
+    perpetrator         TEXT NOT NULL,
+    status              TEXT NOT NULL
 );
 
 CREATE TABLE outbox
 (
     id           UUID PRIMARY KEY,
-    event_type   VARCHAR(255) NOT NULL,
-    payload      TEXT         NOT NULL,
-    status       VARCHAR(50)  NOT NULL,
+    event_type   TEXT NOT NULL,
+    payload      JSON NOT NULL,
+    status       TEXT NOT NULL,
     created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     processed_at TIMESTAMP WITH TIME ZONE
 );

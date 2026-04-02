@@ -30,6 +30,6 @@ class TransactionalOutboxProcessor(
         val topic = eventType.substringAfterLast(".")
             .replace(Regex("([a-z])([A-Z])"), "$1-$2")
             .lowercase()
-        kafkaTemplate.send(topic, eventType, payload)
+        kafkaTemplate.send(topic, eventType, payload).get()
     }
 }

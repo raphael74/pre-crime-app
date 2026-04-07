@@ -21,8 +21,9 @@ class LawEnforcementUnit(
     }
 
     fun executePreArrest(visionId: VisionId, perpetrator: String) {
-        preArrests.add(PreArrest(PreArrestId(), visionId, perpetrator, "ARRESTED_BEFORE_CRIME"))
-        val event = PreArrestExecutedEvent(visionId, perpetrator)
+        val preArrestId = PreArrestId()
+        preArrests.add(PreArrest(preArrestId, visionId, perpetrator, "ARRESTED_BEFORE_CRIME"))
+        val event = PreArrestExecutedEvent(preArrestId, visionId, perpetrator)
         publisher?.publish(event)
     }
 }
@@ -42,6 +43,7 @@ data class PreArrest(
 
 @DomainEvent
 data class PreArrestExecutedEvent(
+    val preArrestId: PreArrestId,
     val visionId: VisionId,
     val perpetrator: String
 )

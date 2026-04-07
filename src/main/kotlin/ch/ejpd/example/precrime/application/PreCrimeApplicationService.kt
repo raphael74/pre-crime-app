@@ -4,14 +4,14 @@ import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
+import org.jmolecules.event.annotation.DomainEventHandler
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @org.jmolecules.ddd.annotation.Service
 @Service
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional
 class PreCrimeApplicationService(
     private val precogRepository: PrecogDivisionRepository,
     private val enforcementRepository: LawEnforcementRepository
@@ -30,6 +30,7 @@ class PreCrimeApplicationService(
         logger.info("🔮 [PrecogDivision] Foresee: $perpetrator will commit $crimeType! Aggregate published event.")
     }
 
+    @DomainEventHandler
     fun onCrimeForeseen(event: CrimeForeseenEvent) {
         logger.info("🚓 [LawEnforcement] Received vision: ${event.perpetrator} planning ${event.crimeType}. Deploying jetpacks!")
         val unit = enforcementRepository.findSingleton()
@@ -37,6 +38,7 @@ class PreCrimeApplicationService(
         enforcementRepository.save(unit)
     }
 
+    @DomainEventHandler
     fun onPreArrestExecuted(event: PreArrestExecutedEvent) {
         logger.info("✅ [PrecogDivision] Received pre-arrest confirmation for ${event.perpetrator}. Updating stats.")
         val division = precogRepository.findSingleton()

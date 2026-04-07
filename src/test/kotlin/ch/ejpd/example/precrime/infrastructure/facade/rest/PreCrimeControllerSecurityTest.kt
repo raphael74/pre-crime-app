@@ -1,7 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
 import ch.ejpd.example.precrime.IntegrationTest
-import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
@@ -37,6 +36,6 @@ class PreCrimeControllerSecurityTest(@Autowired private val restTestClient: Rest
     }
 
     private fun generateAuthorizationHeader(username: String, password: String): String {
-        return "Basic " + Base64.encodeBase64String("${username}:${password}".toByteArray())
+        return "Basic " + java.util.Base64.getEncoder().encodeToString("${username}:${password}".toByteArray())
     }
 }

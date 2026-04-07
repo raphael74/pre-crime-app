@@ -6,9 +6,11 @@ import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @IntegrationTest
+@Transactional
 class JooqLawEnforcementRepositoryTest {
 
     @Autowired
@@ -17,7 +19,7 @@ class JooqLawEnforcementRepositoryTest {
     private val SINGLETON_ID = EnforcementUnitId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
 
     @Test
-    fun `should find singleton unit and it should be able to publish events`() {
+    fun `should find singleton unit`() {
         // WHEN
         val unit = repository.findSingleton()
 

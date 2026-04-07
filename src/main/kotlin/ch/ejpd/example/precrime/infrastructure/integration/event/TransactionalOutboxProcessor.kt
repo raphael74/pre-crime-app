@@ -21,15 +21,13 @@ class TransactionalOutboxProcessor(
         logger.info("Found ${outboxRecords.size} events to process")
 
         outboxRecords.forEach { outboxRecord ->
-            sendKafkaEvent(outboxRecord.eventType, outboxRecord.payload)
+            sendKafkaEvent(outboxRecord.topic, outboxRecord.eventKey, outboxRecord.eventType, outboxRecord.payload)
             outboxRepository.markAsProcessed(outboxRecord.id)
         }
     }
 
-    private fun sendKafkaEvent(eventType: String, payload: String) {
-        val topic = eventType.substringAfterLast(".")
-            .replace(Regex("([a-z])([A-Z])"), "$1-$2")
-            .lowercase()
-        kafkaTemplate.send(topic, eventType, payload).get()
+    private fun sendKafkaEvent(topic: String, eventKey: String, eventType: String, payload: String) {
+        logger.info("Sending Kafka event $eventType to topic $topic with key $eventKey")
+        kafkaTemplate.send(topic, eventKey, payload).get()
     }
 }

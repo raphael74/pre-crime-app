@@ -16,16 +16,18 @@ class JooqPrecogDivisionRepository(
     private val publisher: DomainEventPublisher
 ) : PrecogDivisionRepository {
     private val PRECOG_TABLE = table("precog_division")
-    private val ID_COL = field("id", UUID::class.java)
+    private val ID_COL = uuidField("id", PrecogDivisionId::class.java, ::PrecogDivisionId, PrecogDivisionId::value)
     private val STATS_COL = field("total_crimes_prevented", Int::class.java)
-    private val SINGLETON_ID = UUID.fromString("00000000-0000-0000-0000-000000000001")
+
+    private val SINGLETON_ID = PrecogDivisionId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
     override fun findById(id: PrecogDivisionId): PrecogDivision? {
-        val record = dsl.selectFrom(PRECOG_TABLE)
-            .where(ID_COL.eq(id.value))
+        val record = dsl.select(ID_COL, STATS_COL)
+            .from(PRECOG_TABLE)
+            .where(ID_COL.eq(id))
             .fetchOne() ?: return null
 
-        val division = PrecogDivision(PrecogDivisionId(record.get(ID_COL)), record.get(STATS_COL))
+        val division = PrecogDivision(record.get(ID_COL), record.get(STATS_COL))
         division.register(publisher)
         return division
     }
@@ -33,9 +35,9 @@ class JooqPrecogDivisionRepository(
     override fun save(division: PrecogDivision) {
         dsl.update(PRECOG_TABLE)
             .set(STATS_COL, division.totalCrimesPrevented)
-            .where(ID_COL.eq(division.id.value))
+            .where(ID_COL.eq(division.id))
             .execute()
     }
 
-    override fun findSingleton(): PrecogDivision = findById(PrecogDivisionId(SINGLETON_ID))!!
+    override fun findSingleton(): PrecogDivision = findById(SINGLETON_ID)!!
 }

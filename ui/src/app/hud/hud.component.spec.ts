@@ -94,7 +94,7 @@ describe('HudComponent', () => {
         component.triggerVision();
 
         expect(component.logs().length).toBe(2);
-        expect(component.logs()[0].message).toContain('ERROR: Temporal paradox detected');
+        expect(component.logs()[0].message).toContain('ERROR: Vision Transmission failed');
         discardPeriodicTasks();
     }));
 });

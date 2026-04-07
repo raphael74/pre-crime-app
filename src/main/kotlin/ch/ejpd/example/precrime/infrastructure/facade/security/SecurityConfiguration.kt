@@ -25,6 +25,12 @@ class SecurityConfiguration {
                 authorize(anyRequest, permitAll)
             }
             httpBasic { }
+            logout {
+                logoutUrl = "/api/logout"
+                logoutSuccessHandler = { _, response, _ ->
+                    response.status = 200
+                }
+            }
         }
 
         return http.build()

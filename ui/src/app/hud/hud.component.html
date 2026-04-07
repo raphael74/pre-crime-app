@@ -5,7 +5,13 @@
             <img alt="fedpol logo" class="logo" src="assets/images/fedpol-logo-de.png">
             <h1>Department of Pre-Crime</h1>
         </div>
-        <div class="status-indicator">SYSTEM STATUS: OPTIMAL</div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div *ngIf="backendError()" class="error-warning">{{ backendError() }}</div>
+            <div [class.critical]="backendError()" class="status-indicator">SYSTEM
+                STATUS: {{ backendError() ? 'CRITICAL' : 'OPTIMAL' }}
+            </div>
+            <button (click)="logout()" style="padding: 5px 15px; font-size: 0.8em;">LOGOUT</button>
+        </div>
     </header>
 
     <aside class="panel">

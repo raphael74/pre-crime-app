@@ -4,6 +4,15 @@ CREATE TABLE precog_division
     total_crimes_prevented INT DEFAULT 0
 );
 
+CREATE TABLE vision
+(
+    id                 UUID PRIMARY KEY,
+    precog_division_id UUID      NOT NULL REFERENCES precog_division (id),
+    perpetrator        TEXT      NOT NULL,
+    crime_type         TEXT      NOT NULL,
+    foreseen_at        TIMESTAMP NOT NULL
+);
+
 CREATE TABLE law_enforcement_unit
 (
     id        UUID PRIMARY KEY,

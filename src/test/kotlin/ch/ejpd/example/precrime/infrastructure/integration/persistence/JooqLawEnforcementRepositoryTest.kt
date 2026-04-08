@@ -3,6 +3,9 @@ package ch.ejpd.example.precrime.infrastructure.integration.persistence
 import ch.ejpd.example.precrime.IntegrationTest
 import ch.ejpd.example.precrime.domain.enforcement.EnforcementUnitId
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
+import ch.ejpd.example.precrime.domain.enforcement.PreArrest
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
+import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,6 +45,23 @@ class JooqLawEnforcementRepositoryTest {
         // THEN
         val result = repository.findSingleton()
         assertThat(result.unitName).isEqualTo(newName)
+    }
+
+    @Test
+    fun `should persist pre-arrests in collection`() {
+        // GIVEN
+        val unit = repository.findSingleton()
+        val preArrest = PreArrest(PreArrestId(), VisionId(), "Perpetrator X", "ARRESTED")
+        unit.preArrests.add(preArrest)
+
+        // WHEN
+        repository.save(unit)
+
+        // THEN
+        val result = repository.findSingleton()
+        assertThat(result.preArrests).hasSize(1)
+        assertThat(result.preArrests.first().perpetrator).isEqualTo("Perpetrator X")
+        assertThat(result.preArrests.first().id).isEqualTo(preArrest.id)
     }
 
     @Test

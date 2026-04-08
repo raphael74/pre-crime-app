@@ -1,5 +1,7 @@
 package ch.ejpd.example.precrime
 
+import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
+import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -13,7 +15,11 @@ import java.util.concurrent.TimeUnit
 @IntegrationTest
 @AutoConfigureRestTestClient
 @AutoConfigureMockMvc
-class PreCrimeScenarioTest(@Autowired private val restTestClient: RestTestClient) {
+class PreCrimeScenarioTest(
+    @Autowired private val restTestClient: RestTestClient,
+    @Autowired private val precogRepository: PrecogDivisionRepository,
+    @Autowired private val enforcementRepository: LawEnforcementRepository
+) {
 
     @Test
     fun `a future crime foreseen results in a pre-arrest and updated stats`() {
@@ -29,6 +35,13 @@ class PreCrimeScenarioTest(@Autowired private val restTestClient: RestTestClient
         await().pollInterval(1, TimeUnit.SECONDS).atMost(10, TimeUnit.SECONDS).untilAsserted {
             val updatedCrimeCount = getStats()
             assertThat(updatedCrimeCount).isEqualTo(initialCrimeCount + 1)
+
+            // AND: The visions and pre-arrests are persisted in the aggregates
+            val division = precogRepository.findSingleton()
+            assertThat(division.visions).anyMatch { it.perpetrator == perpetrator && it.crimeType == crimeType }
+
+            val unit = enforcementRepository.findSingleton()
+            assertThat(unit.preArrests).anyMatch { it.perpetrator == perpetrator }
         }
     }
 

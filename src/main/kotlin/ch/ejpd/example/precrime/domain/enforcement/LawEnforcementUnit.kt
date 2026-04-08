@@ -3,6 +3,7 @@ package ch.ejpd.example.precrime.domain.enforcement
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
+import org.jmolecules.ddd.annotation.Entity
 import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
@@ -34,8 +35,9 @@ value class EnforcementUnitId(val value: UUID = UUID.randomUUID()) : Identifier
 @JvmInline
 value class PreArrestId(val value: UUID = UUID.randomUUID()) : Identifier
 
+@Entity
 data class PreArrest(
-    val id: PreArrestId,
+    @Identity val id: PreArrestId,
     val visionId: VisionId,
     val perpetrator: String,
     val status: String

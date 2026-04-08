@@ -1,5 +1,6 @@
 import {Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
+import {catchError, map, Observable, of, tap} from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -13,13 +14,25 @@ export class AuthService {
     constructor(private http: HttpClient) {
     }
 
-    login(username: string, password: string): boolean {
-        // In a real app, you might want to call an endpoint to verify credentials.
-        // For this demo, we'll just set the header.
+    login(username: string, password: string): Observable<boolean> {
         const credentials = btoa(`${username}:${password}`);
-        this._authHeader.set(`Basic ${credentials}`);
-        this._isAuthenticated.set(true);
-        return true;
+        const authHeader = `Basic ${credentials}`;
+
+        // Temporarily set header to allow the call through the interceptor
+        // Or better, we explicitly set it here for this call
+        return this.http.get<any>('/api/user', {
+            headers: {'Authorization': authHeader}
+        }).pipe(
+            tap(() => {
+                this._authHeader.set(authHeader);
+                this._isAuthenticated.set(true);
+            }),
+            map(() => true),
+            catchError(() => {
+                this.clearSession();
+                return of(false);
+            })
+        );
     }
 
     logout() {

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 
 private const val USER_ROLE = "USER"
 
@@ -19,17 +20,20 @@ class SecurityConfiguration {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http {
-            csrf { disable() }
+            csrf {
+                disable()
+            }
             authorizeHttpRequests {
                 authorize("/api/**", hasRole(USER_ROLE))
                 authorize(anyRequest, permitAll)
             }
+            formLogin {
+                disable()
+            }
             httpBasic { }
             logout {
                 logoutUrl = "/api/logout"
-                logoutSuccessHandler = { _, response, _ ->
-                    response.status = 200
-                }
+                logoutSuccessHandler = HttpStatusReturningLogoutSuccessHandler()
             }
         }
 

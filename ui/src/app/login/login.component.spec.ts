@@ -3,6 +3,7 @@ import {LoginComponent} from './login.component';
 import {AuthService} from '../auth.service';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
+import {of} from 'rxjs';
 
 describe('LoginComponent', () => {
     let component: LoginComponent;
@@ -32,7 +33,7 @@ describe('LoginComponent', () => {
     });
 
     it('should call authService.login and navigate on success', () => {
-        authServiceSpy.login.and.returnValue(true);
+        authServiceSpy.login.and.returnValue(of(true));
         component.username.set('admin');
         component.password.set('password');
 
@@ -43,7 +44,7 @@ describe('LoginComponent', () => {
     });
 
     it('should set error message on login failure', () => {
-        authServiceSpy.login.and.returnValue(false);
+        authServiceSpy.login.and.returnValue(of(false));
         component.username.set('wrong');
         component.password.set('wrong');
 

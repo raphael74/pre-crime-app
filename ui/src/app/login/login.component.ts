@@ -20,10 +20,12 @@ export class LoginComponent {
     }
 
     onLogin() {
-        if (this.authService.login(this.username(), this.password())) {
-            this.router.navigate(['/']);
-        } else {
-            this.error.set('Invalid credentials');
-        }
+        this.authService.login(this.username(), this.password()).subscribe(success => {
+            if (success) {
+                this.router.navigate(['/']);
+            } else {
+                this.error.set('Invalid credentials');
+            }
+        });
     }
 }

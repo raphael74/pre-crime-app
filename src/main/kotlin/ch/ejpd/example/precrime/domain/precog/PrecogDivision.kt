@@ -3,6 +3,7 @@ package ch.ejpd.example.precrime.domain.precog
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Entity
+import org.jmolecules.ddd.annotation.Factory
 import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
@@ -22,19 +23,18 @@ class PrecogDivision(
     }
 
     fun foreseeCrime(perpetrator: String, crimeType: String): VisionId {
-        val visionId = VisionId()
-        val foreseenAt = LocalDateTime.now().plusHours(2)
 
-        visions.add(Vision(visionId, perpetrator, crimeType, foreseenAt))
+        val vision = VisionFactory.createVision(perpetrator, crimeType)
+        visions.add(vision)
 
         val event = CrimeForeseenEvent(
-            visionId = visionId,
-            perpetrator = perpetrator,
-            crimeType = crimeType,
-            foreseenAt = foreseenAt
+            visionId = vision.id,
+            perpetrator = vision.perpetrator,
+            crimeType = vision.crimeType,
+            foreseenAt = vision.foreseenAt
         )
         publisher?.publish(event)
-        return visionId
+        return vision.id
     }
 
     fun recordPrevention() {
@@ -49,6 +49,17 @@ data class Vision(
     val crimeType: String,
     val foreseenAt: LocalDateTime
 )
+
+@Factory
+class VisionFactory {
+    companion object {
+        fun createVision(perpetrator: String, crimeType: String): Vision {
+            val visionId = VisionId()
+            val foreseenAt = LocalDateTime.now().plusHours(2)
+            return Vision(visionId, perpetrator, crimeType, foreseenAt)
+        }
+    }
+}
 
 @JvmInline
 value class PrecogDivisionId(val value: UUID = UUID.randomUUID()) : Identifier

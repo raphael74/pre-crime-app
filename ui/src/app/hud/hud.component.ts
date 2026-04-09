@@ -17,8 +17,19 @@ import {AuthService} from '../auth.service';
 export class HudComponent {
     perpetrator = signal('');
     crimeType = signal('');
-    logs = signal<any[]>([]);
     backendError = signal<string | null>(null);
+
+    auditLogs = toSignal(
+        interval(1000).pipe(
+            switchMap(() => this.service.getAuditLogs().pipe(
+                catchError(() => {
+                    this.backendError.set('AUDIT LOG FETCH FAILED');
+                    return EMPTY;
+                })
+            ))
+        ),
+        {initialValue: []}
+    );
 
     crimesPrevented = toSignal(
         interval(1000).pipe(
@@ -39,6 +50,14 @@ export class HudComponent {
     ) {
     }
 
+    formatPayload(payload: string): string {
+        try {
+            return JSON.stringify(JSON.parse(payload), null, 2);
+        } catch (e) {
+            return payload;
+        }
+    }
+
     logout() {
         this.authService.logout();
         this.router.navigate(['/login']);
@@ -50,26 +69,14 @@ export class HudComponent {
         if (!perp || !type) return;
 
         this.backendError.set(null);
-        this.logs.update(logs => [{
-            time: new Date().toLocaleTimeString(),
-            message: `Vision detected: ${perp} will commit ${type}`
-        }, ...logs]);
 
         this.service.triggerVision(perp, type).subscribe({
             next: () => {
-                this.logs.update(logs => [{
-                    time: new Date().toLocaleTimeString(),
-                    message: `Arrest warrant issued. Jetpacks deployed.`
-                }, ...logs]);
                 this.perpetrator.set('');
                 this.crimeType.set('');
             },
             error: () => {
                 this.backendError.set('VISION TRANSMISSION FAILED');
-                this.logs.update(logs => [{
-                    time: new Date().toLocaleTimeString(),
-                    message: `ERROR: Vision Transmission failed.`
-                }, ...logs]);
             }
         });
     }

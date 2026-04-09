@@ -1,16 +1,18 @@
 <div class="hud-container">
     <header class="panel"
-            style="grid-column: span 3; display: flex; justify-content: space-between; align-items: center;">
+            style="flex-direction: row; grid-column: span 3; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center;">
             <img alt="fedpol logo" class="logo" src="assets/images/fedpol-logo-de.png">
             <h1>Department of Pre-Crime</h1>
         </div>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <div *ngIf="backendError()" class="error-warning">{{ backendError() }}</div>
-            <div [class.critical]="backendError()" class="status-indicator">SYSTEM
-                STATUS: {{ backendError() ? 'CRITICAL' : 'OPTIMAL' }}
+            @if (backendError()) {
+                <div class="error-warning">{{ backendError() }}</div>
+            }
+            <div [class.critical]="backendError()" class="status-indicator">
+                System Status: {{ backendError() ? 'Critical' : 'Optimal' }}
             </div>
-            <button (click)="logout()" style="padding: 5px 15px; font-size: 0.8em;">LOGOUT</button>
+            <button (click)="logout()" style="padding: 5px 15px; font-size: 0.8em;">Logout</button>
         </div>
     </header>
 
@@ -20,20 +22,25 @@
         <form #visionForm="ngForm" (ngSubmit)="triggerVision()" class="vision-form">
             <label>Target Perpetrator</label>
             <input (ngModelChange)="perpetrator.set($event)" [ngModel]="perpetrator()" name="perpetrator"
-                   placeholder="NAME..." required>
+                   placeholder="Name..." required>
             <label>Projected Crime</label>
             <input (ngModelChange)="crimeType.set($event)" [ngModel]="crimeType()" name="crimeType"
-                   placeholder="CRIME TYPE..." required>
+                   placeholder="Crime Type..." required>
             <button [disabled]="visionForm.invalid" type="submit">Submit to Precogs</button>
         </form>
     </aside>
 
     <main class="panel">
-        <h2>Live Surveillance Feed</h2>
+        <h2>Live Surveillance Feed (Audit Log)</h2>
         <div class="log-feed">
-            <div *ngFor="let log of logs()" class="log-entry">
-                [{{ log.time }}] >> {{ log.message }}
-            </div>
+            @for (log of auditLogs(); track log.id.value) {
+                <div class="log-entry">
+                    [{{ log.recordedAt | date:'HH:mm:ss' }}] >> {{ log.eventType }}:
+                    <pre style="margin: 5px 0 15px 20px; color: #00f2ff; font-family: monospace; font-size: 0.9em;">{{ formatPayload(log.payload) }}</pre>
+                </div>
+            } @empty {
+                <div class="log-entry" style="opacity: 0.5;">NO SURVEILLANCE DATA AVAILABLE...</div>
+            }
         </div>
     </main>
 

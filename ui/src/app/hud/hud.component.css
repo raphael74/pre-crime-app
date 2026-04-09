@@ -18,6 +18,10 @@
     padding: 15px;
     position: relative;
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .panel::before {
@@ -98,15 +102,34 @@ button:hover {
 }
 
 .log-feed {
-    height: 100%;
+    flex: 1;
     overflow-y: auto;
     font-size: 0.8em;
+    padding-right: 10px;
+}
+
+/* Custom HUD Scrollbar */
+.log-feed::-webkit-scrollbar {
+    width: 6px;
+}
+
+.log-feed::-webkit-scrollbar-track {
+    background: rgba(0, 242, 255, 0.05);
+}
+
+.log-feed::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 255, 0.3);
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+.log-feed::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 255, 0.5);
 }
 
 .log-entry {
     border-bottom: 1px solid rgba(0, 242, 255, 0.1);
     padding: 10px 0;
-    animation: flicker 0.5s ease-in;
 }
 
 @keyframes flicker {

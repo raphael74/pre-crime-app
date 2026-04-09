@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.facade.event
 
+import ch.ejpd.example.precrime.application.AuditApplicationService
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
@@ -12,6 +13,7 @@ import tools.jackson.databind.ObjectMapper
 @Component
 class KafkaDomainEventConsumer(
     private val applicationService: PreCrimeApplicationService,
+    private val auditService: AuditApplicationService,
     private val objectMapper: ObjectMapper
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -21,6 +23,7 @@ class KafkaDomainEventConsumer(
         logger.info("📥 Received CrimeForeseenEvent from Kafka")
         val event = objectMapper.readValue(payload, CrimeForeseenEvent::class.java)
         applicationService.onCrimeForeseen(event)
+        auditService.logEvent("CrimeForeseenEvent", payload)
     }
 
     @KafkaListener(topics = [KafkaTopics.PRE_ARREST_EXECUTED_EVENT_TOPIC], groupId = "pre-crime-group")
@@ -28,5 +31,6 @@ class KafkaDomainEventConsumer(
         logger.info("📥 Received PreArrestExecutedEvent from Kafka")
         val event = objectMapper.readValue(payload, PreArrestExecutedEvent::class.java)
         applicationService.onPreArrestExecuted(event)
+        auditService.logEvent("PreArrestExecutedEvent", payload)
     }
 }

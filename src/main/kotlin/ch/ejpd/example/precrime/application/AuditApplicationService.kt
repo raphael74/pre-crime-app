@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional
 
 @org.jmolecules.ddd.annotation.Service
 @Service
+@Transactional
 class AuditApplicationService(
     private val auditEntryRepository: AuditEntryRepository
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @DomainEventHandler
-    @Transactional
     fun logEvent(eventType: String, payload: String) {
         logger.info("🕵️ [Audit] Logging $eventType")
         val entry = AuditEntry(eventType = eventType, payload = payload)

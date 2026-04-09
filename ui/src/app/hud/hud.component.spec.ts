@@ -2,23 +2,35 @@ import {ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick} from '
 import {HudComponent} from './hud.component';
 import {FormsModule} from '@angular/forms';
 import {of, Subject, throwError} from 'rxjs';
-import {PreCrimeService} from '../pre-crime.service';
+import {AuditEntry, PreCrimeService} from '../pre-crime.service';
+import {AuthService} from '../auth.service';
+import {Router} from '@angular/router';
 
 describe('HudComponent', () => {
     let component: HudComponent;
     let fixture: ComponentFixture<HudComponent>;
     let serviceMock: jasmine.SpyObj<PreCrimeService>;
+    let authServiceMock: jasmine.SpyObj<AuthService>;
+    let routerMock: jasmine.SpyObj<Router>;
     let statsSubject: Subject<number>;
+    let auditLogsSubject: Subject<AuditEntry[]>;
 
     beforeEach(async () => {
         statsSubject = new Subject<number>();
-        serviceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'triggerVision']);
+        auditLogsSubject = new Subject<AuditEntry[]>();
+        serviceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'getAuditLogs', 'triggerVision']);
         serviceMock.getStats.and.returnValue(statsSubject.asObservable());
+        serviceMock.getAuditLogs.and.returnValue(auditLogsSubject.asObservable());
+
+        authServiceMock = jasmine.createSpyObj('AuthService', ['logout']);
+        routerMock = jasmine.createSpyObj('Router', ['navigate']);
 
         await TestBed.configureTestingModule({
             imports: [HudComponent, FormsModule],
             providers: [
-                {provide: PreCrimeService, useValue: serviceMock}
+                {provide: PreCrimeService, useValue: serviceMock},
+                {provide: AuthService, useValue: authServiceMock},
+                {provide: Router, useValue: routerMock}
             ]
         }).compileComponents();
     });
@@ -37,7 +49,7 @@ describe('HudComponent', () => {
         fixture.detectChanges();
         expect(component.perpetrator()).toBe('');
         expect(component.crimeType()).toBe('');
-        expect(component.logs()).toEqual([]);
+        expect(component.auditLogs()).toEqual([]);
         expect(component.crimesPrevented()).toBe(0);
         discardPeriodicTasks();
     }));
@@ -57,6 +69,24 @@ describe('HudComponent', () => {
         discardPeriodicTasks();
     }));
 
+    it('should update audit logs periodically', fakeAsync(() => {
+        fixture = TestBed.createComponent(HudComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        tick(1000);
+        const mockLogs: AuditEntry[] = [{
+            id: { value: '1' },
+            eventType: 'VISION_DETECTED',
+            payload: '{"perpetrator": "John Doe"}',
+            recordedAt: new Date().toISOString()
+        }];
+        auditLogsSubject.next(mockLogs);
+        expect(component.auditLogs()).toEqual(mockLogs);
+
+        discardPeriodicTasks();
+    }));
+
     it('should trigger vision and handle success', fakeAsync(() => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
@@ -69,15 +99,11 @@ describe('HudComponent', () => {
 
         component.triggerVision();
 
-        // Since of('Success') is synchronous, both logs are added immediately
-        expect(component.logs().length).toBe(2);
-        expect(component.logs()[1].message).toContain('Vision detected: John Doe');
-        expect(component.logs()[0].message).toContain('Arrest warrant issued');
-
         expect(serviceMock.triggerVision).toHaveBeenCalledWith('John Doe', 'Murder');
-
         expect(component.perpetrator()).toBe('');
         expect(component.crimeType()).toBe('');
+        expect(component.backendError()).toBeNull();
+        
         discardPeriodicTasks();
     }));
 
@@ -93,8 +119,17 @@ describe('HudComponent', () => {
 
         component.triggerVision();
 
-        expect(component.logs().length).toBe(2);
-        expect(component.logs()[0].message).toContain('ERROR: Vision Transmission failed');
+        expect(component.backendError()).toBe('VISION TRANSMISSION FAILED');
         discardPeriodicTasks();
     }));
+
+    it('should handle logout', () => {
+        fixture = TestBed.createComponent(HudComponent);
+        component = fixture.componentInstance;
+        
+        component.logout();
+        
+        expect(authServiceMock.logout).toHaveBeenCalled();
+        expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+    });
 });

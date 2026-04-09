@@ -37,7 +37,7 @@ class JooqAuditEntryRepositoryTest {
         // THEN
         val allEntries = repository.findAll()
         assertThat(allEntries).hasSize(2)
-        
+
         // Ordered by recordedAt desc
         assertThat(allEntries[0].id).isEqualTo(entry2.id)
         assertThat(allEntries[0].eventType).isEqualTo(entry2.eventType)

@@ -76,7 +76,7 @@ describe('HudComponent', () => {
 
         tick(1000);
         const mockLogs: AuditEntry[] = [{
-            id: { value: '1' },
+            id: {value: '1'},
             eventType: 'VISION_DETECTED',
             payload: '{"perpetrator": "John Doe"}',
             recordedAt: new Date().toISOString()
@@ -103,7 +103,7 @@ describe('HudComponent', () => {
         expect(component.perpetrator()).toBe('');
         expect(component.crimeType()).toBe('');
         expect(component.backendError()).toBeNull();
-        
+
         discardPeriodicTasks();
     }));
 
@@ -126,9 +126,9 @@ describe('HudComponent', () => {
     it('should handle logout', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
-        
+
         component.logout();
-        
+
         expect(authServiceMock.logout).toHaveBeenCalled();
         expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
     });

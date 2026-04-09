@@ -1,10 +1,7 @@
 package ch.ejpd.example.precrime.domain.precog
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
-import org.jmolecules.ddd.annotation.AggregateRoot
-import org.jmolecules.ddd.annotation.Entity
-import org.jmolecules.ddd.annotation.Factory
-import org.jmolecules.ddd.annotation.Identity
+import org.jmolecules.ddd.annotation.*
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.time.LocalDateTime
@@ -74,3 +71,10 @@ data class CrimeForeseenEvent(
     val crimeType: String,
     val foreseenAt: LocalDateTime
 )
+
+@Repository
+interface PrecogDivisionRepository {
+    fun findById(id: PrecogDivisionId): PrecogDivision?
+    fun save(division: PrecogDivision)
+    fun findSingleton(): PrecogDivision
+}

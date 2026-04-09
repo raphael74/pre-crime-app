@@ -5,6 +5,7 @@ import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Entity
 import org.jmolecules.ddd.annotation.Identity
+import org.jmolecules.ddd.annotation.Repository
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.util.*
@@ -49,3 +50,10 @@ data class PreArrestExecutedEvent(
     val visionId: VisionId,
     val perpetrator: String
 )
+
+@Repository
+interface LawEnforcementRepository {
+    fun findById(id: EnforcementUnitId): LawEnforcementUnit?
+    fun save(unit: LawEnforcementUnit)
+    fun findSingleton(): LawEnforcementUnit
+}

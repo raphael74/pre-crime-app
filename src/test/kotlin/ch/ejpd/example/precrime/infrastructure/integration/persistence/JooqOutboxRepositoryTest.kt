@@ -1,11 +1,15 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.IntegrationTest
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
+import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
+import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.time.LocalDateTime
 
 @IntegrationTest
 @Transactional
@@ -17,29 +21,23 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should create and read an outbox entry`() {
         // GIVEN
-        val eventType = "PRECIME_TEST_EVENT"
-        val topic = "test-topic"
-        val key = "test-key"
-        val payload = """{"caseId":"${UUID.randomUUID()}"}"""
+        val testEvent = CrimeForeseenEvent(VisionId(), "joe", "murder", LocalDateTime.now())
 
         // WHEN
-        val id = outboxRepository.create(eventType, topic, key, payload)
+        val id = outboxRepository.create(testEvent)
 
         // THEN
         val result = outboxRepository.findById(id)
         assertThat(result).isNotNull
         assertThat(result?.id).isEqualTo(id)
-        assertThat(result?.eventType).isEqualTo(eventType)
-        assertThat(result?.topic).isEqualTo(topic)
-        assertThat(result?.eventKey).isEqualTo(key)
-        assertThat(result?.payload).isEqualTo(payload)
+        assertThat(result?.event).isEqualTo(testEvent)
     }
 
     @Test
     fun `should find pending records for update`() {
         // GIVEN
-        val id1 = outboxRepository.create("EVENT_1", "topic-1", "key-1", "{}")
-        val id2 = outboxRepository.create("EVENT_2", "topic-2", "key-2", "{}")
+        val id1 = outboxRepository.create(CrimeForeseenEvent(VisionId(), "joe", "murder", LocalDateTime.now()))
+        val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), "jane"))
 
         // WHEN
         val pending = outboxRepository.findPendingForUpdate()
@@ -53,7 +51,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should mark record as processed`() {
         // GIVEN
-        val id = outboxRepository.create("PROCESSED_TEST", "topic-3", "key-3", "{}")
+        val id = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), "jane"))
 
         // WHEN
         outboxRepository.markAsProcessed(id)

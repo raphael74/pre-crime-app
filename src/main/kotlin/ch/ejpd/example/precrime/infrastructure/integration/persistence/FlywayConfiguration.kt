@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class FlywayConfiguration {
-    val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Value("\${precrime.flyway.clean-on-validation-error:false}")
     private var cleanOnValidationError: Boolean = false

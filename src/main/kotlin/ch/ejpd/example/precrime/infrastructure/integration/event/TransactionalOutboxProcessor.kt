@@ -1,5 +1,9 @@
 package ch.ejpd.example.precrime.infrastructure.integration.event
 
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
+import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
+import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORESEEN_EVENT_TOPIC
+import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqOutboxRepository
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -10,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class TransactionalOutboxProcessor(
     private val outboxRepository: JooqOutboxRepository,
-    private val kafkaTemplate: KafkaTemplate<String, String>
+    private val kafkaTemplate: KafkaTemplate<String, Any>
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -18,16 +22,35 @@ class TransactionalOutboxProcessor(
     @Transactional
     fun processOutbox() {
         val outboxRecords = outboxRepository.findPendingForUpdate()
-        logger.info("Found ${outboxRecords.size} events to process")
+        if (outboxRecords.isNotEmpty()) {
+            logger.info("Found ${outboxRecords.size} events to process")
+        }
 
         outboxRecords.forEach { outboxRecord ->
-            sendKafkaEvent(outboxRecord.topic, outboxRecord.eventKey, outboxRecord.eventType, outboxRecord.payload)
+            sendKafkaEvent(outboxRecord.event)
             outboxRepository.markAsProcessed(outboxRecord.id)
         }
     }
 
-    private fun sendKafkaEvent(topic: String, eventKey: String, eventType: String, payload: String) {
-        logger.info("Sending Kafka event $eventType to topic $topic with key $eventKey")
-        kafkaTemplate.send(topic, eventKey, payload).get()
+    private fun sendKafkaEvent(event: Any) {
+        val topic: String
+        val eventKey: String
+
+        when (event) {
+            is CrimeForeseenEvent -> {
+                topic = CRIME_FORESEEN_EVENT_TOPIC
+                eventKey = event.visionId.value.toString()
+            }
+
+            is PreArrestExecutedEvent -> {
+                topic = PRE_ARREST_EXECUTED_EVENT_TOPIC
+                eventKey = event.preArrestId.value.toString()
+            }
+
+            else -> throw IllegalArgumentException("Unsupported event type: ${event::class.simpleName}")
+        }
+
+        logger.info("Sending Kafka event ${event::class.simpleName} to topic $topic with key $eventKey")
+        kafkaTemplate.send(topic, eventKey, event).get()
     }
 }

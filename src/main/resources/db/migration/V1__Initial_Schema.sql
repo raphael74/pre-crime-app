@@ -28,15 +28,21 @@ CREATE TABLE pre_arrest
     status              TEXT NOT NULL
 );
 
+CREATE TABLE audit_log
+(
+    id          UUID PRIMARY KEY,
+    event_type  TEXT                     NOT NULL,
+    payload     JSON                     NOT NULL,
+    recorded_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 CREATE TABLE outbox
 (
     id           UUID PRIMARY KEY,
-    event_type   TEXT NOT NULL,
-    event_key    TEXT NOT NULL,
-    topic        TEXT NOT NULL,
-    payload      JSON NOT NULL,
-    status       TEXT NOT NULL,
-    created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    event_class  TEXT                     NOT NULL,
+    event        JSON                     NOT NULL,
+    status       TEXT                     NOT NULL,
+    created_at   TIMESTAMP WITH TIME ZONE NOT NULL,
     processed_at TIMESTAMP WITH TIME ZONE
 );
 

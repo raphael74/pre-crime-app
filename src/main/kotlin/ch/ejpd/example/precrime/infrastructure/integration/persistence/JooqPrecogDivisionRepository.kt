@@ -19,6 +19,7 @@ class JooqPrecogDivisionRepository(
 
     private val ID_COL = uuidField("id", PrecogDivisionId::class.java, ::PrecogDivisionId, PrecogDivisionId::value)
     private val STATS_COL = field("total_crimes_prevented", Int::class.java)
+    private val VERSION_COL = field("version", Long::class.java)
 
     private val VISION_ID_COL = uuidField("id", VisionId::class.java, ::VisionId, VisionId::value)
     private val PRECOG_ID_COL =
@@ -30,7 +31,7 @@ class JooqPrecogDivisionRepository(
     private val SINGLETON_ID = PrecogDivisionId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
     override fun findById(id: PrecogDivisionId): PrecogDivision? {
-        val record = dsl.select(ID_COL, STATS_COL)
+        val record = dsl.select(ID_COL, STATS_COL, VERSION_COL)
             .from(PRECOG_TABLE)
             .where(ID_COL.eq(id))
             .fetchOne() ?: return null
@@ -43,16 +44,29 @@ class JooqPrecogDivisionRepository(
                 Vision(r.get(VISION_ID_COL), r.get(PERPETRATOR_COL), r.get(CRIME_TYPE_COL), r.get(FORESEEN_AT_COL))
             }
 
-        val division = PrecogDivision(record.get(ID_COL), record.get(STATS_COL), visions.toMutableSet())
+        val division = PrecogDivision(
+            record.get(ID_COL),
+            record.get(VERSION_COL),
+            record.get(STATS_COL),
+            visions.toMutableSet()
+        )
         division.register(publisher)
         return division
     }
 
     override fun save(division: PrecogDivision) {
-        dsl.update(PRECOG_TABLE)
+        val updatedRows = dsl.update(PRECOG_TABLE)
             .set(STATS_COL, division.totalCrimesPrevented)
+            .set(VERSION_COL, VERSION_COL.plus(1))
             .where(ID_COL.eq(division.id))
+            .and(VERSION_COL.eq(division.version))
             .execute()
+
+        if (updatedRows == 0) {
+            throw ch.ejpd.example.precrime.domain.OptimisticLockingException("PrecogDivision with ID ${division.id} was updated or deleted by another transaction")
+        }
+
+        division.version++
 
         // Delete all and re-insert for simplicity
         dsl.deleteFrom(VISION_TABLE)

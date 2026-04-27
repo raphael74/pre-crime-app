@@ -10,6 +10,7 @@ import java.util.*
 @AggregateRoot
 class PrecogDivision(
     @Identity val id: PrecogDivisionId = PrecogDivisionId(),
+    var version: Long = 0,
     var totalCrimesPrevented: Int = 0,
     val visions: MutableSet<Vision> = mutableSetOf()
 ) {

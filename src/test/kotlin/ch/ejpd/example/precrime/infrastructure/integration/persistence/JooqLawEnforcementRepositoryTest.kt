@@ -37,7 +37,7 @@ class JooqLawEnforcementRepositoryTest {
         // GIVEN
         val unit = repository.findSingleton()
         val newName = "New Unit Name"
-        val updatedUnit = LawEnforcementUnit(unit.id, newName)
+        val updatedUnit = LawEnforcementUnit(id = unit.id, unitName = newName)
 
         // WHEN
         repository.save(updatedUnit)

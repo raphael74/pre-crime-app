@@ -13,6 +13,7 @@ import java.util.*
 @AggregateRoot
 class LawEnforcementUnit(
     @Identity val id: EnforcementUnitId = EnforcementUnitId(),
+    var version: Long = 0,
     val unitName: String = "Pre-Crime Response Team Alpha",
     val preArrests: MutableSet<PreArrest> = mutableSetOf()
 ) {

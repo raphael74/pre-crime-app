@@ -1,7 +1,8 @@
 CREATE TABLE precog_division
 (
     id                     UUID PRIMARY KEY,
-    total_crimes_prevented INT DEFAULT 0
+    version                BIGINT NOT NULL DEFAULT 0,
+    total_crimes_prevented INT             DEFAULT 0
 );
 
 CREATE TABLE vision
@@ -16,7 +17,8 @@ CREATE TABLE vision
 CREATE TABLE law_enforcement_unit
 (
     id        UUID PRIMARY KEY,
-    unit_name TEXT NOT NULL
+    version   BIGINT NOT NULL DEFAULT 0,
+    unit_name TEXT   NOT NULL
 );
 
 CREATE TABLE pre_arrest

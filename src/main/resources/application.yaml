@@ -31,3 +31,6 @@ logging:
   level:
     org.jooq: INFO
     org.flywaydb: INFO
+    org.apache.kafka: WARN
+    kafka: WARN
+    state.change.logger: WARN

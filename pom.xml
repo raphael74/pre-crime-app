@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ch.ejpd.example</groupId>
@@ -28,7 +28,7 @@
     </scm>
     <properties>
         <java.version>25</java.version>
-        <kotlin.version>2.3.20</kotlin.version>
+        <kotlin.version>2.3.21</kotlin.version>
         <jmolecules.version>2.0.1</jmolecules.version>
         <jmolecules.integrations.version>0.33.0</jmolecules.integrations.version>
     </properties>

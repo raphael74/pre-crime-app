@@ -44,24 +44,6 @@ services:
       retries: 10
       start_period: 10s
 
-  schema-registry:
-    image: apicurio/apicurio-registry:3.2.1
-    container_name: schema-registry
-    ports:
-      - "8081:8080"
-    environment:
-      APICURIO_STORAGE_KIND: kafkasql
-      APICURIO_KAFKASQL_BOOTSTRAP_SERVERS: kafka:19092
-    depends_on:
-      kafka:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://127.0.0.1:8080/health/ready || exit 1" ]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 10s
-
 volumes:
   precrime-data:
   kafka-data:

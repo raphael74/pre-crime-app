@@ -5,6 +5,7 @@ import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORESEEN_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqOutboxRepository
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxId
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.scheduling.annotation.Scheduled
@@ -27,12 +28,12 @@ class TransactionalOutboxProcessor(
         }
 
         outboxRecords.forEach { outboxRecord ->
-            sendKafkaEvent(outboxRecord.event)
+            sendKafkaEvent(outboxRecord.id, outboxRecord.event)
             outboxRepository.markAsProcessed(outboxRecord.id)
         }
     }
 
-    private fun sendKafkaEvent(event: Any) {
+    private fun sendKafkaEvent(outboxId: OutboxId, event: Any) {
         val topic: String
         val eventKey: String
 
@@ -50,7 +51,11 @@ class TransactionalOutboxProcessor(
             else -> throw IllegalArgumentException("Unsupported event type: ${event::class.simpleName}")
         }
 
-        logger.info("Sending Kafka event ${event::class.simpleName} to topic $topic with key $eventKey")
-        kafkaTemplate.send(topic, eventKey, event).get()
+        logger.info("Sending Kafka event ${event::class.simpleName} with ID ${outboxId.value} to topic $topic with key $eventKey")
+
+        val record = org.apache.kafka.clients.producer.ProducerRecord(topic, eventKey, event)
+        record.headers().add("X-Event-Id", outboxId.value.toString().toByteArray())
+
+        kafkaTemplate.send(record).get()
     }
 }

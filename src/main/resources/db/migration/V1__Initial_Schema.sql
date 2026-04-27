@@ -46,6 +46,14 @@ CREATE TABLE outbox
     processed_at TIMESTAMP WITH TIME ZONE
 );
 
+CREATE TABLE inbox
+(
+    id             UUID                     NOT NULL,
+    consumer_group TEXT                     NOT NULL,
+    processed_at   TIMESTAMP WITH TIME ZONE NOT NULL,
+    PRIMARY KEY (id, consumer_group)
+);
+
 -- Seed singletons for the demo
 INSERT INTO precog_division (id, total_crimes_prevented)
 VALUES ('00000000-0000-0000-0000-000000000001', 0);

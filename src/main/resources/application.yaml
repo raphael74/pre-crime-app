@@ -2,7 +2,6 @@ spring:
   application:
     name: pre-crime-app
   kafka:
-    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
@@ -15,13 +14,9 @@ spring:
       properties:
         spring.json.trusted.packages: "ch.ejpd.example.precrime.*"
   datasource:
-    url: jdbc:postgresql://localhost:5432/precrime
-    username: postgres
-    password: postgres
     driver-class-name: org.postgresql.Driver
   flyway:
-    baseline-on-migrate: true
-    clean-disabled: false
+    clean-disabled: true
 jooq:
   sql-dialect: postgres
 precrime:

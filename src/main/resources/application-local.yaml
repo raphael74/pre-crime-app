@@ -1,0 +1,15 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+  datasource:
+    url: jdbc:postgresql://localhost:5432/precrime
+    username: postgres
+    password: postgres
+  flyway:
+    clean-disabled: false
+precrime:
+  flyway:
+    clean-on-validation-error: true
+logging:
+  level:
+    ch.ejpd.example.precrime: DEBUG

@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="PreCrimeApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <option name="ACTIVE_PROFILES" value="local" />
     <module name="pre-crime-app" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="ch.ejpd.example.precrime.PreCrimeApplication" />
     <extension name="net.ashald.envfile">

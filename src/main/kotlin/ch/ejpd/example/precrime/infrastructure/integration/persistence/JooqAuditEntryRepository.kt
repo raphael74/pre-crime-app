@@ -7,6 +7,8 @@ import org.jooq.DSLContext
 import org.jooq.JSON
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 
 @Component
@@ -17,6 +19,7 @@ class JooqAuditEntryRepository(private val dsl: DSLContext) : AuditEntryReposito
     private val PAYLOAD = DSL.field("payload", JSON::class.java)
     private val RECORDED_AT = DSL.field("recorded_at", OffsetDateTime::class.java)
 
+    @Transactional(propagation = Propagation.MANDATORY)
     override fun save(auditEntry: AuditEntry) {
         dsl.insertInto(AUDIT_TABLE)
             .set(ID, auditEntry.id)

@@ -6,6 +6,8 @@ import org.jooq.DSLContext
 import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.table
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
 
@@ -54,6 +56,7 @@ class JooqPrecogDivisionRepository(
         return division
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     override fun save(division: PrecogDivision) {
         val updatedRows = dsl.update(PRECOG_TABLE)
             .set(STATS_COL, division.totalCrimesPrevented)

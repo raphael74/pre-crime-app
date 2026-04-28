@@ -7,6 +7,8 @@ import org.jooq.DSLContext
 import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.table
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Component
@@ -54,6 +56,7 @@ class JooqLawEnforcementRepository(
         return unit
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     override fun save(unit: LawEnforcementUnit) {
         val updatedRows = dsl.update(UNIT_TABLE)
             .set(NAME_COL, unit.unitName)

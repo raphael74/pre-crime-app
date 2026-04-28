@@ -3,6 +3,8 @@ package ch.ejpd.example.precrime.infrastructure.integration.persistence
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -15,6 +17,7 @@ class JooqInboxRepository(
     private val CONSUMER_GROUP = DSL.field(DSL.name("inbox", "consumer_group"), String::class.java)
     private val PROCESSED_AT = DSL.field(DSL.name("inbox", "processed_at"), OffsetDateTime::class.java)
 
+    @Transactional(propagation = Propagation.MANDATORY)
     fun insertIfNotExists(id: UUID, consumerGroup: String): Boolean {
         // Use a manual check + insert to be safe with H2's problematic MERGE/ON CONFLICT support
         // since we are in a transaction anyway.

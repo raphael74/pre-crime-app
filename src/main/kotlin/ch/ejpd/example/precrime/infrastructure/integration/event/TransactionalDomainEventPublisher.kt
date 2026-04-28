@@ -24,7 +24,7 @@ class TransactionalDomainEventPublisher(
     }
 
     private fun publishSingle(event: Any) {
-        logger.info("Publishing event: ${event::class.simpleName}")
+        logger.info("Queuing event ${event::class.simpleName} for publishing in outbox")
         outboxRepository.create(event)
     }
 }

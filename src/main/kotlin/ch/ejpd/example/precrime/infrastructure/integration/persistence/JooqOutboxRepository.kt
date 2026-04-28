@@ -5,6 +5,8 @@ import org.jooq.JSON
 import org.jooq.Record
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 import java.time.OffsetDateTime
 import java.util.*
@@ -22,6 +24,7 @@ class JooqOutboxRepository(
     private val CREATED_AT = DSL.field("created_at", OffsetDateTime::class.java)
     private val PROCESSED_AT = DSL.field("processed_at", OffsetDateTime::class.java)
 
+    @Transactional(propagation = Propagation.MANDATORY)
     fun create(event: Any): OutboxId {
 
         val id = OutboxId()
@@ -53,6 +56,7 @@ class JooqOutboxRepository(
             .map { it.toOutboxRecord() }
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     fun markAsProcessed(id: OutboxId) {
         dsl.update(OUTBOX_TABLE)
             .set(STATUS, OutboxState.PROCESSED)

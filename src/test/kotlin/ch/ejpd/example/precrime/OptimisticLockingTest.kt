@@ -5,6 +5,7 @@ import ch.ejpd.example.precrime.infrastructure.integration.persistence.Optimisti
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 
 @IntegrationTest
 class OptimisticLockingTest(
@@ -12,6 +13,7 @@ class OptimisticLockingTest(
 ) {
 
     @Test
+    @Transactional
     fun `concurrent update should throw OptimisticLockingException`() {
         // GIVEN
         val division1 = precogRepository.findSingleton()

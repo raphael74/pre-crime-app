@@ -5,6 +5,7 @@ import ch.ejpd.example.precrime.application.PreCrimeApplicationService
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics
+import ch.ejpd.example.precrime.infrastructure.integration.event.IDEMPOTENCE_ID_HEADER
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqInboxRepository
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -31,13 +32,10 @@ class KafkaDomainEventConsumer(
     @KafkaListener(topics = [KafkaTopics.CRIME_FORESEEN_EVENT_TOPIC], groupId = PRE_CRIME_GROUP)
     fun onCrimeForeseen(
         event: CrimeForeseenEvent,
-        @Header("X-Event-Id") eventId: String
+        @Header(IDEMPOTENCE_ID_HEADER) idempotenceId: String
     ) {
-        if (inboxRepository.insertIfNotExists(UUID.fromString(eventId), PRE_CRIME_GROUP)) {
-            logger.info("📥 Received CrimeForeseenEvent from Kafka (ID: $eventId)")
+        checkIdempotence(idempotenceId, PRE_CRIME_GROUP) {
             applicationService.onCrimeForeseen(event)
-        } else {
-            logger.info("⏭️ Skipping duplicate CrimeForeseenEvent (ID: $eventId)")
         }
     }
 
@@ -45,13 +43,10 @@ class KafkaDomainEventConsumer(
     @KafkaListener(topics = [KafkaTopics.PRE_ARREST_EXECUTED_EVENT_TOPIC], groupId = PRE_CRIME_GROUP)
     fun onPreArrestExecuted(
         event: PreArrestExecutedEvent,
-        @Header("X-Event-Id") eventId: String
+        @Header(IDEMPOTENCE_ID_HEADER) idempotenceId: String
     ) {
-        if (inboxRepository.insertIfNotExists(UUID.fromString(eventId), PRE_CRIME_GROUP)) {
-            logger.info("📥 Received PreArrestExecutedEvent from Kafka (ID: $eventId)")
+        checkIdempotence(idempotenceId, PRE_CRIME_GROUP) {
             applicationService.onPreArrestExecuted(event)
-        } else {
-            logger.info("⏭️ Skipping duplicate PreArrestExecutedEvent (ID: $eventId)")
         }
     }
 
@@ -62,16 +57,25 @@ class KafkaDomainEventConsumer(
     )
     fun onPreCrimeEvent(
         consumerRecord: ConsumerRecord<String, Any>,
-        @Header("X-Event-Id") eventId: String
+        @Header(IDEMPOTENCE_ID_HEADER) idempotenceId: String
     ) {
-        if (inboxRepository.insertIfNotExists(UUID.fromString(eventId), PRE_CRIME_AUDIT_GROUP)) {
-            logger.info("🕵️ Received Event for Audit from Kafka (ID: $eventId)")
+        checkIdempotence(idempotenceId, PRE_CRIME_AUDIT_GROUP) {
             auditService.logEvent(
                 consumerRecord.value()::class.simpleName ?: "None",
                 objectMapper.writeValueAsString(consumerRecord.value())
             )
+        }
+    }
+
+    private fun checkIdempotence(
+        idempotenceId: String,
+        consumerGroup: String,
+        action: () -> Unit
+    ) {
+        if (inboxRepository.insertIfNotExists(UUID.fromString(idempotenceId), consumerGroup)) {
+            action()
         } else {
-            logger.info("⏭️ Skipping duplicate Event for Audit (ID: $eventId)")
+            logger.info("Skipping duplicate event with idempotenceId $idempotenceId")
         }
     }
 }

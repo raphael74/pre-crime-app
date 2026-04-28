@@ -63,7 +63,7 @@ class JooqLawEnforcementRepository(
             .execute()
 
         if (updatedRows == 0) {
-            throw ch.ejpd.example.precrime.domain.OptimisticLockingException("LawEnforcementUnit with ID ${unit.id} was updated or deleted by another transaction")
+            throw OptimisticLockingException("LawEnforcementUnit with ID ${unit.id} was updated or deleted by another transaction")
         }
 
         unit.version++

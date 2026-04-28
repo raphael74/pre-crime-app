@@ -63,7 +63,7 @@ class JooqPrecogDivisionRepository(
             .execute()
 
         if (updatedRows == 0) {
-            throw ch.ejpd.example.precrime.domain.OptimisticLockingException("PrecogDivision with ID ${division.id} was updated or deleted by another transaction")
+            throw OptimisticLockingException("PrecogDivision with ID ${division.id} was updated or deleted by another transaction")
         }
 
         division.version++

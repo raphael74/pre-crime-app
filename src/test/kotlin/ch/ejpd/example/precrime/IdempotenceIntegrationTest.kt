@@ -21,10 +21,10 @@ class IdempotenceIntegrationTest(
         // GIVEN
         val visionId = VisionId()
         val event = CrimeForeseenEvent(visionId, "Suspect", "Theft", LocalDateTime.now())
-        val eventId = UUID.randomUUID().toString()
+        val idempotenceId = UUID.randomUUID().toString()
 
         // WHEN: Process the event for the first time
-        consumer.onCrimeForeseen(event, eventId)
+        consumer.onCrimeForeseen(event, idempotenceId)
 
         // THEN: One pre-arrest should be recorded
         val unitAfterFirst = enforcementRepository.findSingleton()
@@ -32,7 +32,7 @@ class IdempotenceIntegrationTest(
         assertThat(unitAfterFirst.preArrests).anyMatch { it.visionId == visionId }
 
         // WHEN: Process the same event again with the same eventId
-        consumer.onCrimeForeseen(event, eventId)
+        consumer.onCrimeForeseen(event, idempotenceId)
 
         // THEN: No additional pre-arrest should be recorded
         val unitAfterSecond = enforcementRepository.findSingleton()

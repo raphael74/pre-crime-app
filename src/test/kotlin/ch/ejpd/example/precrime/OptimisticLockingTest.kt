@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime
 
-import ch.ejpd.example.precrime.domain.OptimisticLockingException
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.OptimisticLockingException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

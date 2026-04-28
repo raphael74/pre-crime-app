@@ -1,6 +1,5 @@
 package ch.ejpd.example.precrime.domain.precog
 
-import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import org.jmolecules.ddd.annotation.*
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
@@ -12,26 +11,30 @@ class PrecogDivision(
     @Identity val id: PrecogDivisionId = PrecogDivisionId(),
     var version: Long = 0,
     var totalCrimesPrevented: Int = 0,
-    val visions: MutableSet<Vision> = mutableSetOf()
+    visions: Set<Vision> = emptySet()
 ) {
-    private var publisher: DomainEventPublisher? = null
+    private val _visions: MutableSet<Vision> = visions.toMutableSet()
+    private val _events = mutableListOf<Any>()
 
-    fun register(publisher: DomainEventPublisher) {
-        this.publisher = publisher
+    val visions: Set<Vision> get() = _visions.toSet()
+    val domainEvents: List<Any> get() = _events.toList()
+
+    fun clearDomainEvents() {
+        _events.clear()
     }
 
-    fun foreseeCrime(perpetrator: String, crimeType: String): VisionId {
-
+    fun foreseeCrime(perpetrator: Perpetrator, crimeType: CrimeType): VisionId {
         val vision = VisionFactory.createVision(perpetrator, crimeType)
-        visions.add(vision)
+        _visions.add(vision)
 
-        val event = CrimeForeseenEvent(
-            visionId = vision.id,
-            perpetrator = vision.perpetrator,
-            crimeType = vision.crimeType,
-            foreseenAt = vision.foreseenAt
+        _events.add(
+            CrimeForeseenEvent(
+                visionId = vision.id,
+                perpetrator = vision.perpetrator,
+                crimeType = vision.crimeType,
+                foreseenAt = vision.foreseenAt
+            )
         )
-        publisher?.publish(event)
         return vision.id
     }
 
@@ -40,18 +43,32 @@ class PrecogDivision(
     }
 }
 
+@ValueObject
+data class Perpetrator(val name: String) {
+    init {
+        require(name.isNotBlank()) { "Perpetrator name cannot be blank" }
+    }
+}
+
+@ValueObject
+data class CrimeType(val value: String) {
+    init {
+        require(value.isNotBlank()) { "Crime type cannot be blank" }
+    }
+}
+
 @Entity
 data class Vision(
     @Identity val id: VisionId,
-    val perpetrator: String,
-    val crimeType: String,
+    val perpetrator: Perpetrator,
+    val crimeType: CrimeType,
     val foreseenAt: LocalDateTime
 )
 
 @Factory
 class VisionFactory {
     companion object {
-        fun createVision(perpetrator: String, crimeType: String): Vision {
+        fun createVision(perpetrator: Perpetrator, crimeType: CrimeType): Vision {
             val visionId = VisionId()
             val foreseenAt = LocalDateTime.now().plusHours(2)
             return Vision(visionId, perpetrator, crimeType, foreseenAt)
@@ -68,8 +85,8 @@ value class VisionId(val value: UUID = UUID.randomUUID()) : Identifier
 @DomainEvent
 data class CrimeForeseenEvent(
     val visionId: VisionId,
-    val perpetrator: String,
-    val crimeType: String,
+    val perpetrator: Perpetrator,
+    val crimeType: CrimeType,
     val foreseenAt: LocalDateTime
 )
 

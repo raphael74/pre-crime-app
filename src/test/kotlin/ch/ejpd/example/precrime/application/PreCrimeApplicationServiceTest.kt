@@ -4,21 +4,22 @@ import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
-import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
-import ch.ejpd.example.precrime.domain.precog.PrecogDivision
-import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.precog.*
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqInboxRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 class PreCrimeApplicationServiceTest {
 
     private val precogRepository = mockk<PrecogDivisionRepository>()
     private val enforcementRepository = mockk<LawEnforcementRepository>()
-    private val service = PreCrimeApplicationService(precogRepository, enforcementRepository)
+    private val inboxRepository = mockk<JooqInboxRepository>(relaxed = true)
+    private val service = PreCrimeApplicationService(precogRepository, enforcementRepository, inboxRepository)
 
     @Test
     fun `getPreventedCrimesCount should return count from singleton precog division`() {
@@ -48,7 +49,7 @@ class PreCrimeApplicationServiceTest {
         // THEN
         verify {
             precogRepository.findSingleton()
-            division.foreseeCrime("John Doe", "Murder")
+            division.foreseeCrime(Perpetrator("John Doe"), CrimeType("Murder"))
             precogRepository.save(division)
         }
     }
@@ -57,18 +58,19 @@ class PreCrimeApplicationServiceTest {
     fun `onCrimeForeseen should find singleton enforcement unit, execute pre-arrest and save`() {
         // GIVEN
         val visionId = VisionId()
-        val event = CrimeForeseenEvent(visionId, "John Doe", "Murder", mockk())
+        val event = CrimeForeseenEvent(visionId, Perpetrator("John Doe"), CrimeType("Murder"), LocalDateTime.now())
         val unit = mockk<LawEnforcementUnit>(relaxed = true)
         every { enforcementRepository.findSingleton() } returns unit
         every { enforcementRepository.save(any()) } returns Unit
+        every { inboxRepository.insertIfNotExists(any(), any()) } returns true
 
         // WHEN
-        service.onCrimeForeseen(event)
+        service.onCrimeForeseen(event, UUID.randomUUID().toString(), "some-group")
 
         // THEN
         verify {
             enforcementRepository.findSingleton()
-            unit.executePreArrest(visionId, "John Doe")
+            unit.executePreArrest(visionId, Perpetrator("John Doe"))
             enforcementRepository.save(unit)
         }
     }
@@ -76,13 +78,14 @@ class PreCrimeApplicationServiceTest {
     @Test
     fun `onPreArrestExecuted should find singleton precog division, record prevention and save`() {
         // GIVEN
-        val event = PreArrestExecutedEvent(PreArrestId(), VisionId(), "John Doe")
+        val event = PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("John Doe"))
         val division = mockk<PrecogDivision>(relaxed = true)
         every { precogRepository.findSingleton() } returns division
         every { precogRepository.save(any()) } returns Unit
+        every { inboxRepository.insertIfNotExists(any(), any()) } returns true
 
         // WHEN
-        service.onPreArrestExecuted(event)
+        service.onPreArrestExecuted(event, UUID.randomUUID().toString(), "some-group")
 
         // THEN
         verify {

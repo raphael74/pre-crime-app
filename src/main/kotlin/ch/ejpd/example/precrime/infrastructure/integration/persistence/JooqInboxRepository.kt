@@ -1,24 +1,22 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
+import ch.ejpd.example.precrime.domain.InboxRepository
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 import java.util.*
 
 @Component
 class JooqInboxRepository(
     private val dsl: DSLContext
-) {
+) : InboxRepository {
     private val INBOX_TABLE = DSL.table(DSL.name("inbox"))
     private val ID = DSL.field(DSL.name("inbox", "id"), UUID::class.java)
     private val CONSUMER_GROUP = DSL.field(DSL.name("inbox", "consumer_group"), String::class.java)
     private val PROCESSED_AT = DSL.field(DSL.name("inbox", "processed_at"), OffsetDateTime::class.java)
 
-    @Transactional(propagation = Propagation.MANDATORY)
-    fun insertIfNotExists(id: UUID, consumerGroup: String): Boolean {
+    override fun insertIfNotExists(id: UUID, consumerGroup: String): Boolean {
         // Use a manual check + insert to be safe with H2's problematic MERGE/ON CONFLICT support
         // since we are in a transaction anyway.
         val exists = dsl.fetchExists(

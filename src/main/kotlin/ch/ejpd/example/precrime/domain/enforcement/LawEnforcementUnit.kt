@@ -1,11 +1,8 @@
 package ch.ejpd.example.precrime.domain.enforcement
 
-import ch.ejpd.example.precrime.domain.DomainEventPublisher
+import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.domain.precog.VisionId
-import org.jmolecules.ddd.annotation.AggregateRoot
-import org.jmolecules.ddd.annotation.Entity
-import org.jmolecules.ddd.annotation.Identity
-import org.jmolecules.ddd.annotation.Repository
+import org.jmolecules.ddd.annotation.*
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.util.*
@@ -14,21 +11,37 @@ import java.util.*
 class LawEnforcementUnit(
     @Identity val id: EnforcementUnitId = EnforcementUnitId(),
     var version: Long = 0,
-    val unitName: String = "Pre-Crime Response Team Alpha",
-    val preArrests: MutableSet<PreArrest> = mutableSetOf()
+    val unitName: UnitName = UnitName("Pre-Crime Response Team Alpha"),
+    preArrests: Set<PreArrest> = emptySet()
 ) {
-    private var publisher: DomainEventPublisher? = null
+    private val _preArrests: MutableSet<PreArrest> = preArrests.toMutableSet()
+    private val _events = mutableListOf<Any>()
 
-    fun register(publisher: DomainEventPublisher) {
-        this.publisher = publisher
+    val preArrests: Set<PreArrest> get() = _preArrests.toSet()
+    val domainEvents: List<Any> get() = _events.toList()
+
+    fun clearDomainEvents() {
+        _events.clear()
     }
 
-    fun executePreArrest(visionId: VisionId, perpetrator: String) {
+    fun executePreArrest(visionId: VisionId, perpetrator: Perpetrator) {
         val preArrestId = PreArrestId()
-        preArrests.add(PreArrest(preArrestId, visionId, perpetrator, "ARRESTED_BEFORE_CRIME"))
-        val event = PreArrestExecutedEvent(preArrestId, visionId, perpetrator)
-        publisher?.publish(event)
+        _preArrests.add(PreArrest(preArrestId, visionId, perpetrator, PreArrestStatus.ARRESTED_BEFORE_CRIME))
+        _events.add(PreArrestExecutedEvent(preArrestId, visionId, perpetrator))
     }
+}
+
+@ValueObject
+data class UnitName(val value: String) {
+    init {
+        require(value.isNotBlank()) { "Unit name cannot be blank" }
+    }
+}
+
+enum class PreArrestStatus {
+    ARRESTED_BEFORE_CRIME,
+    RELEASED,
+    ERRONEOUS_VISION
 }
 
 @JvmInline
@@ -41,15 +54,15 @@ value class PreArrestId(val value: UUID = UUID.randomUUID()) : Identifier
 data class PreArrest(
     @Identity val id: PreArrestId,
     val visionId: VisionId,
-    val perpetrator: String,
-    val status: String
+    val perpetrator: Perpetrator,
+    val status: PreArrestStatus
 )
 
 @DomainEvent
 data class PreArrestExecutedEvent(
     val preArrestId: PreArrestId,
     val visionId: VisionId,
-    val perpetrator: String
+    val perpetrator: Perpetrator
 )
 
 @Repository

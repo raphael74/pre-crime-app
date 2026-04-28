@@ -2,6 +2,7 @@ package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.enforcement.*
+import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.field
@@ -43,23 +44,27 @@ class JooqLawEnforcementRepository(
             .where(UNIT_ID_COL.eq(id))
             .fetch()
             .map { r ->
-                PreArrest(r.get(ARREST_ID_COL), r.get(VISION_ID_COL), r.get(PERPETRATOR_COL), r.get(STATUS_COL))
+                PreArrest(
+                    r.get(ARREST_ID_COL),
+                    r.get(VISION_ID_COL),
+                    Perpetrator(r.get(PERPETRATOR_COL)),
+                    PreArrestStatus.valueOf(r.get(STATUS_COL))
+                )
             }
 
         val unit = LawEnforcementUnit(
             record.get(ID_COL),
             record.get(VERSION_COL),
-            record.get(NAME_COL),
-            preArrests.toMutableSet()
+            UnitName(record.get(NAME_COL)),
+            preArrests.toSet()
         )
-        unit.register(publisher)
         return unit
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
     override fun save(unit: LawEnforcementUnit) {
         val updatedRows = dsl.update(UNIT_TABLE)
-            .set(NAME_COL, unit.unitName)
+            .set(NAME_COL, unit.unitName.value)
             .set(VERSION_COL, VERSION_COL.plus(1))
             .where(ID_COL.eq(unit.id))
             .and(VERSION_COL.eq(unit.version))
@@ -71,22 +76,26 @@ class JooqLawEnforcementRepository(
 
         unit.version++
 
-        // Delete all and re-insert for simplicity in this demo
-        dsl.deleteFrom(ARREST_TABLE)
-            .where(UNIT_ID_COL.eq(unit.id))
-            .execute()
+        // Optimized save: only insert pre-arrests that are not already in the DB
+        unit.preArrests.forEach { arrest ->
+            val exists = dsl.fetchExists(
+                dsl.selectOne()
+                    .from(ARREST_TABLE)
+                    .where(ARREST_ID_COL.eq(arrest.id))
+            )
+            if (!exists) {
+                dsl.insertInto(ARREST_TABLE)
+                    .set(ARREST_ID_COL, arrest.id)
+                    .set(UNIT_ID_COL, unit.id)
+                    .set(VISION_ID_COL, arrest.visionId)
+                    .set(PERPETRATOR_COL, arrest.perpetrator.name)
+                    .set(STATUS_COL, arrest.status.name)
+                    .execute()
+            }
+        }
 
-        val inserts = unit.preArrests.map { arrest ->
-            dsl.insertInto(ARREST_TABLE)
-                .set(ARREST_ID_COL, arrest.id)
-                .set(UNIT_ID_COL, unit.id)
-                .set(VISION_ID_COL, arrest.visionId)
-                .set(PERPETRATOR_COL, arrest.perpetrator)
-                .set(STATUS_COL, arrest.status)
-        }
-        if (inserts.isNotEmpty()) {
-            dsl.batch(inserts).execute()
-        }
+        publisher.publish(unit.domainEvents)
+        unit.clearDomainEvents()
     }
 
     override fun findSingleton(): LawEnforcementUnit = findById(SINGLETON_ID)!!

@@ -1,15 +1,13 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.IntegrationTest
+import ch.ejpd.example.precrime.domain.precog.CrimeType
+import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionId
-import ch.ejpd.example.precrime.domain.precog.Vision
-import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 @IntegrationTest
@@ -50,23 +48,20 @@ class JooqPrecogDivisionRepositoryTest {
     fun `should persist visions in collection`() {
         // GIVEN
         val division = repository.findSingleton()
-        val foreseenAt = LocalDateTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS)
-        val vision = Vision(VisionId(), "Alice Smith", "Theft", foreseenAt)
-        division.visions.add(vision)
+        val perpetrator = Perpetrator("Alice Smith")
+        val crimeType = CrimeType("Theft")
 
         // WHEN
+        val visionId = division.foreseeCrime(perpetrator, crimeType)
         repository.save(division)
 
         // THEN
         val result = repository.findSingleton()
         assertThat(result.visions).hasSize(1)
         val persistedVision = result.visions.first()
-        assertThat(persistedVision.perpetrator).isEqualTo("Alice Smith")
-        assertThat(persistedVision.crimeType).isEqualTo("Theft")
-        // Note: database might truncate fractional seconds if not configured, 
-        // using truncatedTo(SECONDS) to avoid mismatch.
-        assertThat(persistedVision.foreseenAt.truncatedTo(ChronoUnit.SECONDS))
-            .isEqualTo(foreseenAt)
+        assertThat(persistedVision.id).isEqualTo(visionId)
+        assertThat(persistedVision.perpetrator).isEqualTo(perpetrator)
+        assertThat(persistedVision.crimeType).isEqualTo(crimeType)
     }
 
     @Test

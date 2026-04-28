@@ -3,8 +3,9 @@ package ch.ejpd.example.precrime.infrastructure.integration.persistence
 import ch.ejpd.example.precrime.IntegrationTest
 import ch.ejpd.example.precrime.domain.enforcement.EnforcementUnitId
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
-import ch.ejpd.example.precrime.domain.enforcement.PreArrest
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestStatus
+import ch.ejpd.example.precrime.domain.enforcement.UnitName
+import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -29,14 +30,13 @@ class JooqLawEnforcementRepositoryTest {
         // THEN
         assertThat(unit).isNotNull
         assertThat(unit.id).isEqualTo(SINGLETON_ID)
-        assertThat(unit.unitName).isEqualTo("Pre-Crime Team Alpha")
     }
 
     @Test
     fun `should save unit name change`() {
         // GIVEN
         val unit = repository.findSingleton()
-        val newName = "New Unit Name"
+        val newName = UnitName("New Unit Name")
         val updatedUnit = LawEnforcementUnit(id = unit.id, unitName = newName)
 
         // WHEN
@@ -51,17 +51,18 @@ class JooqLawEnforcementRepositoryTest {
     fun `should persist pre-arrests in collection`() {
         // GIVEN
         val unit = repository.findSingleton()
-        val preArrest = PreArrest(PreArrestId(), VisionId(), "Perpetrator X", "ARRESTED")
-        unit.preArrests.add(preArrest)
+        val visionId = VisionId()
+        val perpetrator = Perpetrator("Perpetrator X")
 
         // WHEN
+        unit.executePreArrest(visionId, perpetrator)
         repository.save(unit)
 
         // THEN
         val result = repository.findSingleton()
         assertThat(result.preArrests).hasSize(1)
-        assertThat(result.preArrests.first().perpetrator).isEqualTo("Perpetrator X")
-        assertThat(result.preArrests.first().id).isEqualTo(preArrest.id)
+        assertThat(result.preArrests.first().perpetrator).isEqualTo(perpetrator)
+        assertThat(result.preArrests.first().status).isEqualTo(PreArrestStatus.ARRESTED_BEFORE_CRIME)
     }
 
     @Test

@@ -2,6 +2,8 @@ package ch.ejpd.example.precrime
 
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
+import ch.ejpd.example.precrime.domain.precog.CrimeType
+import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.domain.precog.VisionId
 import ch.ejpd.example.precrime.infrastructure.facade.event.KafkaDomainEventConsumer
 import org.assertj.core.api.Assertions.assertThat
@@ -20,7 +22,8 @@ class IdempotenceIntegrationTest(
     fun `duplicate events should be processed only once`() {
         // GIVEN
         val visionId = VisionId()
-        val event = CrimeForeseenEvent(visionId, "Suspect", "Theft", LocalDateTime.now())
+        val perpetrator = Perpetrator("Suspect")
+        val event = CrimeForeseenEvent(visionId, perpetrator, CrimeType("Theft"), LocalDateTime.now())
         val idempotenceId = UUID.randomUUID().toString()
 
         // WHEN: Process the event for the first time

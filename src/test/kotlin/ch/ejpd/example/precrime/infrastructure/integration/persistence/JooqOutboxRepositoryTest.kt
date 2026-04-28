@@ -4,6 +4,8 @@ import ch.ejpd.example.precrime.IntegrationTest
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
+import ch.ejpd.example.precrime.domain.precog.CrimeType
+import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -21,7 +23,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should create and read an outbox entry`() {
         // GIVEN
-        val testEvent = CrimeForeseenEvent(VisionId(), "joe", "murder", LocalDateTime.now())
+        val testEvent = CrimeForeseenEvent(VisionId(), Perpetrator("joe"), CrimeType("murder"), LocalDateTime.now())
 
         // WHEN
         val id = outboxRepository.create(testEvent)
@@ -36,8 +38,15 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should find pending records for update`() {
         // GIVEN
-        val id1 = outboxRepository.create(CrimeForeseenEvent(VisionId(), "joe", "murder", LocalDateTime.now()))
-        val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), "jane"))
+        val id1 = outboxRepository.create(
+            CrimeForeseenEvent(
+                VisionId(),
+                Perpetrator("joe"),
+                CrimeType("murder"),
+                LocalDateTime.now()
+            )
+        )
+        val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("jane")))
 
         // WHEN
         val pending = outboxRepository.findPendingForUpdate()
@@ -51,7 +60,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should mark record as processed`() {
         // GIVEN
-        val id = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), "jane"))
+        val id = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("jane")))
 
         // WHEN
         outboxRepository.markAsProcessed(id)

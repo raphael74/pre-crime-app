@@ -38,10 +38,10 @@ class PreCrimeScenarioTest(
 
             // AND: The visions and pre-arrests are persisted in the aggregates
             val division = precogRepository.findSingleton()
-            assertThat(division.visions).anyMatch { it.perpetrator == perpetrator && it.crimeType == crimeType }
+            assertThat(division.visions).anyMatch { it.perpetrator.name == perpetrator && it.crimeType.value == crimeType }
 
             val unit = enforcementRepository.findSingleton()
-            assertThat(unit.preArrests).anyMatch { it.perpetrator == perpetrator }
+            assertThat(unit.preArrests).anyMatch { it.perpetrator.name == perpetrator }
         }
     }
 

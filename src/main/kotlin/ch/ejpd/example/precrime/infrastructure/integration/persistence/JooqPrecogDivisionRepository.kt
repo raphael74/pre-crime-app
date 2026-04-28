@@ -43,16 +43,20 @@ class JooqPrecogDivisionRepository(
             .where(PRECOG_ID_COL.eq(id))
             .fetch()
             .map { r ->
-                Vision(r.get(VISION_ID_COL), r.get(PERPETRATOR_COL), r.get(CRIME_TYPE_COL), r.get(FORESEEN_AT_COL))
+                Vision(
+                    r.get(VISION_ID_COL),
+                    Perpetrator(r.get(PERPETRATOR_COL)),
+                    CrimeType(r.get(CRIME_TYPE_COL)),
+                    r.get(FORESEEN_AT_COL)
+                )
             }
 
         val division = PrecogDivision(
             record.get(ID_COL),
             record.get(VERSION_COL),
             record.get(STATS_COL),
-            visions.toMutableSet()
+            visions.toSet()
         )
-        division.register(publisher)
         return division
     }
 
@@ -71,22 +75,26 @@ class JooqPrecogDivisionRepository(
 
         division.version++
 
-        // Delete all and re-insert for simplicity
-        dsl.deleteFrom(VISION_TABLE)
-            .where(PRECOG_ID_COL.eq(division.id))
-            .execute()
+        // Optimized save: only insert visions that are not already in the DB
+        division.visions.forEach { vision ->
+            val exists = dsl.fetchExists(
+                dsl.selectOne()
+                    .from(VISION_TABLE)
+                    .where(VISION_ID_COL.eq(vision.id))
+            )
+            if (!exists) {
+                dsl.insertInto(VISION_TABLE)
+                    .set(VISION_ID_COL, vision.id)
+                    .set(PRECOG_ID_COL, division.id)
+                    .set(PERPETRATOR_COL, vision.perpetrator.name)
+                    .set(CRIME_TYPE_COL, vision.crimeType.value)
+                    .set(FORESEEN_AT_COL, vision.foreseenAt)
+                    .execute()
+            }
+        }
 
-        val inserts = division.visions.map { vision ->
-            dsl.insertInto(VISION_TABLE)
-                .set(VISION_ID_COL, vision.id)
-                .set(PRECOG_ID_COL, division.id)
-                .set(PERPETRATOR_COL, vision.perpetrator)
-                .set(CRIME_TYPE_COL, vision.crimeType)
-                .set(FORESEEN_AT_COL, vision.foreseenAt)
-        }
-        if (inserts.isNotEmpty()) {
-            dsl.batch(inserts).execute()
-        }
+        publisher.publish(division.domainEvents)
+        division.clearDomainEvents()
     }
 
     override fun findSingleton(): PrecogDivision = findById(SINGLETON_ID)!!

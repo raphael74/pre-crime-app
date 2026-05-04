@@ -37,7 +37,7 @@ class JooqPrecogDivisionRepositoryTest {
         division.recordPrevention()
 
         // WHEN
-        repository.save(division)
+        repository.update(division)
 
         // THEN
         val result = repository.findSingleton()
@@ -53,7 +53,7 @@ class JooqPrecogDivisionRepositoryTest {
 
         // WHEN
         val visionId = division.foreseeCrime(perpetrator, crimeType)
-        repository.save(division)
+        repository.update(division)
 
         // THEN
         val result = repository.findSingleton()

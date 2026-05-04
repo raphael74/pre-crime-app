@@ -62,7 +62,7 @@ class JooqLawEnforcementRepository(
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    override fun save(unit: LawEnforcementUnit) {
+    override fun update(unit: LawEnforcementUnit) {
         val updatedRows = dsl.update(UNIT_TABLE)
             .set(NAME_COL, unit.unitName.value)
             .set(VERSION_COL, unit.version.increment())

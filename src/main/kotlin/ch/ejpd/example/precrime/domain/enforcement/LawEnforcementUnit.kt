@@ -69,6 +69,6 @@ data class PreArrestExecutedEvent(
 @Repository
 interface LawEnforcementRepository {
     fun findById(id: EnforcementUnitId): LawEnforcementUnit?
-    fun save(unit: LawEnforcementUnit)
+    fun update(unit: LawEnforcementUnit)
     fun findSingleton(): LawEnforcementUnit
 }

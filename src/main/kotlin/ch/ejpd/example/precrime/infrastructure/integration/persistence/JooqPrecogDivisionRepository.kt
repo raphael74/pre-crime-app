@@ -61,7 +61,7 @@ class JooqPrecogDivisionRepository(
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    override fun save(division: PrecogDivision) {
+    override fun update(division: PrecogDivision) {
         val updatedRows = dsl.update(PRECOG_TABLE)
             .set(STATS_COL, division.totalCrimesPrevented)
             .set(VERSION_COL, division.version.increment())

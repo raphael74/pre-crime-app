@@ -94,7 +94,7 @@ class KafkaDomainEventConsumer(
         @Header(KafkaHeaders.GROUP_ID) groupId: String,
         @Header(IDEMPOTENCE_ID_HEADER) idempotenceId: String
     ) {
-        logger.error("❌ Event moved to DLT. Topic: $topic, Group: $groupId, ID: $idempotenceId, Payload: $payload")
+        logger.error("Event moved to DLT. Topic: $topic, Group: $groupId, ID: $idempotenceId, Payload: $payload")
     }
 
     private fun checkIdempotence(
@@ -105,7 +105,7 @@ class KafkaDomainEventConsumer(
         if (inboxRepository.insertIfNotExists(UUID.fromString(idempotenceId), consumerGroup)) {
             action()
         } else {
-            logger.info("⏭️ Skipping duplicate event with idempotenceId $idempotenceId and consumerGroup $consumerGroup")
+            logger.info("Skipping duplicate event with idempotenceId $idempotenceId and consumerGroup $consumerGroup")
         }
     }
 }

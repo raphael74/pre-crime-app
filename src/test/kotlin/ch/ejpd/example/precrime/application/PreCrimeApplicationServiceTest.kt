@@ -38,7 +38,7 @@ class PreCrimeApplicationServiceTest {
         // GIVEN
         val division = mockk<PrecogDivision>(relaxed = true)
         every { precogRepository.findSingleton() } returns division
-        every { precogRepository.save(any()) } returns Unit
+        every { precogRepository.update(any()) } returns Unit
 
         // WHEN
         service.triggerVision("John Doe", "Murder")
@@ -47,7 +47,7 @@ class PreCrimeApplicationServiceTest {
         verify {
             precogRepository.findSingleton()
             division.foreseeCrime(Perpetrator("John Doe"), CrimeType("Murder"))
-            precogRepository.save(division)
+            precogRepository.update(division)
         }
     }
 
@@ -58,7 +58,7 @@ class PreCrimeApplicationServiceTest {
         val event = CrimeForeseenEvent(visionId, Perpetrator("John Doe"), CrimeType("Murder"), LocalDateTime.now())
         val unit = mockk<LawEnforcementUnit>(relaxed = true)
         every { enforcementRepository.findSingleton() } returns unit
-        every { enforcementRepository.save(any()) } returns Unit
+        every { enforcementRepository.update(any()) } returns Unit
 
         // WHEN
         service.onCrimeForeseen(event)
@@ -67,7 +67,7 @@ class PreCrimeApplicationServiceTest {
         verify {
             enforcementRepository.findSingleton()
             unit.executePreArrest(visionId, Perpetrator("John Doe"))
-            enforcementRepository.save(unit)
+            enforcementRepository.update(unit)
         }
     }
 
@@ -77,7 +77,7 @@ class PreCrimeApplicationServiceTest {
         val event = PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("John Doe"))
         val division = mockk<PrecogDivision>(relaxed = true)
         every { precogRepository.findSingleton() } returns division
-        every { precogRepository.save(any()) } returns Unit
+        every { precogRepository.update(any()) } returns Unit
 
         // WHEN
         service.onPreArrestExecuted(event)
@@ -86,7 +86,7 @@ class PreCrimeApplicationServiceTest {
         verify {
             precogRepository.findSingleton()
             division.recordPrevention()
-            precogRepository.save(division)
+            precogRepository.update(division)
         }
     }
 }

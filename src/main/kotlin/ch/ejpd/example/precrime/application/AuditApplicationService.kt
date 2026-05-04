@@ -17,7 +17,7 @@ class AuditApplicationService(
 
     @DomainEventHandler
     fun logEvent(eventType: String, payload: String) {
-        logger.info("🕵️ [Audit] Logging $eventType")
+        logger.info("[Audit] Logging $eventType")
         val entry = AuditEntry(eventType = eventType, payload = payload)
         auditEntryRepository.save(entry)
     }

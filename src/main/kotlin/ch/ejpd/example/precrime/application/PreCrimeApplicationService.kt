@@ -28,24 +28,24 @@ class PreCrimeApplicationService(
     fun triggerVision(perpetratorName: String, crimeTypeName: String) {
         val division = precogRepository.findSingleton()
         division.foreseeCrime(Perpetrator(perpetratorName), CrimeType(crimeTypeName))
-        precogRepository.save(division)
-        logger.info("🔮 [PrecogDivision] Foresee: $perpetratorName will commit $crimeTypeName! Aggregate published event.")
+        precogRepository.update(division)
+        logger.info("[PrecogDivision] Foresee: $perpetratorName will commit $crimeTypeName! Aggregate published event.")
     }
 
     @DomainEventHandler
     fun onCrimeForeseen(event: CrimeForeseenEvent) {
-        logger.info("🚓 [LawEnforcement] Received vision: ${event.perpetrator.name} planning ${event.crimeType.value}. Deploying jetpacks!")
+        logger.info("[LawEnforcement] Received vision: ${event.perpetrator.name} planning ${event.crimeType.value}. Deploying jetpacks!")
         val unit = enforcementRepository.findSingleton()
         unit.executePreArrest(event.visionId, event.perpetrator)
-        enforcementRepository.save(unit)
+        enforcementRepository.update(unit)
     }
 
     @DomainEventHandler
     fun onPreArrestExecuted(event: PreArrestExecutedEvent) {
-        logger.info("✅ [PrecogDivision] Received pre-arrest confirmation for ${event.perpetrator.name}. Updating stats.")
+        logger.info("[PrecogDivision] Received pre-arrest confirmation for ${event.perpetrator.name}. Updating stats.")
         val division = precogRepository.findSingleton()
         division.recordPrevention()
-        precogRepository.save(division)
-        logger.info("📊 Stats: Total crimes 'prevented' via Minority Report logic: ${division.totalCrimesPrevented}")
+        precogRepository.update(division)
+        logger.info("Stats: Total crimes 'prevented' via Minority Report logic: ${division.totalCrimesPrevented}")
     }
 }

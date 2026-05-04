@@ -40,7 +40,7 @@ class JooqLawEnforcementRepositoryTest {
         val updatedUnit = LawEnforcementUnit(id = unit.id, unitName = newName)
 
         // WHEN
-        repository.save(updatedUnit)
+        repository.update(updatedUnit)
 
         // THEN
         val result = repository.findSingleton()
@@ -56,7 +56,7 @@ class JooqLawEnforcementRepositoryTest {
 
         // WHEN
         unit.executePreArrest(visionId, perpetrator)
-        repository.save(unit)
+        repository.update(unit)
 
         // THEN
         val result = repository.findSingleton()

@@ -21,12 +21,12 @@ class OptimisticLockingTest(
 
         // WHEN
         division1.recordPrevention()
-        precogRepository.save(division1)
+        precogRepository.update(division1)
 
         // THEN
         division2.recordPrevention()
         assertThrows(OptimisticLockingException::class.java) {
-            precogRepository.save(division2)
+            precogRepository.update(division2)
         }
     }
 }

@@ -94,6 +94,6 @@ data class CrimeForeseenEvent(
 @Repository
 interface PrecogDivisionRepository {
     fun findById(id: PrecogDivisionId): PrecogDivision?
-    fun save(division: PrecogDivision)
+    fun update(division: PrecogDivision)
     fun findSingleton(): PrecogDivision
 }

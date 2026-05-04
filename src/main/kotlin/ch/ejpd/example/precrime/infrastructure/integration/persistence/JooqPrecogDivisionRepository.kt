@@ -21,7 +21,7 @@ class JooqPrecogDivisionRepository(
 
     private val ID_COL = uuidField("id", PrecogDivisionId::class.java, ::PrecogDivisionId, PrecogDivisionId::value)
     private val STATS_COL = field("total_crimes_prevented", Int::class.java)
-    private val VERSION_COL = field("version", Long::class.java)
+    private val VERSION_COL = versionField("version")
 
     private val VISION_ID_COL = uuidField("id", VisionId::class.java, ::VisionId, VisionId::value)
     private val PRECOG_ID_COL =
@@ -64,7 +64,7 @@ class JooqPrecogDivisionRepository(
     override fun save(division: PrecogDivision) {
         val updatedRows = dsl.update(PRECOG_TABLE)
             .set(STATS_COL, division.totalCrimesPrevented)
-            .set(VERSION_COL, VERSION_COL.plus(1))
+            .set(VERSION_COL, division.version.increment())
             .where(ID_COL.eq(division.id))
             .and(VERSION_COL.eq(division.version))
             .execute()
@@ -73,7 +73,7 @@ class JooqPrecogDivisionRepository(
             throw OptimisticLockingException("PrecogDivision with ID ${division.id} was updated or deleted by another transaction")
         }
 
-        division.version++
+        division.version = division.version.increment()
 
         // Optimized save: only insert visions that are not already in the DB
         division.visions.forEach { vision ->

@@ -1,10 +1,21 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
+import ch.ejpd.example.precrime.domain.AggregateVersion
 import org.jooq.Converter
 import org.jooq.Field
 import org.jooq.impl.DSL
 import org.jooq.impl.SQLDataType
 import java.util.*
+
+fun versionField(name: String): Field<AggregateVersion> {
+    val converter = object : Converter<Long, AggregateVersion> {
+        override fun from(databaseObject: Long?): AggregateVersion? = databaseObject?.let { AggregateVersion(it) }
+        override fun to(userObject: AggregateVersion?): Long? = userObject?.value
+        override fun fromType(): Class<Long> = Long::class.java
+        override fun toType(): Class<AggregateVersion> = AggregateVersion::class.java
+    }
+    return DSL.field(DSL.name(name), SQLDataType.BIGINT.asConvertedDataType(converter))
+}
 
 fun <ID : Any> uuidField(name: String, type: Class<ID>, from: (UUID) -> ID, to: (ID) -> UUID): Field<ID> {
     val converter = object : Converter<UUID, ID> {

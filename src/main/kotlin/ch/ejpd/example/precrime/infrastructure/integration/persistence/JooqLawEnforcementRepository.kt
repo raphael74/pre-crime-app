@@ -22,7 +22,7 @@ class JooqLawEnforcementRepository(
     private val ARREST_TABLE = table("pre_arrest")
     private val ID_COL = uuidField("id", EnforcementUnitId::class.java, ::EnforcementUnitId, EnforcementUnitId::value)
     private val NAME_COL = field("unit_name", String::class.java)
-    private val VERSION_COL = field("version", Long::class.java)
+    private val VERSION_COL = versionField("version")
 
     private val ARREST_ID_COL = uuidField("id", PreArrestId::class.java, ::PreArrestId, PreArrestId::value)
     private val UNIT_ID_COL =
@@ -65,7 +65,7 @@ class JooqLawEnforcementRepository(
     override fun save(unit: LawEnforcementUnit) {
         val updatedRows = dsl.update(UNIT_TABLE)
             .set(NAME_COL, unit.unitName.value)
-            .set(VERSION_COL, VERSION_COL.plus(1))
+            .set(VERSION_COL, unit.version.increment())
             .where(ID_COL.eq(unit.id))
             .and(VERSION_COL.eq(unit.version))
             .execute()
@@ -74,7 +74,7 @@ class JooqLawEnforcementRepository(
             throw OptimisticLockingException("LawEnforcementUnit with ID ${unit.id} was updated or deleted by another transaction")
         }
 
-        unit.version++
+        unit.version = unit.version.increment()
 
         // Optimized save: only insert pre-arrests that are not already in the DB
         unit.preArrests.forEach { arrest ->

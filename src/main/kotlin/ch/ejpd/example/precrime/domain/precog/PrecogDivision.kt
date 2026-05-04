@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.domain.precog
 
+import ch.ejpd.example.precrime.domain.AggregateVersion
 import org.jmolecules.ddd.annotation.*
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
@@ -9,7 +10,7 @@ import java.util.*
 @AggregateRoot
 class PrecogDivision(
     @Identity val id: PrecogDivisionId = PrecogDivisionId(),
-    var version: Long = 0,
+    var version: AggregateVersion = AggregateVersion(),
     var totalCrimesPrevented: Int = 0,
     visions: Set<Vision> = emptySet()
 ) {

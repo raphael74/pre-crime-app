@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.domain.enforcement
 
+import ch.ejpd.example.precrime.domain.AggregateVersion
 import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.domain.precog.VisionId
 import org.jmolecules.ddd.annotation.*
@@ -10,7 +11,7 @@ import java.util.*
 @AggregateRoot
 class LawEnforcementUnit(
     @Identity val id: EnforcementUnitId = EnforcementUnitId(),
-    var version: Long = 0,
+    var version: AggregateVersion = AggregateVersion(),
     val unitName: UnitName = UnitName("Pre-Crime Response Team Alpha"),
     preArrests: Set<PreArrest> = emptySet()
 ) {

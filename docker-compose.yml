@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - precrime-data:/var/lib/postgresql/data
+      - precrime-data:/var/lib/postgresql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d precrime" ]
       interval: 5s

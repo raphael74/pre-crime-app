@@ -5,21 +5,18 @@ import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
 import ch.ejpd.example.precrime.domain.precog.*
-import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqInboxRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.util.*
 
 class PreCrimeApplicationServiceTest {
 
     private val precogRepository = mockk<PrecogDivisionRepository>()
     private val enforcementRepository = mockk<LawEnforcementRepository>()
-    private val inboxRepository = mockk<JooqInboxRepository>(relaxed = true)
-    private val service = PreCrimeApplicationService(precogRepository, enforcementRepository, inboxRepository)
+    private val service = PreCrimeApplicationService(precogRepository, enforcementRepository)
 
     @Test
     fun `getPreventedCrimesCount should return count from singleton precog division`() {
@@ -62,10 +59,9 @@ class PreCrimeApplicationServiceTest {
         val unit = mockk<LawEnforcementUnit>(relaxed = true)
         every { enforcementRepository.findSingleton() } returns unit
         every { enforcementRepository.save(any()) } returns Unit
-        every { inboxRepository.insertIfNotExists(any(), any()) } returns true
 
         // WHEN
-        service.onCrimeForeseen(event, UUID.randomUUID().toString(), "some-group")
+        service.onCrimeForeseen(event)
 
         // THEN
         verify {
@@ -82,10 +78,9 @@ class PreCrimeApplicationServiceTest {
         val division = mockk<PrecogDivision>(relaxed = true)
         every { precogRepository.findSingleton() } returns division
         every { precogRepository.save(any()) } returns Unit
-        every { inboxRepository.insertIfNotExists(any(), any()) } returns true
 
         // WHEN
-        service.onPreArrestExecuted(event, UUID.randomUUID().toString(), "some-group")
+        service.onPreArrestExecuted(event)
 
         // THEN
         verify {

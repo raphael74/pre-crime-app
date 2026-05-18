@@ -95,7 +95,7 @@ describe('HudComponent', () => {
         component.perpetrator.set('John Doe');
         component.crimeType.set('Murder');
 
-        serviceMock.triggerVision.and.returnValue(of('Success'));
+        serviceMock.triggerVision.and.returnValue(of({visionId: 'uuid', message: 'Success'}));
 
         component.triggerVision();
 

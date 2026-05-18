@@ -42,16 +42,15 @@ describe('PreCrimeService', () => {
     it('should trigger vision', () => {
         const perp = 'John Doe';
         const type = 'Murder';
-        const dummyResponse = 'Success';
+        const dummyResponse = {visionId: 'uuid', message: 'Success'};
 
         service.triggerVision(perp, type).subscribe(response => {
-            expect(response).toBe(dummyResponse);
+            expect(response).toEqual(dummyResponse);
         });
 
-        const req = httpMock.expectOne(req => req.url === '/api/pre-crime/vision');
+        const req = httpMock.expectOne('/api/pre-crime/vision');
         expect(req.request.method).toBe('POST');
-        expect(req.request.params.get('perpetrator')).toBe(perp);
-        expect(req.request.params.get('crimeType')).toBe(type);
+        expect(req.request.body).toEqual({perpetrator: perp, crimeType: type});
         req.flush(dummyResponse);
     });
 });

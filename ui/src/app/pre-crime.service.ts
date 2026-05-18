@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
 export interface AuditEntry {
@@ -7,6 +7,11 @@ export interface AuditEntry {
     eventType: string;
     payload: string;
     recordedAt: string;
+}
+
+export interface CreateVisionResponse {
+    visionId: string;
+    message: string;
 }
 
 @Injectable({
@@ -24,10 +29,7 @@ export class PreCrimeService {
         return this.http.get<AuditEntry[]>('/api/audit/logs');
     }
 
-    triggerVision(perp: string, type: string): Observable<string> {
-        const params = new HttpParams()
-            .set('perpetrator', perp)
-            .set('crimeType', type);
-        return this.http.post('/api/pre-crime/vision', {}, {params, responseType: 'text'});
+    triggerVision(perpetrator: string, crimeType: string): Observable<CreateVisionResponse> {
+        return this.http.post<CreateVisionResponse>('/api/pre-crime/vision', {perpetrator, crimeType});
     }
 }

@@ -2,6 +2,7 @@ package ch.ejpd.example.precrime
 
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
+import ch.ejpd.example.precrime.infrastructure.facade.rest.CreateVisionRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -55,15 +56,11 @@ class PreCrimeScenarioTest(
 
     private fun triggerVision(perpetrator: String, crimeType: String) {
         restTestClient.post()
-            .uri {
-                it.path("/api/pre-crime/vision")
-                    .queryParam("perpetrator", perpetrator)
-                    .queryParam("crimeType", crimeType)
-                    .build()
-            }
+            .uri("/api/pre-crime/vision")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
+            .body(CreateVisionRequest(perpetrator, crimeType))
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isCreated
     }
 
     private fun generateAuthorizationHeader(username: String, password: String): String {

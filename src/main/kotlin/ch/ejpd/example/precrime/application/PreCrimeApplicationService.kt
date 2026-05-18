@@ -2,10 +2,7 @@ package ch.ejpd.example.precrime.application
 
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
-import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
-import ch.ejpd.example.precrime.domain.precog.CrimeType
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
+import ch.ejpd.example.precrime.domain.precog.*
 import org.jmolecules.event.annotation.DomainEventHandler
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -25,11 +22,12 @@ class PreCrimeApplicationService(
         return precogRepository.findSingleton().totalCrimesPrevented
     }
 
-    fun triggerVision(perpetratorName: String, crimeTypeName: String) {
+    fun triggerVision(perpetratorName: String, crimeTypeName: String): VisionId {
         val division = precogRepository.findSingleton()
-        division.foreseeCrime(Perpetrator(perpetratorName), CrimeType(crimeTypeName))
+        val visionId = division.foreseeCrime(Perpetrator(perpetratorName), CrimeType(crimeTypeName))
         precogRepository.update(division)
         logger.info("[PrecogDivision] Foresee: $perpetratorName will commit $crimeTypeName! Aggregate published event.")
+        return visionId
     }
 
     @DomainEventHandler

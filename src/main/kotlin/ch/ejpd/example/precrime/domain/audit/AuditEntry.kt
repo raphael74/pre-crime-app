@@ -15,8 +15,7 @@ data class AuditEntry(
     val recordedAt: OffsetDateTime = OffsetDateTime.now()
 )
 
-@JvmInline
-value class AuditEntryId(val value: UUID = UUID.randomUUID()) : Identifier
+data class AuditEntryId(val value: UUID = UUID.randomUUID()) : Identifier
 
 @Repository
 interface AuditEntryRepository {

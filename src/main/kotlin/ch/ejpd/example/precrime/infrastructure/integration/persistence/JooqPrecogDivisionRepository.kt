@@ -2,13 +2,12 @@ package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.precog.*
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRECOG_DIVISION
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.VISION
 import org.jooq.DSLContext
-import org.jooq.impl.DSL.field
-import org.jooq.impl.DSL.table
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.util.*
 
 @Component
@@ -16,45 +15,32 @@ class JooqPrecogDivisionRepository(
     private val dsl: DSLContext,
     private val publisher: DomainEventPublisher
 ) : PrecogDivisionRepository {
-    private val PRECOG_TABLE = table("precog_division")
-    private val VISION_TABLE = table("vision")
-
-    private val ID_COL = uuidField("id", PrecogDivisionId::class.java, ::PrecogDivisionId, PrecogDivisionId::value)
-    private val STATS_COL = field("total_crimes_prevented", Int::class.java)
-    private val VERSION_COL = versionField("version")
-
-    private val VISION_ID_COL = uuidField("id", VisionId::class.java, ::VisionId, VisionId::value)
-    private val PRECOG_ID_COL =
-        uuidField("precog_division_id", PrecogDivisionId::class.java, ::PrecogDivisionId, PrecogDivisionId::value)
-    private val PERPETRATOR_COL = field("perpetrator", String::class.java)
-    private val CRIME_TYPE_COL = field("crime_type", String::class.java)
-    private val FORESEEN_AT_COL = field("foreseen_at", LocalDateTime::class.java)
 
     private val SINGLETON_ID = PrecogDivisionId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
     override fun findById(id: PrecogDivisionId): PrecogDivision? {
-        val record = dsl.select(ID_COL, STATS_COL, VERSION_COL)
-            .from(PRECOG_TABLE)
-            .where(ID_COL.eq(id))
+        val record = dsl.select(PRECOG_DIVISION.ID, PRECOG_DIVISION.TOTAL_CRIMES_PREVENTED, PRECOG_DIVISION.VERSION)
+            .from(PRECOG_DIVISION)
+            .where(PRECOG_DIVISION.ID.eq(id))
             .fetchOne() ?: return null
 
-        val visions = dsl.select(VISION_ID_COL, PERPETRATOR_COL, CRIME_TYPE_COL, FORESEEN_AT_COL)
-            .from(VISION_TABLE)
-            .where(PRECOG_ID_COL.eq(id))
+        val visions = dsl.select(VISION.ID, VISION.PERPETRATOR, VISION.CRIME_TYPE, VISION.FORESEEN_AT)
+            .from(VISION)
+            .where(VISION.PRECOG_DIVISION_ID.eq(id))
             .fetch()
             .map { r ->
                 Vision(
-                    r.get(VISION_ID_COL),
-                    Perpetrator(r.get(PERPETRATOR_COL)),
-                    CrimeType(r.get(CRIME_TYPE_COL)),
-                    r.get(FORESEEN_AT_COL)
+                    r.get(VISION.ID)!!,
+                    Perpetrator(r.get(VISION.PERPETRATOR)!!),
+                    CrimeType(r.get(VISION.CRIME_TYPE)!!),
+                    r.get(VISION.FORESEEN_AT)!!
                 )
             }
 
         val division = PrecogDivision(
-            record.get(ID_COL),
-            record.get(VERSION_COL),
-            record.get(STATS_COL),
+            record.get(PRECOG_DIVISION.ID)!!,
+            record.get(PRECOG_DIVISION.VERSION)!!,
+            record.get(PRECOG_DIVISION.TOTAL_CRIMES_PREVENTED)!!,
             visions.toSet()
         )
         return division
@@ -62,11 +48,11 @@ class JooqPrecogDivisionRepository(
 
     @Transactional(propagation = Propagation.MANDATORY)
     override fun update(division: PrecogDivision) {
-        val updatedRows = dsl.update(PRECOG_TABLE)
-            .set(STATS_COL, division.totalCrimesPrevented)
-            .set(VERSION_COL, division.version.increment())
-            .where(ID_COL.eq(division.id))
-            .and(VERSION_COL.eq(division.version))
+        val updatedRows = dsl.update(PRECOG_DIVISION)
+            .set(PRECOG_DIVISION.TOTAL_CRIMES_PREVENTED, division.totalCrimesPrevented)
+            .set(PRECOG_DIVISION.VERSION, division.version.increment())
+            .where(PRECOG_DIVISION.ID.eq(division.id))
+            .and(PRECOG_DIVISION.VERSION.eq(division.version))
             .execute()
 
         if (updatedRows == 0) {
@@ -79,16 +65,16 @@ class JooqPrecogDivisionRepository(
         division.visions.forEach { vision ->
             val exists = dsl.fetchExists(
                 dsl.selectOne()
-                    .from(VISION_TABLE)
-                    .where(VISION_ID_COL.eq(vision.id))
+                    .from(VISION)
+                    .where(VISION.ID.eq(vision.id))
             )
             if (!exists) {
-                dsl.insertInto(VISION_TABLE)
-                    .set(VISION_ID_COL, vision.id)
-                    .set(PRECOG_ID_COL, division.id)
-                    .set(PERPETRATOR_COL, vision.perpetrator.name)
-                    .set(CRIME_TYPE_COL, vision.crimeType.value)
-                    .set(FORESEEN_AT_COL, vision.foreseenAt)
+                dsl.insertInto(VISION)
+                    .set(VISION.ID, vision.id)
+                    .set(VISION.PRECOG_DIVISION_ID, division.id)
+                    .set(VISION.PERPETRATOR, vision.perpetrator.name)
+                    .set(VISION.CRIME_TYPE, vision.crimeType.value)
+                    .set(VISION.FORESEEN_AT, vision.foreseenAt)
                     .execute()
             }
         }

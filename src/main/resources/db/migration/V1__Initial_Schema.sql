@@ -9,31 +9,31 @@ CREATE TABLE vision
 (
     id                 UUID PRIMARY KEY,
     precog_division_id UUID      NOT NULL REFERENCES precog_division (id),
-    perpetrator        TEXT      NOT NULL,
-    crime_type         TEXT      NOT NULL,
+    perpetrator        VARCHAR   NOT NULL,
+    crime_type         VARCHAR   NOT NULL,
     foreseen_at        TIMESTAMP NOT NULL
 );
 
 CREATE TABLE law_enforcement_unit
 (
     id        UUID PRIMARY KEY,
-    version   BIGINT NOT NULL DEFAULT 0,
-    unit_name TEXT   NOT NULL
+    version   BIGINT  NOT NULL DEFAULT 0,
+    unit_name VARCHAR NOT NULL
 );
 
 CREATE TABLE pre_arrest
 (
     id                  UUID PRIMARY KEY,
-    enforcement_unit_id UUID NOT NULL REFERENCES law_enforcement_unit (id),
-    vision_id           UUID NOT NULL,
-    perpetrator         TEXT NOT NULL,
-    status              TEXT NOT NULL
+    enforcement_unit_id UUID    NOT NULL REFERENCES law_enforcement_unit (id),
+    vision_id           UUID    NOT NULL,
+    perpetrator         VARCHAR NOT NULL,
+    status              VARCHAR NOT NULL
 );
 
 CREATE TABLE audit_log
 (
     id          UUID PRIMARY KEY,
-    event_type  TEXT                     NOT NULL,
+    event_type  VARCHAR                  NOT NULL,
     payload     JSON                     NOT NULL,
     recorded_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
@@ -41,9 +41,9 @@ CREATE TABLE audit_log
 CREATE TABLE outbox
 (
     id           UUID PRIMARY KEY,
-    event_class  TEXT                     NOT NULL,
+    event_class  VARCHAR                  NOT NULL,
     event        JSON                     NOT NULL,
-    status       TEXT                     NOT NULL,
+    status       VARCHAR                  NOT NULL,
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL,
     processed_at TIMESTAMP WITH TIME ZONE
 );
@@ -51,7 +51,7 @@ CREATE TABLE outbox
 CREATE TABLE inbox
 (
     id             UUID                     NOT NULL,
-    consumer_group TEXT                     NOT NULL,
+    consumer_group VARCHAR                  NOT NULL,
     processed_at   TIMESTAMP WITH TIME ZONE NOT NULL,
     PRIMARY KEY (id, consumer_group)
 );

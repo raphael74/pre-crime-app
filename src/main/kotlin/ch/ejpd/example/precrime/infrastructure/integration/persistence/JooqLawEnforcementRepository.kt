@@ -3,10 +3,9 @@ package ch.ejpd.example.precrime.infrastructure.integration.persistence
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.enforcement.*
 import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.LAW_ENFORCEMENT_UNIT
+import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRE_ARREST
 import org.jooq.DSLContext
-import org.jooq.impl.DSL.field
-import org.jooq.impl.DSL.table
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -18,44 +17,31 @@ class JooqLawEnforcementRepository(
     private val publisher: DomainEventPublisher
 ) : LawEnforcementRepository {
 
-    private val UNIT_TABLE = table("law_enforcement_unit")
-    private val ARREST_TABLE = table("pre_arrest")
-    private val ID_COL = uuidField("id", EnforcementUnitId::class.java, ::EnforcementUnitId, EnforcementUnitId::value)
-    private val NAME_COL = field("unit_name", String::class.java)
-    private val VERSION_COL = versionField("version")
-
-    private val ARREST_ID_COL = uuidField("id", PreArrestId::class.java, ::PreArrestId, PreArrestId::value)
-    private val UNIT_ID_COL =
-        uuidField("enforcement_unit_id", EnforcementUnitId::class.java, ::EnforcementUnitId, EnforcementUnitId::value)
-    private val VISION_ID_COL = uuidField("vision_id", VisionId::class.java, ::VisionId, VisionId::value)
-    private val PERPETRATOR_COL = field("perpetrator", String::class.java)
-    private val STATUS_COL = field("status", String::class.java)
-
     private val SINGLETON_ID = EnforcementUnitId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
 
     override fun findById(id: EnforcementUnitId): LawEnforcementUnit? {
-        val record = dsl.select(ID_COL, NAME_COL, VERSION_COL)
-            .from(UNIT_TABLE)
-            .where(ID_COL.eq(id))
+        val record = dsl.select(LAW_ENFORCEMENT_UNIT.ID, LAW_ENFORCEMENT_UNIT.UNIT_NAME, LAW_ENFORCEMENT_UNIT.VERSION)
+            .from(LAW_ENFORCEMENT_UNIT)
+            .where(LAW_ENFORCEMENT_UNIT.ID.eq(id))
             .fetchOne() ?: return null
 
-        val preArrests = dsl.select(ARREST_ID_COL, VISION_ID_COL, PERPETRATOR_COL, STATUS_COL)
-            .from(ARREST_TABLE)
-            .where(UNIT_ID_COL.eq(id))
+        val preArrests = dsl.select(PRE_ARREST.ID, PRE_ARREST.VISION_ID, PRE_ARREST.PERPETRATOR, PRE_ARREST.STATUS)
+            .from(PRE_ARREST)
+            .where(PRE_ARREST.ENFORCEMENT_UNIT_ID.eq(id))
             .fetch()
             .map { r ->
                 PreArrest(
-                    r.get(ARREST_ID_COL),
-                    r.get(VISION_ID_COL),
-                    Perpetrator(r.get(PERPETRATOR_COL)),
-                    PreArrestStatus.valueOf(r.get(STATUS_COL))
+                    r.get(PRE_ARREST.ID)!!,
+                    r.get(PRE_ARREST.VISION_ID)!!,
+                    Perpetrator(r.get(PRE_ARREST.PERPETRATOR)!!),
+                    r.get(PRE_ARREST.STATUS)!!
                 )
             }
 
         val unit = LawEnforcementUnit(
-            record.get(ID_COL),
-            record.get(VERSION_COL),
-            UnitName(record.get(NAME_COL)),
+            record.get(LAW_ENFORCEMENT_UNIT.ID)!!,
+            record.get(LAW_ENFORCEMENT_UNIT.VERSION)!!,
+            UnitName(record.get(LAW_ENFORCEMENT_UNIT.UNIT_NAME)!!),
             preArrests.toSet()
         )
         return unit
@@ -63,11 +49,11 @@ class JooqLawEnforcementRepository(
 
     @Transactional(propagation = Propagation.MANDATORY)
     override fun update(unit: LawEnforcementUnit) {
-        val updatedRows = dsl.update(UNIT_TABLE)
-            .set(NAME_COL, unit.unitName.value)
-            .set(VERSION_COL, unit.version.increment())
-            .where(ID_COL.eq(unit.id))
-            .and(VERSION_COL.eq(unit.version))
+        val updatedRows = dsl.update(LAW_ENFORCEMENT_UNIT)
+            .set(LAW_ENFORCEMENT_UNIT.UNIT_NAME, unit.unitName.value)
+            .set(LAW_ENFORCEMENT_UNIT.VERSION, unit.version.increment())
+            .where(LAW_ENFORCEMENT_UNIT.ID.eq(unit.id))
+            .and(LAW_ENFORCEMENT_UNIT.VERSION.eq(unit.version))
             .execute()
 
         if (updatedRows == 0) {
@@ -80,16 +66,16 @@ class JooqLawEnforcementRepository(
         unit.preArrests.forEach { arrest ->
             val exists = dsl.fetchExists(
                 dsl.selectOne()
-                    .from(ARREST_TABLE)
-                    .where(ARREST_ID_COL.eq(arrest.id))
+                    .from(PRE_ARREST)
+                    .where(PRE_ARREST.ID.eq(arrest.id))
             )
             if (!exists) {
-                dsl.insertInto(ARREST_TABLE)
-                    .set(ARREST_ID_COL, arrest.id)
-                    .set(UNIT_ID_COL, unit.id)
-                    .set(VISION_ID_COL, arrest.visionId)
-                    .set(PERPETRATOR_COL, arrest.perpetrator.name)
-                    .set(STATUS_COL, arrest.status.name)
+                dsl.insertInto(PRE_ARREST)
+                    .set(PRE_ARREST.ID, arrest.id)
+                    .set(PRE_ARREST.ENFORCEMENT_UNIT_ID, unit.id)
+                    .set(PRE_ARREST.VISION_ID, arrest.visionId)
+                    .set(PRE_ARREST.PERPETRATOR, arrest.perpetrator.name)
+                    .set(PRE_ARREST.STATUS, arrest.status)
                     .execute()
             }
         }

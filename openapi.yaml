@@ -4,7 +4,7 @@ info:
   description: API for the Pre-Crime department.
   version: 1.0.0
 paths:
-  /api/audit/logs:
+  /audit/logs:
     get:
       summary: Get audit logs
       operationId: getLogs
@@ -19,7 +19,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AuditEntry'
-  /api/pre-crime/stats:
+  /pre-crime/stats:
     get:
       summary: Get prevented crimes count
       operationId: getStats
@@ -32,7 +32,7 @@ paths:
             application/json:
               schema:
                 type: integer
-  /api/pre-crime/vision:
+  /pre-crime/vision:
     post:
       summary: Trigger a vision
       operationId: createVision
@@ -51,7 +51,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateVisionResponse'
-  /api/user:
+  /user:
     get:
       summary: Get current user
       operationId: getCurrentUser

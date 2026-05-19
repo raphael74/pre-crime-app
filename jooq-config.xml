@@ -76,7 +76,7 @@
                     <enumConverter>true</enumConverter>
                     <includeExpression>outbox\.status</includeExpression>
                 </forcedType>
-                </forcedTypes>
+            </forcedTypes>
 
         </database>
         <target>

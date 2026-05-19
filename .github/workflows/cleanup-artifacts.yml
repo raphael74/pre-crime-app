@@ -2,7 +2,7 @@ name: Cleanup Old Artifacts
 
 on:
   workflow_run:
-    workflows: ["Build and Bundle Application"]
+    workflows: [ "Build and Bundle Application" ]
     types:
       - completed
   workflow_dispatch:

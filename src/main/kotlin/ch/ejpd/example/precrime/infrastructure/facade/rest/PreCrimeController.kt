@@ -8,9 +8,11 @@ import ch.ejpd.example.precrime.infrastructure.facade.security.SecurityConfigura
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@RequestMapping("/api")
 class PreCrimeController(private val applicationService: PreCrimeApplicationService) : PreCrimeApi {
 
     @PreAuthorize("hasRole('$USER_ROLE')")

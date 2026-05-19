@@ -19,13 +19,20 @@ spring:
     clean-disabled: true
 jooq:
   sql-dialect: postgres
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 precrime:
   flyway:
-    clean-on-validation-error: true
+    clean-on-validation-error: false
 logging:
   level:
     org.jooq: INFO
     org.flywaydb: INFO
+    org.springframework.kafka: WARN
     org.apache.kafka: WARN
     kafka: WARN
     state.change.logger: WARN
+    org.jooq.Constants: off

@@ -1,0 +1,110 @@
+openapi: 3.0.3
+info:
+  title: Pre-Crime API
+  description: API for the Pre-Crime department.
+  version: 1.0.0
+paths:
+  /api/audit/logs:
+    get:
+      summary: Get audit logs
+      operationId: getLogs
+      tags:
+        - Audit
+      responses:
+        '200':
+          description: List of audit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEntry'
+  /api/pre-crime/stats:
+    get:
+      summary: Get prevented crimes count
+      operationId: getStats
+      tags:
+        - PreCrime
+      responses:
+        '200':
+          description: Count of prevented crimes
+          content:
+            application/json:
+              schema:
+                type: integer
+  /api/pre-crime/vision:
+    post:
+      summary: Trigger a vision
+      operationId: createVision
+      tags:
+        - PreCrime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVisionRequest'
+      responses:
+        '201':
+          description: Vision triggered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateVisionResponse'
+  /api/user:
+    get:
+      summary: Get current user
+      operationId: getCurrentUser
+      tags:
+        - User
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+components:
+  schemas:
+    AuditEntry:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/AuditEntryId'
+        eventType:
+          type: string
+        payload:
+          type: string
+        recordedAt:
+          type: string
+          format: date-time
+    AuditEntryId:
+      type: object
+      properties:
+        value:
+          type: string
+          format: uuid
+    CreateVisionRequest:
+      type: object
+      required:
+        - perpetrator
+        - crimeType
+      properties:
+        perpetrator:
+          type: string
+        crimeType:
+          type: string
+    CreateVisionResponse:
+      type: object
+      properties:
+        visionId:
+          type: string
+          format: uuid
+        message:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        username:
+          type: string

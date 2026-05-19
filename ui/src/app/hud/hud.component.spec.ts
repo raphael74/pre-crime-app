@@ -2,14 +2,15 @@ import {ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick} from '
 import {HudComponent} from './hud.component';
 import {FormsModule} from '@angular/forms';
 import {of, Subject, throwError} from 'rxjs';
-import {AuditEntry, PreCrimeService} from '../pre-crime.service';
+import {AuditEntry, AuditService, PreCrimeService} from '../api';
 import {AuthService} from '../auth.service';
 import {Router} from '@angular/router';
 
 describe('HudComponent', () => {
     let component: HudComponent;
     let fixture: ComponentFixture<HudComponent>;
-    let serviceMock: jasmine.SpyObj<PreCrimeService>;
+    let auditServiceMock: jasmine.SpyObj<AuditService>;
+    let preCrimeServiceMock: jasmine.SpyObj<PreCrimeService>;
     let authServiceMock: jasmine.SpyObj<AuthService>;
     let routerMock: jasmine.SpyObj<Router>;
     let statsSubject: Subject<number>;
@@ -18,9 +19,12 @@ describe('HudComponent', () => {
     beforeEach(async () => {
         statsSubject = new Subject<number>();
         auditLogsSubject = new Subject<AuditEntry[]>();
-        serviceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'getAuditLogs', 'triggerVision']);
-        serviceMock.getStats.and.returnValue(statsSubject.asObservable());
-        serviceMock.getAuditLogs.and.returnValue(auditLogsSubject.asObservable());
+
+        auditServiceMock = jasmine.createSpyObj('AuditService', ['getLogs']);
+        auditServiceMock.getLogs.and.returnValue(auditLogsSubject.asObservable() as any);
+
+        preCrimeServiceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'createVision']);
+        preCrimeServiceMock.getStats.and.returnValue(statsSubject.asObservable() as any);
 
         authServiceMock = jasmine.createSpyObj('AuthService', ['logout']);
         routerMock = jasmine.createSpyObj('Router', ['navigate']);
@@ -28,7 +32,8 @@ describe('HudComponent', () => {
         await TestBed.configureTestingModule({
             imports: [HudComponent, FormsModule],
             providers: [
-                {provide: PreCrimeService, useValue: serviceMock},
+                {provide: AuditService, useValue: auditServiceMock},
+                {provide: PreCrimeService, useValue: preCrimeServiceMock},
                 {provide: AuthService, useValue: authServiceMock},
                 {provide: Router, useValue: routerMock}
             ]
@@ -95,11 +100,11 @@ describe('HudComponent', () => {
         component.perpetrator.set('John Doe');
         component.crimeType.set('Murder');
 
-        serviceMock.triggerVision.and.returnValue(of({visionId: 'uuid', message: 'Success'}));
+        preCrimeServiceMock.createVision.and.returnValue(of({visionId: 'uuid', message: 'Success'}) as any);
 
         component.triggerVision();
 
-        expect(serviceMock.triggerVision).toHaveBeenCalledWith('John Doe', 'Murder');
+        expect(preCrimeServiceMock.createVision).toHaveBeenCalledWith({perpetrator: 'John Doe', crimeType: 'Murder'});
         expect(component.perpetrator()).toBe('');
         expect(component.crimeType()).toBe('');
         expect(component.backendError()).toBeNull();
@@ -115,7 +120,7 @@ describe('HudComponent', () => {
         component.perpetrator.set('John Doe');
         component.crimeType.set('Murder');
 
-        serviceMock.triggerVision.and.returnValue(throwError(() => new Error('Error')));
+        preCrimeServiceMock.createVision.and.returnValue(throwError(() => new Error('Error')));
 
         component.triggerVision();
 

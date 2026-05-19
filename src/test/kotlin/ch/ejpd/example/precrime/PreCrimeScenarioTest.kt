@@ -2,7 +2,7 @@ package ch.ejpd.example.precrime
 
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
-import ch.ejpd.example.precrime.infrastructure.facade.rest.CreateVisionRequest
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test

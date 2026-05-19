@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
 import ch.ejpd.example.precrime.IntegrationTest
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient

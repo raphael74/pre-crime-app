@@ -1,42 +1,32 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
+import ch.ejpd.example.precrime.infrastructure.facade.rest.api.PreCrimeApi
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionResponse
 import ch.ejpd.example.precrime.infrastructure.facade.security.SecurityConfiguration.Companion.USER_ROLE
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.*
-import java.util.*
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/pre-crime")
-class PreCrimeController(private val applicationService: PreCrimeApplicationService) {
+class PreCrimeController(private val applicationService: PreCrimeApplicationService) : PreCrimeApi {
 
-    @GetMapping("/stats")
     @PreAuthorize("hasRole('$USER_ROLE')")
-    fun getStats(): Int {
-        return applicationService.getPreventedCrimesCount()
+    override fun getStats(): ResponseEntity<Int> {
+        return ResponseEntity.ok(applicationService.getPreventedCrimesCount())
     }
 
-    @PostMapping("/vision")
     @PreAuthorize("hasRole('$USER_ROLE')")
-    fun createVision(@RequestBody request: CreateVisionRequest): ResponseEntity<CreateVisionResponse> {
-        val visionId = applicationService.triggerVision(request.perpetrator, request.crimeType)
+    override fun createVision(createVisionRequest: CreateVisionRequest): ResponseEntity<CreateVisionResponse> {
+        val visionId =
+            applicationService.triggerVision(createVisionRequest.perpetrator!!, createVisionRequest.crimeType!!)
         return ResponseEntity.status(HttpStatus.CREATED).body(
             CreateVisionResponse(
                 visionId = visionId.value,
-                message = "Vision triggered for ${request.perpetrator}. The Pre-Crime unit is on its way!"
+                message = "Vision triggered for ${createVisionRequest.perpetrator}. The Pre-Crime unit is on its way!"
             )
         )
     }
 }
-
-data class CreateVisionRequest(
-    val perpetrator: String,
-    val crimeType: String
-)
-
-data class CreateVisionResponse(
-    val visionId: UUID,
-    val message: String
-)

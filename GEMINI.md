@@ -64,5 +64,8 @@ The UI will be available at `http://localhost:4200` (proxied to `/api` on `local
 - **Domain First**: Business logic resides strictly in the `domain` package and should have no dependencies on external frameworks (except jMolecules annotations).
 - **Type-Safe SQL**: All database interactions use **jOOQ**. Do not use raw strings for queries if possible.
 - **Reliable Messaging**: Never publish directly to Kafka from the application service. Use `DomainEventPublisher`, which persists events to the `outbox` table within the same transaction.
+- **OpenAPI First**: The REST API is defined in `openapi.yaml`. Backend controller interfaces and DTOs are generated
+  using the `openapi-generator-maven-plugin`. Frontend services and models are generated using
+  `@openapitools/openapi-generator-cli`.
 - **Kotlin Style**: Use idiomatic Kotlin (data classes, expressions, null safety). Avoid `!!` and prefer `val` over `var`.
 - **UI Architecture**: Angular components should be standalone. Use `HttpClient` for backend interactions via the configured proxy.

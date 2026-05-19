@@ -1,6 +1,7 @@
 import {Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {catchError, map, Observable, of, tap} from 'rxjs';
+import {UserService} from './api';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,7 @@ export class AuthService {
     private _authHeader = signal<string | null>(null);
     authHeader = this._authHeader.asReadonly();
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private userService: UserService) {
     }
 
     login(username: string, password: string): Observable<boolean> {

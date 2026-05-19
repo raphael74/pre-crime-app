@@ -4,8 +4,8 @@ import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {catchError, EMPTY, interval, switchMap} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
-import {PreCrimeService} from '../pre-crime.service';
 import {AuthService} from '../auth.service';
+import {AuditService, PreCrimeService} from '../api';
 
 @Component({
     selector: 'app-hud',
@@ -21,7 +21,7 @@ export class HudComponent {
 
     auditLogs = toSignal(
         interval(1000).pipe(
-            switchMap(() => this.service.getAuditLogs().pipe(
+            switchMap(() => this.auditService.getLogs().pipe(
                 catchError(() => {
                     this.backendError.set('AUDIT LOG FETCH FAILED');
                     return EMPTY;
@@ -33,7 +33,7 @@ export class HudComponent {
 
     crimesPrevented = toSignal(
         interval(1000).pipe(
-            switchMap(() => this.service.getStats().pipe(
+            switchMap(() => this.preCrimeService.getStats().pipe(
                 catchError(() => {
                     this.backendError.set('STATUS UPDATE FAILED');
                     return EMPTY;
@@ -44,13 +44,15 @@ export class HudComponent {
     );
 
     constructor(
-        private service: PreCrimeService,
+        private auditService: AuditService,
+        private preCrimeService: PreCrimeService,
         private authService: AuthService,
         private router: Router
     ) {
     }
 
-    formatPayload(payload: string): string {
+    formatPayload(payload: string | undefined): string {
+        if (!payload) return '';
         try {
             return JSON.stringify(JSON.parse(payload), null, 2);
         } catch (e) {
@@ -70,7 +72,7 @@ export class HudComponent {
 
         this.backendError.set(null);
 
-        this.service.triggerVision(perp, type).subscribe({
+        this.preCrimeService.createVision({perpetrator: perp, crimeType: type}).subscribe({
             next: () => {
                 this.perpetrator.set('');
                 this.crimeType.set('');

@@ -2,6 +2,7 @@ import {TestBed} from '@angular/core/testing';
 import {AuthService} from './auth.service';
 import {provideHttpClient} from '@angular/common/http';
 import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
+import {UserService} from './api';
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -11,6 +12,7 @@ describe('AuthService', () => {
         TestBed.configureTestingModule({
             providers: [
                 AuthService,
+                UserService,
                 provideHttpClient(),
                 provideHttpClientTesting()
             ]

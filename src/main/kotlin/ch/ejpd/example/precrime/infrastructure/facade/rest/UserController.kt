@@ -1,16 +1,16 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import ch.ejpd.example.precrime.infrastructure.facade.rest.api.UserApi
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.UserResponse
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.RestController
-import java.security.Principal
 
 @RestController
-@RequestMapping("/api/user")
-class UserController {
+class UserController : UserApi {
 
-    @GetMapping
-    fun getCurrentUser(principal: Principal): Map<String, String> {
-        return mapOf("username" to principal.name)
+    override fun getCurrentUser(): ResponseEntity<UserResponse> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return ResponseEntity.ok(UserResponse(username = authentication?.name ?: "anonymous"))
     }
 }

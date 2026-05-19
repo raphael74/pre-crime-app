@@ -26,7 +26,7 @@ class SecurityConfiguration {
                 disable()
             }
             authorizeHttpRequests {
-                authorize("/api/**", hasRole(USER_ROLE))
+                authorize("/api/**", authenticated)
                 authorize(anyRequest, permitAll)
             }
             formLogin {

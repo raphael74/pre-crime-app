@@ -47,7 +47,7 @@ jobs:
           ./mvnw clean package
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: pre-crime-app
           path: target/pre-crime-app.jar

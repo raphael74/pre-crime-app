@@ -1,6 +1,5 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
-import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.precog.*
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRECOG_DIVISION
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.VISION
@@ -12,8 +11,7 @@ import java.util.*
 
 @Component
 class JooqPrecogDivisionRepository(
-    private val dsl: DSLContext,
-    private val publisher: DomainEventPublisher
+    private val dsl: DSLContext
 ) : PrecogDivisionRepository {
 
     private val SINGLETON_ID = PrecogDivisionId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
@@ -79,8 +77,6 @@ class JooqPrecogDivisionRepository(
             }
         }
 
-        publisher.publish(division.domainEvents)
-        division.clearDomainEvents()
     }
 
     override fun findSingleton(): PrecogDivision = findById(SINGLETON_ID)!!

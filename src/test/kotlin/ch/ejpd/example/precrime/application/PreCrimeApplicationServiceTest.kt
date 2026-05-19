@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.application
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
@@ -16,7 +17,8 @@ class PreCrimeApplicationServiceTest {
 
     private val precogRepository = mockk<PrecogDivisionRepository>()
     private val enforcementRepository = mockk<LawEnforcementRepository>()
-    private val service = PreCrimeApplicationService(precogRepository, enforcementRepository)
+    private val publisher = mockk<DomainEventPublisher>(relaxed = true)
+    private val service = PreCrimeApplicationService(precogRepository, enforcementRepository, publisher)
 
     @Test
     fun `getPreventedCrimesCount should return count from singleton precog division`() {
@@ -34,7 +36,7 @@ class PreCrimeApplicationServiceTest {
     }
 
     @Test
-    fun `triggerVision should find singleton, foresee crime and save`() {
+    fun `triggerVision should find singleton, foresee crime and save and publish`() {
         // GIVEN
         val division = mockk<PrecogDivision>(relaxed = true)
         every { precogRepository.findSingleton() } returns division
@@ -48,11 +50,13 @@ class PreCrimeApplicationServiceTest {
             precogRepository.findSingleton()
             division.foreseeCrime(Perpetrator("John Doe"), CrimeType("Murder"))
             precogRepository.update(division)
+            publisher.publish(any())
+            division.clearDomainEvents()
         }
     }
 
     @Test
-    fun `onCrimeForeseen should find singleton enforcement unit, execute pre-arrest and save`() {
+    fun `onCrimeForeseen should find singleton enforcement unit, execute pre-arrest and save and publish`() {
         // GIVEN
         val visionId = VisionId()
         val event = CrimeForeseenEvent(visionId, Perpetrator("John Doe"), CrimeType("Murder"), LocalDateTime.now())
@@ -68,11 +72,13 @@ class PreCrimeApplicationServiceTest {
             enforcementRepository.findSingleton()
             unit.executePreArrest(visionId, Perpetrator("John Doe"))
             enforcementRepository.update(unit)
+            publisher.publish(any())
+            unit.clearDomainEvents()
         }
     }
 
     @Test
-    fun `onPreArrestExecuted should find singleton precog division, record prevention and save`() {
+    fun `onPreArrestExecuted should find singleton precog division, record prevention and save and publish`() {
         // GIVEN
         val event = PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("John Doe"))
         val division = mockk<PrecogDivision>(relaxed = true)
@@ -87,6 +93,8 @@ class PreCrimeApplicationServiceTest {
             precogRepository.findSingleton()
             division.recordPrevention()
             precogRepository.update(division)
+            publisher.publish(any())
+            division.clearDomainEvents()
         }
     }
 }

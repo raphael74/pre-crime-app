@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.application
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.precog.*
@@ -13,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class PreCrimeApplicationService(
     private val precogRepository: PrecogDivisionRepository,
-    private val enforcementRepository: LawEnforcementRepository
+    private val enforcementRepository: LawEnforcementRepository,
+    private val publisher: DomainEventPublisher
 ) {
     val logger = LoggerFactory.getLogger(javaClass)
 
@@ -26,6 +28,8 @@ class PreCrimeApplicationService(
         val division = precogRepository.findSingleton()
         val visionId = division.foreseeCrime(Perpetrator(perpetratorName), CrimeType(crimeTypeName))
         precogRepository.update(division)
+        publisher.publish(division.domainEvents)
+        division.clearDomainEvents()
         logger.info("[PrecogDivision] Foresee: $perpetratorName will commit $crimeTypeName! Aggregate published event.")
         return visionId
     }
@@ -36,6 +40,8 @@ class PreCrimeApplicationService(
         val unit = enforcementRepository.findSingleton()
         unit.executePreArrest(event.visionId, event.perpetrator)
         enforcementRepository.update(unit)
+        publisher.publish(unit.domainEvents)
+        unit.clearDomainEvents()
     }
 
     @DomainEventHandler
@@ -44,6 +50,8 @@ class PreCrimeApplicationService(
         val division = precogRepository.findSingleton()
         division.recordPrevention()
         precogRepository.update(division)
+        publisher.publish(division.domainEvents)
+        division.clearDomainEvents()
         logger.info("Stats: Total crimes 'prevented' via Minority Report logic: ${division.totalCrimesPrevented}")
     }
 }

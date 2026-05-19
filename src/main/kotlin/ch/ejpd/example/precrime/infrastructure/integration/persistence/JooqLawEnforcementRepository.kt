@@ -1,6 +1,5 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
-import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.enforcement.*
 import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.LAW_ENFORCEMENT_UNIT
@@ -13,8 +12,7 @@ import java.util.*
 
 @Component
 class JooqLawEnforcementRepository(
-    private val dsl: DSLContext,
-    private val publisher: DomainEventPublisher
+    private val dsl: DSLContext
 ) : LawEnforcementRepository {
 
     private val SINGLETON_ID = EnforcementUnitId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
@@ -80,8 +78,6 @@ class JooqLawEnforcementRepository(
             }
         }
 
-        publisher.publish(unit.domainEvents)
-        unit.clearDomainEvents()
     }
 
     override fun findSingleton(): LawEnforcementUnit = findById(SINGLETON_ID)!!

@@ -21,7 +21,7 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun createVision(createVisionRequest: CreateVisionRequest): ResponseEntity<CreateVisionResponse> {
         val visionId =
-            applicationService.triggerVision(createVisionRequest.perpetrator!!, createVisionRequest.crimeType!!)
+            applicationService.triggerVision(createVisionRequest.perpetrator, createVisionRequest.crimeType)
         return ResponseEntity.status(HttpStatus.CREATED).body(
             CreateVisionResponse(
                 visionId = visionId.value,

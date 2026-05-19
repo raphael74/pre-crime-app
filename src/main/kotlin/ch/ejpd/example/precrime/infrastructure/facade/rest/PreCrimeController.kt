@@ -1,8 +1,10 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
+import ch.ejpd.example.precrime.infrastructure.facade.security.SecurityConfiguration.Companion.USER_ROLE
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -11,11 +13,13 @@ import java.util.*
 class PreCrimeController(private val applicationService: PreCrimeApplicationService) {
 
     @GetMapping("/stats")
+    @PreAuthorize("hasRole('$USER_ROLE')")
     fun getStats(): Int {
         return applicationService.getPreventedCrimesCount()
     }
 
     @PostMapping("/vision")
+    @PreAuthorize("hasRole('$USER_ROLE')")
     fun createVision(@RequestBody request: CreateVisionRequest): ResponseEntity<CreateVisionResponse> {
         val visionId = applicationService.triggerVision(request.perpetrator, request.crimeType)
         return ResponseEntity.status(HttpStatus.CREATED).body(

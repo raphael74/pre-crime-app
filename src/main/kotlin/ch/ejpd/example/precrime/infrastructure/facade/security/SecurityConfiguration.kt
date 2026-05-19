@@ -11,11 +11,13 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 
-private const val USER_ROLE = "USER"
-
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration {
+
+    companion object {
+        const val USER_ROLE = "USER"
+    }
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {

@@ -43,6 +43,18 @@ export class HudComponent {
         {initialValue: 0}
     );
 
+    apologies = toSignal(
+        interval(1000).pipe(
+            switchMap(() => this.preCrimeService.getApologies().pipe(
+                catchError(() => {
+                    this.backendError.set('APOLOGY LOG FETCH FAILED');
+                    return EMPTY;
+                })
+            ))
+        ),
+        {initialValue: []}
+    );
+
     constructor(
         private auditService: AuditService,
         private preCrimeService: PreCrimeService,

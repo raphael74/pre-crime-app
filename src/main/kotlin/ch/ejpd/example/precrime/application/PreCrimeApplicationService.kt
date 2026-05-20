@@ -1,6 +1,9 @@
 package ch.ejpd.example.precrime.application
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
+import ch.ejpd.example.precrime.domain.apology.PreApology
+import ch.ejpd.example.precrime.domain.apology.PreApologyRepository
+import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyService
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.precog.*
@@ -15,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 class PreCrimeApplicationService(
     private val precogRepository: PrecogDivisionRepository,
     private val enforcementRepository: LawEnforcementRepository,
+    private val preApologyRepository: PreApologyRepository,
+    private val preEmptiveApologyService: PreEmptiveApologyService,
     private val publisher: DomainEventPublisher
 ) {
     val logger = LoggerFactory.getLogger(javaClass)
@@ -22,6 +27,11 @@ class PreCrimeApplicationService(
     @Transactional(readOnly = true)
     fun getPreventedCrimesCount(): Int {
         return precogRepository.findSingleton().totalCrimesPrevented
+    }
+
+    @Transactional(readOnly = true)
+    fun getAllApologies(): List<PreApology> {
+        return preApologyRepository.findAll()
     }
 
     fun triggerVision(perpetratorName: String, crimeTypeName: String): VisionId {
@@ -53,5 +63,16 @@ class PreCrimeApplicationService(
         publisher.publish(division.domainEvents)
         division.clearDomainEvents()
         logger.info("Stats: Total crimes 'prevented' via Minority Report logic: ${division.totalCrimesPrevented}")
+
+        // Generate and save pre-emptive apology & compensation statement
+        val vision = division.visions.find { it.id == event.visionId }
+            ?: throw IllegalStateException("Vision ${event.visionId} not found in division")
+
+        val apology = preEmptiveApologyService.generateApology(vision)
+        preApologyRepository.save(apology)
+
+        publisher.publish(apology.domainEvents)
+        apology.clearDomainEvents()
+        logger.info("[PreApologyService] Issued pre-emptive apology to ${apology.perpetrator.name}. Net payout: ${apology.compensation.netPayout}")
     }
 }

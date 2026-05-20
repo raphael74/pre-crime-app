@@ -1,4 +1,4 @@
-# Pre-Crime Application: Gemini Context
+# Pre-Crime Application: Antigravity Context
 
 This project is a reference implementation of **Domain-Driven Design (DDD)** and **Onion Architecture** using a modern
 Kotlin/Spring Boot backend and an Angular frontend. It is themed around a futuristic "Pre-Crime" department.

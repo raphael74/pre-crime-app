@@ -4,5 +4,6 @@ class KafkaTopics {
     companion object {
         const val CRIME_FORESEEN_EVENT_TOPIC = "crime-foreseen-event"
         const val PRE_ARREST_EXECUTED_EVENT_TOPIC = "pre-arrest-executed-event"
+        const val PRE_APOLOGY_ISSUED_EVENT_TOPIC = "pre-apology-issued-event"
     }
 }

@@ -40,7 +40,7 @@
                     <userType>ch.ejpd.example.precrime.domain.precog.VisionId</userType>
                     <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.VisionIdConverter
                     </converter>
-                    <includeExpression>vision\.id|pre_arrest\.vision_id</includeExpression>
+                    <includeExpression>vision\.id|pre_arrest\.vision_id|pre_apology\.vision_id</includeExpression>
                 </forcedType>
                 <forcedType>
                     <userType>ch.ejpd.example.precrime.domain.enforcement.EnforcementUnitId</userType>
@@ -75,6 +75,11 @@
                     <userType>ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxState</userType>
                     <enumConverter>true</enumConverter>
                     <includeExpression>outbox\.status</includeExpression>
+                </forcedType>
+                <forcedType>
+                    <userType>ch.ejpd.example.precrime.domain.apology.PreApologyId</userType>
+                    <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.PreApologyIdConverter</converter>
+                    <includeExpression>pre_apology\.id</includeExpression>
                 </forcedType>
             </forcedTypes>
 

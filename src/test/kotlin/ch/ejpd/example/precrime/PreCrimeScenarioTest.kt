@@ -3,6 +3,7 @@ package ch.ejpd.example.precrime
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.PreApologyResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -29,7 +30,7 @@ class PreCrimeScenarioTest(
 
         // WHEN: Precogs foresee a crime
         val perpetrator = "John Doe"
-        val crimeType = "Future Murder"
+        val crimeType = "Murder" // Using "Murder" to trigger base amount calculations correctly
         triggerVision(perpetrator, crimeType)
 
         // THEN: The statistics should be updated via the bidirectional event flow
@@ -43,6 +44,17 @@ class PreCrimeScenarioTest(
 
             val unit = enforcementRepository.findSingleton()
             assertThat(unit.preArrests).anyMatch { it.perpetrator.name == perpetrator }
+
+            // AND: A pre-emptive apology is generated and retrievable via REST API
+            val apologies = getApologies()
+            assertThat(apologies).hasSize(1)
+            val apology = apologies.first()
+            assertThat(apology.perpetrator).isEqualTo(perpetrator)
+            assertThat(apology.baseAmount?.toDouble()).isEqualTo(10000.0)
+            assertThat(apology.jetpackFuelDeduction?.toDouble()).isEqualTo(450.0)
+            assertThat(apology.haloRentalFee?.toDouble()).isEqualTo(250.0)
+            assertThat(apology.netPayout?.toDouble()).isEqualTo(9300.0)
+            assertThat(apology.apologyText).contains("Dear Family of John Doe")
         }
     }
 
@@ -52,6 +64,14 @@ class PreCrimeScenarioTest(
             .exchange()
             .expectStatus().isOk
             .expectBody(Int::class.java).returnResult().responseBody ?: 0
+    }
+
+    private fun getApologies(): List<PreApologyResponse> {
+        return restTestClient.get().uri("/api/pre-crime/apologies")
+            .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(Array<PreApologyResponse>::class.java).returnResult().responseBody?.toList() ?: emptyList()
     }
 
     private fun triggerVision(perpetrator: String, crimeType: String) {

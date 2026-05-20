@@ -32,6 +32,21 @@ paths:
             application/json:
               schema:
                 type: integer
+  /pre-crime/apologies:
+    get:
+      summary: Get all pre-emptive apologies
+      operationId: getApologies
+      tags:
+        - PreCrime
+      responses:
+        '200':
+          description: List of pre-emptive apologies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreApologyResponse'
   /pre-crime/vision:
     post:
       summary: Trigger a vision
@@ -102,6 +117,27 @@ components:
           type: string
           format: uuid
         message:
+          type: string
+    PreApologyResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        visionId:
+          type: string
+          format: uuid
+        perpetrator:
+          type: string
+        baseAmount:
+          type: number
+        jetpackFuelDeduction:
+          type: number
+        haloRentalFee:
+          type: number
+        netPayout:
+          type: number
+        apologyText:
           type: string
     UserResponse:
       type: object

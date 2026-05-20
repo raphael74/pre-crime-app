@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.application
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
+import ch.ejpd.example.precrime.domain.apology.*
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
@@ -17,8 +18,16 @@ class PreCrimeApplicationServiceTest {
 
     private val precogRepository = mockk<PrecogDivisionRepository>()
     private val enforcementRepository = mockk<LawEnforcementRepository>()
+    private val preApologyRepository = mockk<PreApologyRepository>(relaxed = true)
+    private val preEmptiveApologyService = mockk<PreEmptiveApologyService>()
     private val publisher = mockk<DomainEventPublisher>(relaxed = true)
-    private val service = PreCrimeApplicationService(precogRepository, enforcementRepository, publisher)
+    private val service = PreCrimeApplicationService(
+        precogRepository,
+        enforcementRepository,
+        preApologyRepository,
+        preEmptiveApologyService,
+        publisher
+    )
 
     @Test
     fun `getPreventedCrimesCount should return count from singleton precog division`() {
@@ -80,10 +89,26 @@ class PreCrimeApplicationServiceTest {
     @Test
     fun `onPreArrestExecuted should find singleton precog division, record prevention and save and publish`() {
         // GIVEN
-        val event = PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("John Doe"))
+        val visionId = VisionId()
+        val event = PreArrestExecutedEvent(PreArrestId(), visionId, Perpetrator("John Doe"))
+
+        val vision = Vision(visionId, Perpetrator("John Doe"), CrimeType("Murder"), LocalDateTime.now())
         val division = mockk<PrecogDivision>(relaxed = true)
+        every { division.visions } returns setOf(vision)
         every { precogRepository.findSingleton() } returns division
         every { precogRepository.update(any()) } returns Unit
+
+        val unit = mockk<LawEnforcementUnit>()
+        every { enforcementRepository.findSingleton() } returns unit
+
+        val apology = PreApology(
+            visionId = visionId,
+            perpetrator = Perpetrator("John Doe"),
+            compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
+            apologyLetter = ApologyLetter("Dear family...")
+        ).apply { issue() }
+        every { preEmptiveApologyService.generateApology(vision) } returns apology
+        every { preApologyRepository.save(any()) } returns Unit
 
         // WHEN
         service.onPreArrestExecuted(event)
@@ -93,6 +118,8 @@ class PreCrimeApplicationServiceTest {
             precogRepository.findSingleton()
             division.recordPrevention()
             precogRepository.update(division)
+            preEmptiveApologyService.generateApology(vision)
+            preApologyRepository.save(apology)
             publisher.publish(any())
             division.clearDomainEvents()
         }

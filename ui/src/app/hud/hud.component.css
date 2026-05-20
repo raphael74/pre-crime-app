@@ -169,3 +169,21 @@ button:hover {
         top: 100%;
     }
 }
+
+.apology-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.apology-list::-webkit-scrollbar-track {
+    background: rgba(0, 242, 255, 0.05);
+}
+
+.apology-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 255, 0.3);
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+.apology-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 255, 0.5);
+}

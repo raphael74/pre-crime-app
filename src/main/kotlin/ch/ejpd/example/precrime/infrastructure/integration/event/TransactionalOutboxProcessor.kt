@@ -1,8 +1,10 @@
 package ch.ejpd.example.precrime.infrastructure.integration.event
 
+import ch.ejpd.example.precrime.domain.apology.PreApologyIssuedEvent
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORESEEN_EVENT_TOPIC
+import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_APOLOGY_ISSUED_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqOutboxRepository
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxId
@@ -49,6 +51,11 @@ class TransactionalOutboxProcessor(
             is PreArrestExecutedEvent -> {
                 topic = PRE_ARREST_EXECUTED_EVENT_TOPIC
                 eventKey = event.preArrestId.value.toString()
+            }
+
+            is PreApologyIssuedEvent -> {
+                topic = PRE_APOLOGY_ISSUED_EVENT_TOPIC
+                eventKey = event.apologyId.value.toString()
             }
 
             else -> throw IllegalArgumentException("Unsupported event type: ${event::class.simpleName}")

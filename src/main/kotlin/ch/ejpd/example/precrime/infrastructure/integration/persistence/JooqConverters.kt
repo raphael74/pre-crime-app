@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.domain.AggregateVersion
+import ch.ejpd.example.precrime.domain.apology.PreApologyId
 import ch.ejpd.example.precrime.domain.audit.AuditEntryId
 import ch.ejpd.example.precrime.domain.enforcement.EnforcementUnitId
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
@@ -45,4 +46,9 @@ class AuditEntryIdConverter : AbstractConverter<UUID, AuditEntryId>(UUID::class.
 class OutboxIdConverter : AbstractConverter<UUID, OutboxId>(UUID::class.java, OutboxId::class.java) {
     override fun from(t: UUID?): OutboxId? = t?.let { OutboxId(it) }
     override fun to(u: OutboxId?): UUID? = u?.value
+}
+
+class PreApologyIdConverter : AbstractConverter<UUID, PreApologyId>(UUID::class.java, PreApologyId::class.java) {
+    override fun from(t: UUID?): PreApologyId? = t?.let { PreApologyId(it) }
+    override fun to(u: PreApologyId?): UUID? = u?.value
 }

@@ -44,12 +44,45 @@
         </div>
     </main>
 
-    <aside class="panel">
-        <h2>Statistics</h2>
-        <div style="font-size: 3em; text-align: center; margin-top: 20px;">
-            {{ crimesPrevented() }}
+    <aside class="panel" style="display: flex; flex-direction: column; gap: 20px;">
+        <div>
+            <h2>Statistics</h2>
+            <div style="font-size: 3em; text-align: center; margin-top: 10px; text-shadow: 0 0 10px #00f2ff;">
+                {{ crimesPrevented() }}
+            </div>
+            <div style="text-align: center; font-size: 0.9em; color: #00f2ff; opacity: 0.8;">Crimes Prevented</div>
         </div>
-        <div style="text-align: center;">Crimes Prevented</div>
+
+        <div style="border-top: 1px solid rgba(0, 242, 255, 0.3); padding-top: 15px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+            <h2>Pre-Emptive Apologies</h2>
+            <div class="apology-list"
+                 style="flex: 1; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; padding-right: 5px;">
+                @for (apology of apologies(); track apology.id) {
+                    <div class="apology-card"
+                         style="border: 1px solid rgba(0, 242, 255, 0.2); background: rgba(0, 10, 20, 0.6); padding: 10px; font-size: 0.85em; display: flex; flex-direction: column; gap: 5px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 242, 255, 0.1); padding-bottom: 4px; font-weight: bold;">
+                            <span style="color: #00f2ff;">{{ apology.perpetrator }}</span>
+                            <span [style.color]="(apology.netPayout ?? 0) >= 0 ? '#00ff66' : '#ff4d4d'"
+                                  style="text-shadow: 0 0 5px currentColor;">
+                                {{ (apology.netPayout ?? 0) >= 0 ? '+' : '' }}{{ apology.netPayout | currency:'USD' }}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.8em; line-height: 1.3; opacity: 0.9; color: #e0faff; font-family: monospace;">
+                            {{ apology.apologyText }}
+                        </div>
+                        <div style="font-size: 0.75em; display: flex; flex-wrap: wrap; justify-content: space-between; color: rgba(0, 242, 255, 0.6); font-family: monospace; border-top: 1px dashed rgba(0, 242, 255, 0.15); padding-top: 4px;">
+                            <span>Base: ${{ apology.baseAmount }}</span>
+                            <span>Fuel: -${{ apology.jetpackFuelDeduction }}</span>
+                            <span>Halo: -${{ apology.haloRentalFee }}</span>
+                        </div>
+                    </div>
+                } @empty {
+                    <div style="text-align: center; opacity: 0.5; font-size: 0.9em; margin-top: 20px;">NO APOLOGIES
+                        GENERATED YET...
+                    </div>
+                }
+            </div>
+        </div>
     </aside>
 
     <footer class="panel" style="grid-column: span 3; font-size: 0.7em; color: rgba(0, 242, 255, 0.5);">

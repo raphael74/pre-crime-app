@@ -9,9 +9,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-class PreEmptiveApologyServiceTest {
+class PreEmptiveApologyDomainServiceTest {
 
-    private val service = PreEmptiveApologyService()
+    private val service = PreEmptiveApologyDomainService()
     private val enforcementUnit = LawEnforcementUnit()
 
     @Test

@@ -3,7 +3,7 @@ package ch.ejpd.example.precrime.application
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.PreApology
 import ch.ejpd.example.precrime.domain.apology.PreApologyRepository
-import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyService
+import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyDomainService
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.precog.*
@@ -19,7 +19,7 @@ class PreCrimeApplicationService(
     private val precogRepository: PrecogDivisionRepository,
     private val enforcementRepository: LawEnforcementRepository,
     private val preApologyRepository: PreApologyRepository,
-    private val preEmptiveApologyService: PreEmptiveApologyService,
+    private val preEmptiveApologyDomainService: PreEmptiveApologyDomainService,
     private val publisher: DomainEventPublisher
 ) {
     val logger = LoggerFactory.getLogger(javaClass)
@@ -68,7 +68,7 @@ class PreCrimeApplicationService(
         val vision = division.visions.find { it.id == event.visionId }
             ?: throw IllegalStateException("Vision ${event.visionId} not found in division")
 
-        val apology = preEmptiveApologyService.generateApology(vision)
+        val apology = preEmptiveApologyDomainService.generateApology(vision)
         preApologyRepository.save(apology)
 
         publisher.publish(apology.domainEvents)

@@ -4,7 +4,7 @@ import ch.ejpd.example.precrime.domain.precog.Vision
 import org.jmolecules.ddd.annotation.Service
 
 @Service
-class PreEmptiveApologyService {
+class PreEmptiveApologyDomainService {
 
     fun generateApology(vision: Vision): PreApology {
         // Base compensation scales with crime severity

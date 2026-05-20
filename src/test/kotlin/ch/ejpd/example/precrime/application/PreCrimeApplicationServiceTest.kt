@@ -19,13 +19,13 @@ class PreCrimeApplicationServiceTest {
     private val precogRepository = mockk<PrecogDivisionRepository>()
     private val enforcementRepository = mockk<LawEnforcementRepository>()
     private val preApologyRepository = mockk<PreApologyRepository>(relaxed = true)
-    private val preEmptiveApologyService = mockk<PreEmptiveApologyService>()
+    private val preEmptiveApologyDomainService = mockk<PreEmptiveApologyDomainService>()
     private val publisher = mockk<DomainEventPublisher>(relaxed = true)
     private val service = PreCrimeApplicationService(
         precogRepository,
         enforcementRepository,
         preApologyRepository,
-        preEmptiveApologyService,
+        preEmptiveApologyDomainService,
         publisher
     )
 
@@ -107,7 +107,7 @@ class PreCrimeApplicationServiceTest {
             compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
             apologyLetter = ApologyLetter("Dear family...")
         ).apply { issue() }
-        every { preEmptiveApologyService.generateApology(vision) } returns apology
+        every { preEmptiveApologyDomainService.generateApology(vision) } returns apology
         every { preApologyRepository.save(any()) } returns Unit
 
         // WHEN
@@ -118,7 +118,7 @@ class PreCrimeApplicationServiceTest {
             precogRepository.findSingleton()
             division.recordPrevention()
             precogRepository.update(division)
-            preEmptiveApologyService.generateApology(vision)
+            preEmptiveApologyDomainService.generateApology(vision)
             preApologyRepository.save(apology)
             publisher.publish(any())
             division.clearDomainEvents()

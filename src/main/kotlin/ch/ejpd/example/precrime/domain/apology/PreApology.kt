@@ -7,6 +7,7 @@ import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.annotation.Repository
 import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
+import org.jmolecules.event.annotation.DomainEvent
 import java.util.*
 
 @AggregateRoot
@@ -62,3 +63,11 @@ interface PreApologyRepository {
     fun findById(id: PreApologyId): PreApology?
     fun findAll(): List<PreApology>
 }
+
+@DomainEvent
+data class PreApologyIssuedEvent(
+    val apologyId: PreApologyId,
+    val visionId: VisionId,
+    val perpetrator: Perpetrator,
+    val netPayout: Double
+)

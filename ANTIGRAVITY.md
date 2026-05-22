@@ -20,6 +20,7 @@ Kotlin/Spring Boot backend and an Angular frontend. It is themed around a futuri
 
 1. **Precog Division**: Responsible for foreseeing future crimes and recording prevention statistics.
 2. **Law Enforcement Unit**: Responsible for executing "pre-arrests" based on visions received via domain events.
+3. **Pre-Apology**: Automatically generates apologies and compensation statements for the families of pre-arrested individuals.
 
 ## Technical Stack
 

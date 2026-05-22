@@ -20,8 +20,8 @@ where:
 
 - **Precog Division**: Foresees future crimes and publishes visions.
 - **Law Enforcement**: Responds to these visions by executing "pre-arrests" before the crime occurs.
-- **Feedback Loop**: Successful arrests are reported back to update statistics, completing the cycle of crime
-  prevention.
+- **Feedback Loop**: Successful arrests are reported back to update statistics.
+- **Pre-emptive Apology**: Automatically issues apologies and "compensation" statements (with dystopian recovery fees) to the family of the pre-arrested individual.
 
 ## Architecture Diagram
 
@@ -31,6 +31,7 @@ The following diagram illustrates the main aggregates and the event-driven flow 
 sequenceDiagram
     participant P as Precog Division Aggregate
     participant L as Law Enforcement Aggregate
+    participant A as Pre-Apology Aggregate
     participant K as Kafka (Event Bus)
 
     Note over P: Crime Foreseen
@@ -42,6 +43,9 @@ sequenceDiagram
     K-->>P: Consume PreArrestExecuted
     
     Note over P: Record Prevention (Stats)
+    
+    Note over A: Generate Apology & Billing
+    A->>K: PreApologyIssued Event
 ```
 
 ## Technical Stack
@@ -88,6 +92,7 @@ Navigate to the `ui` directory and start the dev server:
 ```bash
 cd ui
 npm install
+npm generate-api
 npm start
 ```
 

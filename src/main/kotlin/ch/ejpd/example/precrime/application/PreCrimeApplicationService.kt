@@ -22,7 +22,7 @@ class PreCrimeApplicationService(
     private val preEmptiveApologyDomainService: PreEmptiveApologyDomainService,
     private val publisher: DomainEventPublisher
 ) {
-    val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(readOnly = true)
     fun getPreventedCrimesCount(): Int {

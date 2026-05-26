@@ -35,7 +35,7 @@ class JooqOutboxRepository(
             .from(OUTBOX)
             .where(OUTBOX.ID.eq(id))
             .fetchOne()
-            ?.map { it.toOutboxRecord() }
+            ?.toOutboxRecord()
     }
 
     fun findPendingForUpdate(): List<OutboxRecord> {

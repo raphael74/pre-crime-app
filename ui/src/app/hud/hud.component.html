@@ -1,18 +1,17 @@
 <div class="hud-container">
-    <header class="panel"
-            style="flex-direction: row; grid-column: span 3; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center;">
+    <header class="panel hud-header">
+        <div class="header-logo-container">
             <img alt="fedpol logo" class="logo" src="assets/images/fedpol-logo-de.png">
             <h1>Department of Pre-Crime</h1>
         </div>
-        <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="header-actions">
             @if (backendError()) {
-                <div class="error-warning">{{ backendError() }}</div>
+            <div class="error-warning">{{ backendError() }}</div>
             }
             <div [class.critical]="backendError()" class="status-indicator">
                 System Status: {{ backendError() ? 'Critical' : 'Optimal' }}
             </div>
-            <button (click)="logout()" style="padding: 5px 15px; font-size: 0.8em;">Logout</button>
+            <button (click)="logout()" class="logout-btn">Logout</button>
         </div>
     </header>
 
@@ -34,58 +33,55 @@
         <h2>Live Surveillance Feed (Audit Log)</h2>
         <div class="log-feed">
             @for (log of auditLogs(); track log.id?.value) {
-                <div class="log-entry">
-                    [{{ log.recordedAt | date:'HH:mm:ss' }}] >> {{ log.eventType }}:
-                    <pre style="margin: 5px 0 15px 20px; color: #00f2ff; font-family: monospace; font-size: 0.9em;">{{ formatPayload(log.payload) }}</pre>
-                </div>
+            <div class="log-entry">
+                [{{ log.recordedAt | date:'HH:mm:ss' }}] >> {{ log.eventType }}:
+                <pre class="log-payload">{{ formatPayload(log.payload) }}</pre>
+            </div>
             } @empty {
-                <div class="log-entry" style="opacity: 0.5;">NO SURVEILLANCE DATA AVAILABLE...</div>
+            <div class="log-entry empty-state">NO SURVEILLANCE DATA AVAILABLE...</div>
             }
         </div>
     </main>
 
-    <aside class="panel" style="display: flex; flex-direction: column; gap: 20px;">
+    <aside class="panel stats-apologies-panel">
         <div>
             <h2>Statistics</h2>
-            <div style="font-size: 3em; text-align: center; margin-top: 10px; text-shadow: 0 0 10px #00f2ff;">
+            <div class="stats-number">
                 {{ crimesPrevented() }}
             </div>
-            <div style="text-align: center; font-size: 0.9em; color: #00f2ff; opacity: 0.8;">Crimes Prevented</div>
+            <div class="stats-label">Crimes Prevented</div>
         </div>
 
-        <div style="border-top: 1px solid rgba(0, 242, 255, 0.3); padding-top: 15px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div class="apologies-section">
             <h2>Pre-Emptive Apologies</h2>
-            <div class="apology-list"
-                 style="flex: 1; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; padding-right: 5px;">
+            <div class="apology-list">
                 @for (apology of apologies(); track apology.id) {
-                    <div class="apology-card"
-                         style="border: 1px solid rgba(0, 242, 255, 0.2); background: rgba(0, 10, 20, 0.6); padding: 10px; font-size: 0.85em; display: flex; flex-direction: column; gap: 5px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 242, 255, 0.1); padding-bottom: 4px; font-weight: bold;">
-                            <span style="color: #00f2ff;">{{ apology.perpetrator }}</span>
-                            <span [style.color]="(apology.netPayout ?? 0) >= 0 ? '#00ff66' : '#ff4d4d'"
-                                  style="text-shadow: 0 0 5px currentColor;">
+                <div class="apology-card">
+                    <div class="apology-header">
+                        <span class="apology-perpetrator">{{ apology.perpetrator }}</span>
+                        <span [class.negative]="(apology.netPayout ?? 0) < 0"
+                              [class.positive]="(apology.netPayout ?? 0) >= 0"
+                              class="apology-payout">
                                 {{ (apology.netPayout ?? 0) >= 0 ? '+' : '' }}{{ apology.netPayout | currency:'USD' }}
                             </span>
-                        </div>
-                        <div style="font-size: 0.8em; line-height: 1.3; opacity: 0.9; color: #e0faff; font-family: monospace;">
-                            {{ apology.apologyText }}
-                        </div>
-                        <div style="font-size: 0.75em; display: flex; flex-wrap: wrap; justify-content: space-between; color: rgba(0, 242, 255, 0.6); font-family: monospace; border-top: 1px dashed rgba(0, 242, 255, 0.15); padding-top: 4px;">
-                            <span>Base: ${{ apology.baseAmount }}</span>
-                            <span>Fuel: -${{ apology.jetpackFuelDeduction }}</span>
-                            <span>Halo: -${{ apology.haloRentalFee }}</span>
-                        </div>
                     </div>
+                    <div class="apology-text">{{ apology.apologyText }}</div>
+                    <div class="apology-breakdown">
+                        <span>Base: ${{ apology.baseAmount }}</span>
+                        <span>Fuel: -${{ apology.jetpackFuelDeduction }}</span>
+                        <span>Halo: -${{ apology.haloRentalFee }}</span>
+                    </div>
+                </div>
                 } @empty {
-                    <div style="text-align: center; opacity: 0.5; font-size: 0.9em; margin-top: 20px;">NO APOLOGIES
-                        GENERATED YET...
-                    </div>
+                <div class="apologies-empty">NO APOLOGIES
+                    GENERATED YET...
+                </div>
                 }
             </div>
         </div>
     </aside>
 
-    <footer class="panel" style="grid-column: span 3; font-size: 0.7em; color: rgba(0, 242, 255, 0.5);">
+    <footer class="panel hud-footer">
         CONFIDENTIAL - PROPERTY OF PRE-CRIME DIVISION - FEDPOL.
     </footer>
 </div>

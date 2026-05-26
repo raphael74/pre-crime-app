@@ -5,6 +5,7 @@ import ch.ejpd.example.precrime.domain.audit.AuditEntryRepository
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.AUDIT_LOG
 import org.jooq.DSLContext
 import org.jooq.JSON
+import org.jooq.Record
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -27,13 +28,13 @@ class JooqAuditEntryRepository(private val dsl: DSLContext) : AuditEntryReposito
             .from(AUDIT_LOG)
             .orderBy(AUDIT_LOG.RECORDED_AT.desc())
             .fetch()
-            .map { r ->
-                AuditEntry(
-                    id = r.get(AUDIT_LOG.ID)!!,
-                    eventType = r.get(AUDIT_LOG.EVENT_TYPE)!!,
-                    payload = r.get(AUDIT_LOG.PAYLOAD)!!.data(),
-                    recordedAt = r.get(AUDIT_LOG.RECORDED_AT)!!
-                )
-            }
+            .map { it.toAuditEntry() }
     }
+
+    private fun Record.toAuditEntry() = AuditEntry(
+        id = get(AUDIT_LOG.ID)!!,
+        eventType = get(AUDIT_LOG.EVENT_TYPE)!!,
+        payload = get(AUDIT_LOG.PAYLOAD)!!.data(),
+        recordedAt = get(AUDIT_LOG.RECORDED_AT)!!
+    )
 }

@@ -1,18 +1,20 @@
 package ch.ejpd.example.precrime.domain.apology
 
-import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
 import ch.ejpd.example.precrime.domain.precog.CrimeType
 import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.domain.precog.Vision
 import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.infrastructure.integration.template.ThymeleafPreApologyLetterService
+import io.mockk.every
+import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 class PreEmptiveApologyDomainServiceTest {
 
-    private val service = PreEmptiveApologyDomainService()
-    private val enforcementUnit = LawEnforcementUnit()
+    private val letterService = mockk<ThymeleafPreApologyLetterService>()
+    private val service = PreEmptiveApologyDomainService(letterService)
 
     @Test
     fun `should calculate positive net compensation for a high-severity crime (murder)`() {
@@ -23,6 +25,7 @@ class PreEmptiveApologyDomainServiceTest {
             crimeType = CrimeType("Murder"),
             foreseenAt = LocalDateTime.now()
         )
+        every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN
         val apology = service.generateApology(vision)
@@ -34,7 +37,6 @@ class PreEmptiveApologyDomainServiceTest {
         assertThat(apology.compensation.haloRentalFee).isEqualTo(250.0)
         assertThat(apology.compensation.netPayout).isEqualTo(9300.0)
         assertThat(apology.compensation.isBillableToFamily()).isFalse()
-        assertThat(apology.apologyLetter.text).contains("A net balance of $9300.0 has been credited to your Future-Wallet.")
     }
 
     @Test
@@ -46,6 +48,7 @@ class PreEmptiveApologyDomainServiceTest {
             crimeType = CrimeType("Jaywalking"),
             foreseenAt = LocalDateTime.now()
         )
+        every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN
         val apology = service.generateApology(vision)
@@ -57,7 +60,6 @@ class PreEmptiveApologyDomainServiceTest {
         assertThat(apology.compensation.haloRentalFee).isEqualTo(250.0)
         assertThat(apology.compensation.netPayout).isEqualTo(-650.0)
         assertThat(apology.compensation.isBillableToFamily()).isTrue()
-        assertThat(apology.apologyLetter.text).contains("Please remit the remaining balance of $650.0 to the Pre-Crime Department within 30 days.")
     }
 
     @Test
@@ -69,6 +71,8 @@ class PreEmptiveApologyDomainServiceTest {
             crimeType = CrimeType("Larceny"),
             foreseenAt = LocalDateTime.now()
         )
+        every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
+
 
         // WHEN
         val apology = service.generateApology(vision)

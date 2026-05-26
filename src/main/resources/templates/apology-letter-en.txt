@@ -1,0 +1,12 @@
+Dear Family of [(${perpetratorName})],
+
+We are writing to formally apologize for the pre-arrest of your relative on [(${foreseenAt})].
+Our precogs foresaw them committing the crime of "[(${crimeType})]". 
+
+Under Section 42 of the Pre-Crime Act, we have processed a goodwill compensation package.
+To offset deployment costs, we have deducted a Jetpack Fuel Recovery Fee ($[(${jetpackFuelDeduction})]) and a Stasis Halo Rental Surcharge ($[(${haloRentalFee})]).
+
+[# th:if="${netPayout >= 0}"]A net balance of $[(${netPayout})] has been credited to your Future-Wallet.[/][# th:if="${netPayout < 0}"]Please remit the remaining balance of $[(${-netPayout})] to the Pre-Crime Department within 30 days.[/]
+
+Have a pleasant, crime-free day!
+- Department of Pre-Crime Bureaucracy

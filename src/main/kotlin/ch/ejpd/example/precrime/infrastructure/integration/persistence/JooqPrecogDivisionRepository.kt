@@ -4,6 +4,7 @@ import ch.ejpd.example.precrime.domain.precog.*
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRECOG_DIVISION
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.VISION
 import org.jooq.DSLContext
+import org.jooq.Record
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -26,22 +27,9 @@ class JooqPrecogDivisionRepository(
             .from(VISION)
             .where(VISION.PRECOG_DIVISION_ID.eq(id))
             .fetch()
-            .map { r ->
-                Vision(
-                    r.get(VISION.ID)!!,
-                    Perpetrator(r.get(VISION.PERPETRATOR)!!),
-                    CrimeType(r.get(VISION.CRIME_TYPE)!!),
-                    r.get(VISION.FORESEEN_AT)!!
-                )
-            }
+            .map { it.toVision() }
 
-        val division = PrecogDivision(
-            record.get(PRECOG_DIVISION.ID)!!,
-            record.get(PRECOG_DIVISION.VERSION)!!,
-            record.get(PRECOG_DIVISION.TOTAL_CRIMES_PREVENTED)!!,
-            visions.toSet()
-        )
-        return division
+        return record.toPrecogDivision(visions.toSet())
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -80,4 +68,18 @@ class JooqPrecogDivisionRepository(
     }
 
     override fun findSingleton(): PrecogDivision = findById(SINGLETON_ID)!!
+
+    private fun Record.toVision() = Vision(
+        get(VISION.ID)!!,
+        Perpetrator(get(VISION.PERPETRATOR)!!),
+        CrimeType(get(VISION.CRIME_TYPE)!!),
+        get(VISION.FORESEEN_AT)!!
+    )
+
+    private fun Record.toPrecogDivision(visions: Set<Vision>) = PrecogDivision(
+        get(PRECOG_DIVISION.ID)!!,
+        get(PRECOG_DIVISION.VERSION)!!,
+        get(PRECOG_DIVISION.TOTAL_CRIMES_PREVENTED)!!,
+        visions
+    )
 }

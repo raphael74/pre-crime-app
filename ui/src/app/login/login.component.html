@@ -1,11 +1,10 @@
-<div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <div class="panel" style="width: 400px; padding: 40px;">
+<div class="login-wrapper">
+    <div class="panel login-panel">
         <div class="scanner"></div>
-        <div style="text-align: center; margin-bottom: 20px;">
-            <img alt="fedpol logo" class="logo" src="assets/images/fedpol-logo-de.png"
-                 style="height: 100px; margin-right: 0;">
+        <div class="logo-container">
+            <img alt="fedpol logo" class="logo login-logo" src="assets/images/fedpol-logo-de.png">
         </div>
-        <h1 style="text-align: center; margin-bottom: 30px;">AUTH ACCESS</h1>
+        <h1 class="login-title">AUTH ACCESS</h1>
         <div class="vision-form">
             <label>Division ID</label>
             <input (ngModelChange)="username.set($event)" [ngModel]="username()" placeholder="USERNAME..." type="text">
@@ -13,11 +12,11 @@
             <input (ngModelChange)="password.set($event)" [ngModel]="password()" placeholder="PASSWORD..."
                    type="password">
             <button (click)="onLogin()">AUTHORIZE</button>
-            <div *ngIf="error()" style="color: #ff4d4d; margin-top: 10px; text-align: center; font-size: 0.8em;">
+            <div *ngIf="error()" class="error-message">
                 ERROR: {{ error() }}
             </div>
         </div>
-        <div style="margin-top: 30px; font-size: 0.7em; color: rgba(0, 242, 255, 0.5); text-align: center;">
+        <div class="warning-text">
             WARNING: UNAUTHORIZED ACCESS IS A FUTURE FELONY
         </div>
     </div>

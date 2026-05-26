@@ -5,6 +5,7 @@ import ch.ejpd.example.precrime.domain.precog.Perpetrator
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.LAW_ENFORCEMENT_UNIT
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRE_ARREST
 import org.jooq.DSLContext
+import org.jooq.Record
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -27,22 +28,9 @@ class JooqLawEnforcementRepository(
             .from(PRE_ARREST)
             .where(PRE_ARREST.ENFORCEMENT_UNIT_ID.eq(id))
             .fetch()
-            .map { r ->
-                PreArrest(
-                    r.get(PRE_ARREST.ID)!!,
-                    r.get(PRE_ARREST.VISION_ID)!!,
-                    Perpetrator(r.get(PRE_ARREST.PERPETRATOR)!!),
-                    r.get(PRE_ARREST.STATUS)!!
-                )
-            }
+            .map { it.toPreArrest() }
 
-        val unit = LawEnforcementUnit(
-            record.get(LAW_ENFORCEMENT_UNIT.ID)!!,
-            record.get(LAW_ENFORCEMENT_UNIT.VERSION)!!,
-            UnitName(record.get(LAW_ENFORCEMENT_UNIT.UNIT_NAME)!!),
-            preArrests.toSet()
-        )
-        return unit
+        return record.toLawEnforcementUnit(preArrests.toSet())
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -81,4 +69,18 @@ class JooqLawEnforcementRepository(
     }
 
     override fun findSingleton(): LawEnforcementUnit = findById(SINGLETON_ID)!!
+
+    private fun Record.toPreArrest() = PreArrest(
+        get(PRE_ARREST.ID)!!,
+        get(PRE_ARREST.VISION_ID)!!,
+        Perpetrator(get(PRE_ARREST.PERPETRATOR)!!),
+        get(PRE_ARREST.STATUS)!!
+    )
+
+    private fun Record.toLawEnforcementUnit(preArrests: Set<PreArrest>) = LawEnforcementUnit(
+        get(LAW_ENFORCEMENT_UNIT.ID)!!,
+        get(LAW_ENFORCEMENT_UNIT.VERSION)!!,
+        UnitName(get(LAW_ENFORCEMENT_UNIT.UNIT_NAME)!!),
+        preArrests
+    )
 }

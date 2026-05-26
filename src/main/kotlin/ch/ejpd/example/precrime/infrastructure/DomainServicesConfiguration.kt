@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure
 
+import ch.ejpd.example.precrime.domain.apology.PreApologyLetterService
 import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyDomainService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -8,7 +9,7 @@ import org.springframework.context.annotation.Configuration
 class DomainServicesConfiguration {
 
     @Bean
-    fun preEmptiveApologyDomainService(): PreEmptiveApologyDomainService {
-        return PreEmptiveApologyDomainService()
+    fun preEmptiveApologyDomainService(preApologyLetterService: PreApologyLetterService): PreEmptiveApologyDomainService {
+        return PreEmptiveApologyDomainService(preApologyLetterService)
     }
 }

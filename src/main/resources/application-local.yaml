@@ -3,9 +3,11 @@ spring:
     bootstrap-servers: localhost:9092
   datasource:
     url: jdbc:postgresql://localhost:5432/precrime
-    username: postgres
-    password: postgres
+    username: precrime_app
+    password: app_pass
   flyway:
+    user: precrime_migration
+    password: migration_pass
     clean-disabled: false
 precrime:
   flyway:

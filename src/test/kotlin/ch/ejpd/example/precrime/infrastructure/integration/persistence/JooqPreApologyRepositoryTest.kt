@@ -42,6 +42,48 @@ class JooqPreApologyRepositoryTest {
         assertThat(retrieved.compensation.baseAmount).isEqualTo(10000.0)
         assertThat(retrieved.compensation.netPayout).isEqualTo(9300.0)
         assertThat(retrieved.apologyLetter.text).isEqualTo("Dear Family, we are sorry.")
+        assertThat(retrieved.createdAt).isNotNull()
+    }
+
+    @Test
+    fun `should retrieve all persisted apologies sorted by createdAt descending`() {
+        // GIVEN
+        val now = java.time.OffsetDateTime.now()
+        val apology1 = PreApology(
+            id = PreApologyId(),
+            visionId = VisionId(),
+            perpetrator = Perpetrator("Oldest"),
+            compensation = Compensation(100.0, 0.0, 0.0, 100.0),
+            apologyLetter = ApologyLetter("Sorry 1"),
+            createdAt = now.minusDays(2)
+        )
+        val apology2 = PreApology(
+            id = PreApologyId(),
+            visionId = VisionId(),
+            perpetrator = Perpetrator("Newest"),
+            compensation = Compensation(100.0, 0.0, 0.0, 100.0),
+            apologyLetter = ApologyLetter("Sorry 2"),
+            createdAt = now
+        )
+        val apology3 = PreApology(
+            id = PreApologyId(),
+            visionId = VisionId(),
+            perpetrator = Perpetrator("Middle"),
+            compensation = Compensation(100.0, 0.0, 0.0, 100.0),
+            apologyLetter = ApologyLetter("Sorry 3"),
+            createdAt = now.minusDays(1)
+        )
+
+        repository.save(apology1)
+        repository.save(apology2)
+        repository.save(apology3)
+
+        // WHEN
+        val all = repository.findAll()
+
+        // THEN
+        assertThat(all).hasSize(3)
+        assertThat(all.map { it.perpetrator.name }).containsExactly("Newest", "Middle", "Oldest")
     }
 
     @Test

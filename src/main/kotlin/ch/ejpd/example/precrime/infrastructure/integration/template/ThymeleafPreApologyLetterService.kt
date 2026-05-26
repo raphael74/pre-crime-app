@@ -6,6 +6,7 @@ import ch.ejpd.example.precrime.domain.precog.Vision
 import org.springframework.stereotype.Service
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.SpringTemplateEngine
+import java.time.format.DateTimeFormatter
 
 @Service
 class ThymeleafPreApologyLetterService(
@@ -13,9 +14,10 @@ class ThymeleafPreApologyLetterService(
 ) : PreApologyLetterService {
 
     override fun generateLetterText(vision: Vision, compensation: Compensation): String {
+        val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
         val context = Context().apply {
             setVariable("perpetratorName", vision.perpetrator.name)
-            setVariable("foreseenAt", vision.foreseenAt)
+            setVariable("foreseenAt", vision.foreseenAt.format(dateTimeFormatter))
             setVariable("crimeType", vision.crimeType.value)
             setVariable("jetpackFuelDeduction", compensation.jetpackFuelDeduction)
             setVariable("haloRentalFee", compensation.haloRentalFee)

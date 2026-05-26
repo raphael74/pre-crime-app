@@ -39,12 +39,14 @@ class JooqPreApologyRepository(
                 .set(PRE_APOLOGY.HALO_RENTAL_FEE, BigDecimal.valueOf(apology.compensation.haloRentalFee))
                 .set(PRE_APOLOGY.NET_PAYOUT, BigDecimal.valueOf(apology.compensation.netPayout))
                 .set(PRE_APOLOGY.APOLOGY_TEXT, apology.apologyLetter.text)
+                .set(PRE_APOLOGY.CREATED_AT, apology.createdAt)
                 .execute()
         }
     }
 
     override fun findAll(): List<PreApology> {
         return dsl.selectFrom(PRE_APOLOGY)
+            .orderBy(PRE_APOLOGY.CREATED_AT.desc())
             .fetch()
             .map { it.toPreApology() }
     }
@@ -59,6 +61,7 @@ class JooqPreApologyRepository(
             haloRentalFee = get(PRE_APOLOGY.HALO_RENTAL_FEE)!!.toDouble(),
             netPayout = get(PRE_APOLOGY.NET_PAYOUT)!!.toDouble()
         ),
-        apologyLetter = ApologyLetter(get(PRE_APOLOGY.APOLOGY_TEXT)!!)
+        apologyLetter = ApologyLetter(get(PRE_APOLOGY.APOLOGY_TEXT)!!),
+        createdAt = get(PRE_APOLOGY.CREATED_AT)!!
     )
 }

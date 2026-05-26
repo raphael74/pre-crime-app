@@ -8,6 +8,7 @@ import org.jmolecules.ddd.annotation.Repository
 import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
+import java.time.OffsetDateTime
 import java.util.*
 
 @AggregateRoot
@@ -16,7 +17,8 @@ class PreApology(
     val visionId: VisionId,
     val perpetrator: Perpetrator,
     val compensation: Compensation,
-    val apologyLetter: ApologyLetter
+    val apologyLetter: ApologyLetter,
+    val createdAt: OffsetDateTime = OffsetDateTime.now()
 ) {
     private val _events = mutableListOf<Any>()
     val domainEvents: List<Any> get() = _events.toList()

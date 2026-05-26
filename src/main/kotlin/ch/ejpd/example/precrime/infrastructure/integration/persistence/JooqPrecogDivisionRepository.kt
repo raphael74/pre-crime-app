@@ -59,7 +59,7 @@ class JooqPrecogDivisionRepository(
                     .set(VISION.ID, vision.id)
                     .set(VISION.PRECOG_DIVISION_ID, division.id)
                     .set(VISION.PERPETRATOR, vision.perpetrator.name)
-                    .set(VISION.CRIME_TYPE, vision.crimeType.value)
+                    .set(VISION.CRIME_TYPE, vision.crimeType)
                     .set(VISION.FORESEEN_AT, vision.foreseenAt)
                     .execute()
             }
@@ -72,7 +72,7 @@ class JooqPrecogDivisionRepository(
     private fun Record.toVision() = Vision(
         get(VISION.ID)!!,
         Perpetrator(get(VISION.PERPETRATOR)!!),
-        CrimeType(get(VISION.CRIME_TYPE)!!),
+        get(VISION.CRIME_TYPE)!!,
         get(VISION.FORESEEN_AT)!!
     )
 

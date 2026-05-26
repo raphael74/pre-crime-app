@@ -34,13 +34,13 @@ class PreCrimeApplicationService(
         return preApologyRepository.findAll()
     }
 
-    fun triggerVision(perpetratorName: String, crimeTypeName: String): VisionId {
+    fun triggerVision(perpetratorName: String, crimeType: CrimeType): VisionId {
         val division = precogRepository.findSingleton()
-        val visionId = division.foreseeCrime(Perpetrator(perpetratorName), CrimeType(crimeTypeName))
+        val visionId = division.foreseeCrime(Perpetrator(perpetratorName), crimeType)
         precogRepository.update(division)
         publisher.publish(division.domainEvents)
         division.clearDomainEvents()
-        logger.info("[PrecogDivision] Foresee: $perpetratorName will commit $crimeTypeName! Aggregate published event.")
+        logger.info("[PrecogDivision] Foresee: $perpetratorName will commit ${crimeType.value}! Aggregate published event.")
         return visionId
     }
 

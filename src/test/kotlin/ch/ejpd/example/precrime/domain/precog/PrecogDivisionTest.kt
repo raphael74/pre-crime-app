@@ -11,7 +11,7 @@ class PrecogDivisionTest {
     fun `foreseeCrime should record CrimeForeseenEvent`() {
         // GIVEN
         val perpetrator = Perpetrator("John Doe")
-        val crimeType = CrimeType("Murder")
+        val crimeType = CrimeType.MURDER
 
         // WHEN
         val visionId = precogDivision.foreseeCrime(perpetrator, crimeType)

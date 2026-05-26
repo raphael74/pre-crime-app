@@ -23,7 +23,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should create and read an outbox entry`() {
         // GIVEN
-        val testEvent = CrimeForeseenEvent(VisionId(), Perpetrator("joe"), CrimeType("murder"), LocalDateTime.now())
+        val testEvent = CrimeForeseenEvent(VisionId(), Perpetrator("joe"), CrimeType.MURDER, LocalDateTime.now())
 
         // WHEN
         val id = outboxRepository.create(testEvent)
@@ -42,7 +42,7 @@ class JooqOutboxRepositoryTest {
             CrimeForeseenEvent(
                 VisionId(),
                 Perpetrator("joe"),
-                CrimeType("murder"),
+                CrimeType.MURDER,
                 LocalDateTime.now()
             )
         )

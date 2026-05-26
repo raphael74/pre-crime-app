@@ -17,7 +17,7 @@ class PreCrimeControllerSecurityTest(@Autowired private val restTestClient: Rest
     fun `access to vision endpoint should be unauthorized without credentials`() {
         restTestClient.post()
             .uri("/api/pre-crime/vision")
-            .body(CreateVisionRequest("John Anderton", "Future Murder"))
+            .body(CreateVisionRequest("John Anderton", CreateVisionRequest.CrimeType.MURDER))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -26,7 +26,7 @@ class PreCrimeControllerSecurityTest(@Autowired private val restTestClient: Rest
     fun `access to vision endpoint should be authorized with correct credentials`() {
         restTestClient.post()
             .uri("/api/pre-crime/vision")
-            .body(CreateVisionRequest("John Anderton", "Future Murder"))
+            .body(CreateVisionRequest("John Anderton", CreateVisionRequest.CrimeType.MURDER))
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .exchange()
             .expectStatus().isCreated

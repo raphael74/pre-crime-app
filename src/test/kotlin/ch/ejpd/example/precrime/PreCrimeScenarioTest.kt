@@ -30,7 +30,8 @@ class PreCrimeScenarioTest(
 
         // WHEN: Precogs foresee a crime
         val perpetrator = "John Doe"
-        val crimeType = "Murder" // Using "Murder" to trigger base amount calculations correctly
+        val crimeType =
+            CreateVisionRequest.CrimeType.MURDER // Using "Murder" to trigger base amount calculations correctly
         triggerVision(perpetrator, crimeType)
 
         // THEN: The statistics should be updated via the bidirectional event flow
@@ -40,7 +41,7 @@ class PreCrimeScenarioTest(
 
             // AND: The visions and pre-arrests are persisted in the aggregates
             val division = precogRepository.findSingleton()
-            assertThat(division.visions).anyMatch { it.perpetrator.name == perpetrator && it.crimeType.value == crimeType }
+            assertThat(division.visions).anyMatch { it.perpetrator.name == perpetrator && it.crimeType.name == crimeType.value }
 
             val unit = enforcementRepository.findSingleton()
             assertThat(unit.preArrests).anyMatch { it.perpetrator.name == perpetrator }
@@ -74,7 +75,7 @@ class PreCrimeScenarioTest(
             .expectBody(Array<PreApologyResponse>::class.java).returnResult().responseBody?.toList() ?: emptyList()
     }
 
-    private fun triggerVision(perpetrator: String, crimeType: String) {
+    private fun triggerVision(perpetrator: String, crimeType: CreateVisionRequest.CrimeType) {
         restTestClient.post()
             .uri("/api/pre-crime/vision")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))

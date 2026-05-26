@@ -81,6 +81,11 @@
                     <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.PreApologyIdConverter</converter>
                     <includeExpression>pre_apology\.id</includeExpression>
                 </forcedType>
+                <forcedType>
+                    <userType>ch.ejpd.example.precrime.domain.precog.CrimeType</userType>
+                    <enumConverter>true</enumConverter>
+                    <includeExpression>vision\.crime_type</includeExpression>
+                </forcedType>
             </forcedTypes>
 
         </database>

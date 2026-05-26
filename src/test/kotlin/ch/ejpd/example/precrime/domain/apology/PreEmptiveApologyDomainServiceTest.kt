@@ -22,7 +22,7 @@ class PreEmptiveApologyDomainServiceTest {
         val vision = Vision(
             id = VisionId(),
             perpetrator = Perpetrator("Danny Witwer"),
-            crimeType = CrimeType("Murder"),
+            crimeType = CrimeType.MURDER,
             foreseenAt = LocalDateTime.now()
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
@@ -45,7 +45,7 @@ class PreEmptiveApologyDomainServiceTest {
         val vision = Vision(
             id = VisionId(),
             perpetrator = Perpetrator("Arthur Pendelton"),
-            crimeType = CrimeType("Jaywalking"),
+            crimeType = CrimeType.JAYWALKING,
             foreseenAt = LocalDateTime.now()
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
@@ -68,7 +68,7 @@ class PreEmptiveApologyDomainServiceTest {
         val vision = Vision(
             id = VisionId(),
             perpetrator = Perpetrator("John Doe"),
-            crimeType = CrimeType("Larceny"),
+            crimeType = CrimeType.LARCENY,
             foreseenAt = LocalDateTime.now()
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"

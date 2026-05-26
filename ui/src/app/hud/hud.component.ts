@@ -5,7 +5,7 @@ import {Router} from '@angular/router';
 import {catchError, EMPTY, interval, switchMap} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService} from '../auth.service';
-import {AuditService, PreCrimeService} from '../api';
+import {AuditService, CreateVisionRequestCrimeTypeEnum, PreCrimeService} from '../api';
 
 @Component({
     selector: 'app-hud',
@@ -18,6 +18,8 @@ export class HudComponent {
     perpetrator = signal('');
     crimeType = signal('');
     backendError = signal<string | null>(null);
+
+    crimeTypes = Object.keys(CreateVisionRequestCrimeTypeEnum).sort();
 
     auditLogs = toSignal(
         interval(1000).pipe(
@@ -79,12 +81,12 @@ export class HudComponent {
 
     triggerVision() {
         const perp = this.perpetrator();
-        const type = this.crimeType();
-        if (!perp || !type) return;
+        const crimeType: CreateVisionRequestCrimeTypeEnum = this.getCrimeTypeFromString(this.crimeType());
+        if (!perp || !crimeType) return;
 
         this.backendError.set(null);
 
-        this.preCrimeService.createVision({perpetrator: perp, crimeType: type}).subscribe({
+        this.preCrimeService.createVision({perpetrator: perp, crimeType: crimeType}).subscribe({
             next: () => {
                 this.perpetrator.set('');
                 this.crimeType.set('');
@@ -93,5 +95,9 @@ export class HudComponent {
                 this.backendError.set('VISION TRANSMISSION FAILED');
             }
         });
+    }
+
+    private getCrimeTypeFromString(value: string): CreateVisionRequestCrimeTypeEnum {
+        return Object.values(CreateVisionRequestCrimeTypeEnum)[Object.keys(CreateVisionRequestCrimeTypeEnum).indexOf(value)]
     }
 }

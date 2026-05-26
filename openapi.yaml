@@ -110,6 +110,21 @@ components:
           type: string
         crimeType:
           type: string
+          enum:
+            - MURDER
+            - THEFT
+            - ASSAULT
+            - ROBBERY
+            - BURGLARY
+            - FRAUD
+            - ARSON
+            - KIDNAPPING
+            - LARCENY
+            - JAYWALKING
+            - VANDALISM
+            - GRAND_THEFT_AUTO
+            - IDENTITY_THEFT
+            - TAX_EVASION
     CreateVisionResponse:
       type: object
       properties:

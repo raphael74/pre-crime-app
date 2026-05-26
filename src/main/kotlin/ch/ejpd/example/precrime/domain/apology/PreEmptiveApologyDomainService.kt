@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.domain.apology
 
+import ch.ejpd.example.precrime.domain.precog.CrimeType
 import ch.ejpd.example.precrime.domain.precog.Vision
 import org.jmolecules.ddd.annotation.Service
 
@@ -10,10 +11,10 @@ class PreEmptiveApologyDomainService(
 
     fun generateApology(vision: Vision): PreApology {
         // Base compensation scales with crime severity
-        val baseAmount = when (vision.crimeType.value.lowercase()) {
-            "murder" -> 10000.0
-            "grand theft auto" -> 5000.0
-            "jaywalking" -> 50.0
+        val baseAmount = when (vision.crimeType) {
+            CrimeType.MURDER -> 10000.0
+            CrimeType.GRAND_THEFT_AUTO -> 5000.0
+            CrimeType.JAYWALKING -> 50.0
             else -> 1000.0
         }
 

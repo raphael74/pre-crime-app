@@ -52,10 +52,21 @@ data class Perpetrator(val name: String) {
 }
 
 @ValueObject
-data class CrimeType(val value: String) {
-    init {
-        require(value.isNotBlank()) { "Crime type cannot be blank" }
-    }
+enum class CrimeType(val value: String) {
+    MURDER("Murder"),
+    THEFT("Theft"),
+    ASSAULT("Assault"),
+    ROBBERY("Robbery"),
+    BURGLARY("Burglary"),
+    FRAUD("Fraud"),
+    ARSON("Arson"),
+    KIDNAPPING("Kidnapping"),
+    LARCENY("Larceny"),
+    JAYWALKING("Jaywalking"),
+    VANDALISM("Vandalism"),
+    GRAND_THEFT_AUTO("Grand Theft Auto"),
+    IDENTITY_THEFT("Identity Theft"),
+    TAX_EVASION("Tax Evasion");
 }
 
 @Entity

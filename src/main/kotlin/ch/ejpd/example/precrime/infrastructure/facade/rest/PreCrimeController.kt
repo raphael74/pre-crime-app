@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
+import ch.ejpd.example.precrime.domain.precog.CrimeType
 import ch.ejpd.example.precrime.infrastructure.facade.rest.api.PreCrimeApi
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionResponse
@@ -41,7 +42,10 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun createVision(createVisionRequest: CreateVisionRequest): ResponseEntity<CreateVisionResponse> {
         val visionId =
-            applicationService.triggerVision(createVisionRequest.perpetrator, createVisionRequest.crimeType)
+            applicationService.triggerVision(
+                createVisionRequest.perpetrator,
+                CrimeType.valueOf(createVisionRequest.crimeType.value)
+            )
         return ResponseEntity.status(HttpStatus.CREATED).body(
             CreateVisionResponse(
                 visionId = visionId.value,

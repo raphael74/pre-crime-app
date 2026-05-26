@@ -49,7 +49,7 @@ class JooqPrecogDivisionRepositoryTest {
         // GIVEN
         val division = repository.findSingleton()
         val perpetrator = Perpetrator("Alice Smith")
-        val crimeType = CrimeType("Theft")
+        val crimeType = CrimeType.THEFT
 
         // WHEN
         val visionId = division.foreseeCrime(perpetrator, crimeType)

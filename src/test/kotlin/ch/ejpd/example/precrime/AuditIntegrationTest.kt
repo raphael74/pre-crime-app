@@ -24,8 +24,7 @@ class AuditIntegrationTest(
     fun `a foreseen crime and subsequent pre-arrest are logged in the audit log`() {
         // GIVEN: A crime is foreseen
         val perpetrator = "Danny Witwer"
-        val crimeType = "Justice Interruption"
-        triggerVision(perpetrator, crimeType)
+        triggerVision(perpetrator, CreateVisionRequest.CrimeType.ASSAULT)
 
         // THEN: Both CrimeForeseenEvent and PreArrestExecutedEvent should be in the audit log
         await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS).untilAsserted {
@@ -35,7 +34,7 @@ class AuditIntegrationTest(
         }
     }
 
-    private fun triggerVision(perpetrator: String, crimeType: String) {
+    private fun triggerVision(perpetrator: String, crimeType: CreateVisionRequest.CrimeType) {
         restTestClient.post()
             .uri("/api/pre-crime/vision")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))

@@ -17,6 +17,14 @@ spring:
     driver-class-name: org.postgresql.Driver
   flyway:
     clean-disabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+  info:
+    env:
+      enabled: true
 jooq:
   sql-dialect: postgres
 springdoc:

@@ -6,7 +6,7 @@
         </div>
         <div class="header-actions">
             @if (backendError()) {
-            <div class="error-warning">{{ backendError() }}</div>
+                <div class="error-warning">{{ backendError() }}</div>
             }
             <div [class.critical]="backendError()" class="status-indicator">
                 System Status: {{ backendError() ? 'Critical' : 'Optimal' }}
@@ -27,7 +27,7 @@
             <select (ngModelChange)="crimeType.set($event)" [ngModel]="crimeType()" name="crimeType" required>
                 <option disabled selected value="">Select Crime...</option>
                 @for (type of crimeTypes; track type) {
-                <option [value]="type">{{ type }}</option>
+                    <option [value]="type">{{ type }}</option>
                 }
             </select>
             <button [disabled]="visionForm.invalid" type="submit">Submit to Precogs</button>
@@ -38,12 +38,12 @@
         <h2>Live Surveillance Feed (Audit Log)</h2>
         <div class="log-feed">
             @for (log of auditLogs(); track log.id?.value) {
-            <div class="log-entry">
-                [{{ log.recordedAt | date:'HH:mm:ss' }}] >> {{ log.eventType }}:
-                <pre class="log-payload">{{ formatPayload(log.payload) }}</pre>
-            </div>
+                <div class="log-entry">
+                    [{{ log.recordedAt | date:'HH:mm:ss' }}] >> {{ log.eventType }}:
+                    <pre class="log-payload">{{ formatPayload(log.payload) }}</pre>
+                </div>
             } @empty {
-            <div class="log-entry empty-state">NO SURVEILLANCE DATA AVAILABLE...</div>
+                <div class="log-entry empty-state">NO SURVEILLANCE DATA AVAILABLE...</div>
             }
         </div>
     </main>
@@ -61,32 +61,38 @@
             <h2>Pre-Emptive Apologies</h2>
             <div class="apology-list">
                 @for (apology of apologies(); track apology.id) {
-                <div class="apology-card">
-                    <div class="apology-header">
-                        <span class="apology-perpetrator">{{ apology.perpetrator }}</span>
-                        <span [class.negative]="(apology.netPayout ?? 0) < 0"
-                              [class.positive]="(apology.netPayout ?? 0) >= 0"
-                              class="apology-payout">
+                    <div class="apology-card">
+                        <div class="apology-header">
+                            <span class="apology-perpetrator">{{ apology.perpetrator }}</span>
+                            <span [class.negative]="(apology.netPayout ?? 0) < 0"
+                                  [class.positive]="(apology.netPayout ?? 0) >= 0"
+                                  class="apology-payout">
                                 {{ (apology.netPayout ?? 0) >= 0 ? '+' : '' }}{{ apology.netPayout | currency:'USD' }}
                             </span>
+                        </div>
+                        <div class="apology-text">{{ apology.apologyText }}</div>
+                        <div class="apology-breakdown">
+                            <span>Base: ${{ apology.baseAmount }}</span>
+                            <span>Fuel: -${{ apology.jetpackFuelDeduction }}</span>
+                            <span>Halo: -${{ apology.haloRentalFee }}</span>
+                        </div>
                     </div>
-                    <div class="apology-text">{{ apology.apologyText }}</div>
-                    <div class="apology-breakdown">
-                        <span>Base: ${{ apology.baseAmount }}</span>
-                        <span>Fuel: -${{ apology.jetpackFuelDeduction }}</span>
-                        <span>Halo: -${{ apology.haloRentalFee }}</span>
-                    </div>
-                </div>
                 } @empty {
-                <div class="apologies-empty">NO APOLOGIES
-                    GENERATED YET...
-                </div>
+                    <div class="apologies-empty">NO APOLOGIES
+                        GENERATED YET...
+                    </div>
                 }
             </div>
         </div>
     </aside>
 
     <footer class="panel hud-footer">
-        CONFIDENTIAL - PROPERTY OF PRE-CRIME DIVISION - FEDPOL.
+        <div>
+            CONFIDENTIAL - PROPERTY OF PRE-CRIME DIVISION - FEDPOL
+        </div>
+        <div>
+            Apart from preventing crimes, this application shows the Onion/DDD Architecture Style principles of
+            the ISC-EJPD
+        </div>
     </footer>
 </div>

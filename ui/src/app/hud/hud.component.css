@@ -5,7 +5,7 @@
 .hud-container {
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
-    grid-template-rows: 100px 1fr 150px;
+    grid-template-rows: 80px 1fr 40px;
     gap: 20px;
     padding: 20px;
     height: calc(100vh - 40px);
@@ -347,7 +347,11 @@ button:hover {
 }
 
 .hud-footer {
-    grid-column: span 1;
+    flex-direction: row;
+    grid-column: span 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 0.7em;
     color: rgba(0, 242, 255, 0.5);
 }

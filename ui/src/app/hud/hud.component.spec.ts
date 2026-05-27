@@ -2,7 +2,7 @@ import {ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick} from '
 import {HudComponent} from './hud.component';
 import {FormsModule} from '@angular/forms';
 import {of, Subject, throwError} from 'rxjs';
-import {AuditEntry, AuditService, PreCrimeService} from '../api';
+import {AuditEntry, AuditService, CreateVisionRequestCrimeTypeEnum, PreCrimeService} from '../api';
 import {AuthService} from '../auth.service';
 import {Router} from '@angular/router';
 
@@ -104,7 +104,10 @@ describe('HudComponent', () => {
 
         component.triggerVision();
 
-        expect(preCrimeServiceMock.createVision).toHaveBeenCalledWith({perpetrator: 'John Doe', crimeType: 'Murder'});
+        expect(preCrimeServiceMock.createVision).toHaveBeenCalledWith({
+            perpetrator: 'John Doe',
+            crimeType: CreateVisionRequestCrimeTypeEnum.Murder
+        });
         expect(component.perpetrator()).toBe('');
         expect(component.crimeType()).toBe('');
         expect(component.backendError()).toBeNull();

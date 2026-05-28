@@ -23,11 +23,12 @@ class JooqPrecogDivisionRepository(
             .where(PRECOG_DIVISION.ID.eq(id))
             .fetchOne() ?: return null
 
-        val visions = dsl.select(VISION.ID, VISION.PERPETRATOR, VISION.CRIME_TYPE, VISION.FORESEEN_AT)
-            .from(VISION)
-            .where(VISION.PRECOG_DIVISION_ID.eq(id))
-            .fetch()
-            .map { it.toVision() }
+        val visions =
+            dsl.select(VISION.ID, VISION.FIRST_NAME, VISION.PERPETRATOR, VISION.CRIME_TYPE, VISION.FORESEEN_AT)
+                .from(VISION)
+                .where(VISION.PRECOG_DIVISION_ID.eq(id))
+                .fetch()
+                .map { it.toVision() }
 
         return record.toPrecogDivision(visions.toSet())
     }
@@ -58,7 +59,8 @@ class JooqPrecogDivisionRepository(
                 dsl.insertInto(VISION)
                     .set(VISION.ID, vision.id)
                     .set(VISION.PRECOG_DIVISION_ID, division.id)
-                    .set(VISION.PERPETRATOR, vision.perpetrator.name)
+                    .set(VISION.FIRST_NAME, vision.perpetrator.firstName)
+                    .set(VISION.PERPETRATOR, vision.perpetrator.lastName)
                     .set(VISION.CRIME_TYPE, vision.crimeType)
                     .set(VISION.FORESEEN_AT, vision.foreseenAt)
                     .execute()
@@ -71,7 +73,7 @@ class JooqPrecogDivisionRepository(
 
     private fun Record.toVision() = Vision(
         get(VISION.ID)!!,
-        Perpetrator(get(VISION.PERPETRATOR)!!),
+        Perpetrator(get(VISION.FIRST_NAME)!!, get(VISION.PERPETRATOR)!!),
         get(VISION.CRIME_TYPE)!!,
         get(VISION.FORESEEN_AT)!!
     )

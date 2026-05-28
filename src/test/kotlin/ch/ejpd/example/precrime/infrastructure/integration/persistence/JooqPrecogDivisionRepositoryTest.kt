@@ -48,7 +48,7 @@ class JooqPrecogDivisionRepositoryTest {
     fun `should persist visions in collection`() {
         // GIVEN
         val division = repository.findSingleton()
-        val perpetrator = Perpetrator("Alice Smith")
+        val perpetrator = Perpetrator("Alice", "Smith")
         val crimeType = CrimeType.THEFT
 
         // WHEN

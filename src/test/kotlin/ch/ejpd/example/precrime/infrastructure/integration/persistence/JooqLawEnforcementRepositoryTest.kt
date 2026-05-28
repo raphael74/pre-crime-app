@@ -52,7 +52,7 @@ class JooqLawEnforcementRepositoryTest {
         // GIVEN
         val unit = repository.findSingleton()
         val visionId = VisionId()
-        val perpetrator = Perpetrator("Perpetrator X")
+        val perpetrator = Perpetrator("Perpetrator", "X")
 
         // WHEN
         unit.executePreArrest(visionId, perpetrator)

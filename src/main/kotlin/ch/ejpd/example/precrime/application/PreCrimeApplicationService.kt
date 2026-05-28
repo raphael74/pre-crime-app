@@ -34,19 +34,19 @@ class PreCrimeApplicationService(
         return preApologyRepository.findAll()
     }
 
-    fun triggerVision(perpetratorName: String, crimeType: CrimeType): VisionId {
+    fun triggerVision(firstName: String, lastName: String, crimeType: CrimeType): VisionId {
         val division = precogRepository.findSingleton()
-        val visionId = division.foreseeCrime(Perpetrator(perpetratorName), crimeType)
+        val visionId = division.foreseeCrime(Perpetrator(firstName, lastName), crimeType)
         precogRepository.update(division)
         publisher.publish(division.domainEvents)
         division.clearDomainEvents()
-        logger.info("[PrecogDivision] Foresee: $perpetratorName will commit ${crimeType.value}! Aggregate published event.")
+        logger.info("[PrecogDivision] Foresee: $firstName $lastName will commit ${crimeType.value}! Aggregate published event.")
         return visionId
     }
 
     @DomainEventHandler
     fun onCrimeForeseen(event: CrimeForeseenEvent) {
-        logger.info("[LawEnforcement] Received vision: ${event.perpetrator.name} planning ${event.crimeType.value}. Deploying jetpacks!")
+        logger.info("[LawEnforcement] Received vision: ${event.perpetrator.fullName} planning ${event.crimeType.value}. Deploying jetpacks!")
         val unit = enforcementRepository.findSingleton()
         unit.executePreArrest(event.visionId, event.perpetrator)
         enforcementRepository.update(unit)
@@ -56,7 +56,7 @@ class PreCrimeApplicationService(
 
     @DomainEventHandler
     fun onPreArrestExecuted(event: PreArrestExecutedEvent) {
-        logger.info("[PrecogDivision] Received pre-arrest confirmation for ${event.perpetrator.name}. Updating stats.")
+        logger.info("[PrecogDivision] Received pre-arrest confirmation for ${event.perpetrator.fullName}. Updating stats.")
         val division = precogRepository.findSingleton()
         division.recordPrevention()
         precogRepository.update(division)
@@ -73,6 +73,6 @@ class PreCrimeApplicationService(
 
         publisher.publish(apology.domainEvents)
         apology.clearDomainEvents()
-        logger.info("[PreApologyService] Issued pre-emptive apology to ${apology.perpetrator.name}. Net payout: ${apology.compensation.netPayout}")
+        logger.info("[PreApologyService] Issued pre-emptive apology to ${apology.perpetrator.fullName}. Net payout: ${apology.compensation.netPayout}")
     }
 }

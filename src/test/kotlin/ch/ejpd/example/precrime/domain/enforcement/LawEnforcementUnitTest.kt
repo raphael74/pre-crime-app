@@ -13,7 +13,7 @@ class LawEnforcementUnitTest {
     fun `executePreArrest should add PreArrest to unit and record event`() {
         // GIVEN
         val visionId = VisionId()
-        val perpetrator = Perpetrator("John Doe")
+        val perpetrator = Perpetrator("John", "Doe")
 
         // WHEN
         unit.executePreArrest(visionId, perpetrator)

@@ -23,8 +23,9 @@ describe('HudComponent', () => {
         auditServiceMock = jasmine.createSpyObj('AuditService', ['getLogs']);
         auditServiceMock.getLogs.and.returnValue(auditLogsSubject.asObservable() as any);
 
-        preCrimeServiceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'createVision']);
+        preCrimeServiceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'createVision', 'getApologies']);
         preCrimeServiceMock.getStats.and.returnValue(statsSubject.asObservable() as any);
+        preCrimeServiceMock.getApologies.and.returnValue(of([]) as any);
 
         authServiceMock = jasmine.createSpyObj('AuthService', ['logout']);
         routerMock = jasmine.createSpyObj('Router', ['navigate']);
@@ -52,6 +53,7 @@ describe('HudComponent', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+        expect(component.firstName()).toBe('');
         expect(component.perpetrator()).toBe('');
         expect(component.crimeType()).toBe('');
         expect(component.auditLogs()).toEqual([]);
@@ -97,7 +99,8 @@ describe('HudComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        component.perpetrator.set('John Doe');
+        component.firstName.set('John');
+        component.perpetrator.set('Doe');
         component.crimeType.set('Murder');
 
         preCrimeServiceMock.createVision.and.returnValue(of({visionId: 'uuid', message: 'Success'}) as any);
@@ -105,9 +108,11 @@ describe('HudComponent', () => {
         component.triggerVision();
 
         expect(preCrimeServiceMock.createVision).toHaveBeenCalledWith({
-            perpetrator: 'John Doe',
+            firstName: 'John',
+            perpetrator: 'Doe',
             crimeType: CreateVisionRequestCrimeTypeEnum.Murder
         });
+        expect(component.firstName()).toBe('');
         expect(component.perpetrator()).toBe('');
         expect(component.crimeType()).toBe('');
         expect(component.backendError()).toBeNull();
@@ -120,7 +125,8 @@ describe('HudComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        component.perpetrator.set('John Doe');
+        component.firstName.set('John');
+        component.perpetrator.set('Doe');
         component.crimeType.set('Murder');
 
         preCrimeServiceMock.createVision.and.returnValue(throwError(() => new Error('Error')));

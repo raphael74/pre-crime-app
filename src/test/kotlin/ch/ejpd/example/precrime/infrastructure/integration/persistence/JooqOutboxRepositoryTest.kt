@@ -23,7 +23,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should create and read an outbox entry`() {
         // GIVEN
-        val testEvent = CrimeForeseenEvent(VisionId(), Perpetrator("joe"), CrimeType.MURDER, LocalDateTime.now())
+        val testEvent = CrimeForeseenEvent(VisionId(), Perpetrator("Joe", "Doe"), CrimeType.MURDER, LocalDateTime.now())
 
         // WHEN
         val id = outboxRepository.create(testEvent)
@@ -41,12 +41,12 @@ class JooqOutboxRepositoryTest {
         val id1 = outboxRepository.create(
             CrimeForeseenEvent(
                 VisionId(),
-                Perpetrator("joe"),
+                Perpetrator("Joe", "Doe"),
                 CrimeType.MURDER,
                 LocalDateTime.now()
             )
         )
-        val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("jane")))
+        val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("Jane", "Doe")))
 
         // WHEN
         val pending = outboxRepository.findPendingForUpdate()
@@ -60,7 +60,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should mark record as processed`() {
         // GIVEN
-        val id = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("jane")))
+        val id = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("Jane", "Doe")))
 
         // WHEN
         outboxRepository.markAsProcessed(id)

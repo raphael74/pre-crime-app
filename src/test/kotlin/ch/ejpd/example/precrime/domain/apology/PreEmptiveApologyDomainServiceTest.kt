@@ -21,7 +21,7 @@ class PreEmptiveApologyDomainServiceTest {
         // GIVEN
         val vision = Vision(
             id = VisionId(),
-            perpetrator = Perpetrator("Danny Witwer"),
+            perpetrator = Perpetrator("Danny", "Witwer"),
             crimeType = CrimeType.MURDER,
             foreseenAt = LocalDateTime.now()
         )
@@ -31,7 +31,7 @@ class PreEmptiveApologyDomainServiceTest {
         val apology = service.generateApology(vision)
 
         // THEN
-        assertThat(apology.perpetrator.name).isEqualTo("Danny Witwer")
+        assertThat(apology.perpetrator.fullName).isEqualTo("Danny Witwer")
         assertThat(apology.compensation.baseAmount).isEqualTo(10000.0)
         assertThat(apology.compensation.jetpackFuelDeduction).isEqualTo(450.0)
         assertThat(apology.compensation.haloRentalFee).isEqualTo(250.0)
@@ -44,7 +44,7 @@ class PreEmptiveApologyDomainServiceTest {
         // GIVEN
         val vision = Vision(
             id = VisionId(),
-            perpetrator = Perpetrator("Arthur Pendelton"),
+            perpetrator = Perpetrator("Arthur", "Pendelton"),
             crimeType = CrimeType.JAYWALKING,
             foreseenAt = LocalDateTime.now()
         )
@@ -54,7 +54,7 @@ class PreEmptiveApologyDomainServiceTest {
         val apology = service.generateApology(vision)
 
         // THEN
-        assertThat(apology.perpetrator.name).isEqualTo("Arthur Pendelton")
+        assertThat(apology.perpetrator.fullName).isEqualTo("Arthur Pendelton")
         assertThat(apology.compensation.baseAmount).isEqualTo(50.0)
         assertThat(apology.compensation.jetpackFuelDeduction).isEqualTo(450.0)
         assertThat(apology.compensation.haloRentalFee).isEqualTo(250.0)
@@ -67,7 +67,7 @@ class PreEmptiveApologyDomainServiceTest {
         // GIVEN
         val vision = Vision(
             id = VisionId(),
-            perpetrator = Perpetrator("John Doe"),
+            perpetrator = Perpetrator("John", "Doe"),
             crimeType = CrimeType.LARCENY,
             foreseenAt = LocalDateTime.now()
         )

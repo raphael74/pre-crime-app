@@ -104,9 +104,12 @@ components:
       type: object
       required:
         - perpetrator
+        - firstName
         - crimeType
       properties:
         perpetrator:
+          type: string
+        firstName:
           type: string
         crimeType:
           type: string
@@ -143,6 +146,8 @@ components:
           type: string
           format: uuid
         perpetrator:
+          type: string
+        firstName:
           type: string
         baseAmount:
           type: number

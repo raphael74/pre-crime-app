@@ -29,10 +29,11 @@ class PreCrimeScenarioTest(
         val initialCrimeCount = getStats()
 
         // WHEN: Precogs foresee a crime
-        val perpetrator = "John Doe"
+        val firstName = "John"
+        val lastName = "Doe"
         val crimeType =
             CreateVisionRequest.CrimeType.MURDER // Using "Murder" to trigger base amount calculations correctly
-        triggerVision(perpetrator, crimeType)
+        triggerVision(firstName, lastName, crimeType)
 
         // THEN: The statistics should be updated via the bidirectional event flow
         await().pollInterval(1, TimeUnit.SECONDS).atMost(10, TimeUnit.SECONDS).untilAsserted {
@@ -41,16 +42,17 @@ class PreCrimeScenarioTest(
 
             // AND: The visions and pre-arrests are persisted in the aggregates
             val division = precogRepository.findSingleton()
-            assertThat(division.visions).anyMatch { it.perpetrator.name == perpetrator && it.crimeType.name == crimeType.value }
+            assertThat(division.visions).anyMatch { it.perpetrator.fullName == "$firstName $lastName" && it.crimeType.name == crimeType.value }
 
             val unit = enforcementRepository.findSingleton()
-            assertThat(unit.preArrests).anyMatch { it.perpetrator.name == perpetrator }
+            assertThat(unit.preArrests).anyMatch { it.perpetrator.fullName == "$firstName $lastName" }
 
             // AND: A pre-emptive apology is generated and retrievable via REST API
             val apologies = getApologies()
             assertThat(apologies).hasSize(1)
             val apology = apologies.first()
-            assertThat(apology.perpetrator).isEqualTo(perpetrator)
+            assertThat(apology.perpetrator).isEqualTo(lastName)
+            assertThat(apology.firstName).isEqualTo(firstName)
             assertThat(apology.baseAmount?.toDouble()).isEqualTo(10000.0)
             assertThat(apology.jetpackFuelDeduction?.toDouble()).isEqualTo(450.0)
             assertThat(apology.haloRentalFee?.toDouble()).isEqualTo(250.0)
@@ -75,11 +77,11 @@ class PreCrimeScenarioTest(
             .expectBody(Array<PreApologyResponse>::class.java).returnResult().responseBody?.toList() ?: emptyList()
     }
 
-    private fun triggerVision(perpetrator: String, crimeType: CreateVisionRequest.CrimeType) {
+    private fun triggerVision(firstName: String, lastName: String, crimeType: CreateVisionRequest.CrimeType) {
         restTestClient.post()
             .uri("/api/pre-crime/vision")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
-            .body(CreateVisionRequest(perpetrator, crimeType))
+            .body(CreateVisionRequest(lastName, firstName, crimeType))
             .exchange()
             .expectStatus().isCreated
     }

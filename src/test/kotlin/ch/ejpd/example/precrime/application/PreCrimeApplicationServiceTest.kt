@@ -52,12 +52,12 @@ class PreCrimeApplicationServiceTest {
         every { precogRepository.update(any()) } returns Unit
 
         // WHEN
-        service.triggerVision("John Doe", CrimeType.MURDER)
+        service.triggerVision("John", "Doe", CrimeType.MURDER)
 
         // THEN
         verify {
             precogRepository.findSingleton()
-            division.foreseeCrime(Perpetrator("John Doe"), CrimeType.MURDER)
+            division.foreseeCrime(Perpetrator("John", "Doe"), CrimeType.MURDER)
             precogRepository.update(division)
             publisher.publish(any())
             division.clearDomainEvents()
@@ -68,7 +68,7 @@ class PreCrimeApplicationServiceTest {
     fun `onCrimeForeseen should find singleton enforcement unit, execute pre-arrest and save and publish`() {
         // GIVEN
         val visionId = VisionId()
-        val event = CrimeForeseenEvent(visionId, Perpetrator("John Doe"), CrimeType.MURDER, LocalDateTime.now())
+        val event = CrimeForeseenEvent(visionId, Perpetrator("John", "Doe"), CrimeType.MURDER, LocalDateTime.now())
         val unit = mockk<LawEnforcementUnit>(relaxed = true)
         every { enforcementRepository.findSingleton() } returns unit
         every { enforcementRepository.update(any()) } returns Unit
@@ -79,7 +79,7 @@ class PreCrimeApplicationServiceTest {
         // THEN
         verify {
             enforcementRepository.findSingleton()
-            unit.executePreArrest(visionId, Perpetrator("John Doe"))
+            unit.executePreArrest(visionId, Perpetrator("John", "Doe"))
             enforcementRepository.update(unit)
             publisher.publish(any())
             unit.clearDomainEvents()
@@ -90,9 +90,9 @@ class PreCrimeApplicationServiceTest {
     fun `onPreArrestExecuted should find singleton precog division, record prevention and save and publish`() {
         // GIVEN
         val visionId = VisionId()
-        val event = PreArrestExecutedEvent(PreArrestId(), visionId, Perpetrator("John Doe"))
+        val event = PreArrestExecutedEvent(PreArrestId(), visionId, Perpetrator("John", "Doe"))
 
-        val vision = Vision(visionId, Perpetrator("John Doe"), CrimeType.MURDER, LocalDateTime.now())
+        val vision = Vision(visionId, Perpetrator("John", "Doe"), CrimeType.MURDER, LocalDateTime.now())
         val division = mockk<PrecogDivision>(relaxed = true)
         every { division.visions } returns setOf(vision)
         every { precogRepository.findSingleton() } returns division
@@ -103,7 +103,7 @@ class PreCrimeApplicationServiceTest {
 
         val apology = PreApology(
             visionId = visionId,
-            perpetrator = Perpetrator("John Doe"),
+            perpetrator = Perpetrator("John", "Doe"),
             compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
             apologyLetter = ApologyLetter("Dear family...")
         ).apply { issue() }

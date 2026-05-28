@@ -16,7 +16,7 @@ class ThymeleafPreApologyLetterService(
     override fun generateLetterText(vision: Vision, compensation: Compensation): String {
         val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
         val context = Context().apply {
-            setVariable("perpetratorName", vision.perpetrator.name)
+            setVariable("perpetratorName", vision.perpetrator.fullName)
             setVariable("foreseenAt", vision.foreseenAt.format(dateTimeFormatter))
             setVariable("crimeType", vision.crimeType.value)
             setVariable("jetpackFuelDeduction", compensation.jetpackFuelDeduction)

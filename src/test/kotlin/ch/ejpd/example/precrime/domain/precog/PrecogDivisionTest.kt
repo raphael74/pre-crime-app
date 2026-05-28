@@ -10,7 +10,7 @@ class PrecogDivisionTest {
     @Test
     fun `foreseeCrime should record CrimeForeseenEvent`() {
         // GIVEN
-        val perpetrator = Perpetrator("John Doe")
+        val perpetrator = Perpetrator("John", "Doe")
         val crimeType = CrimeType.MURDER
 
         // WHEN

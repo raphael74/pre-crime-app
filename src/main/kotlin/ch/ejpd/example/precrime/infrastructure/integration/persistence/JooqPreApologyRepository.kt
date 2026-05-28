@@ -33,7 +33,8 @@ class JooqPreApologyRepository(
             dsl.insertInto(PRE_APOLOGY)
                 .set(PRE_APOLOGY.ID, apology.id)
                 .set(PRE_APOLOGY.VISION_ID, apology.visionId)
-                .set(PRE_APOLOGY.PERPETRATOR, apology.perpetrator.name)
+                .set(PRE_APOLOGY.FIRST_NAME, apology.perpetrator.firstName)
+                .set(PRE_APOLOGY.PERPETRATOR, apology.perpetrator.lastName)
                 .set(PRE_APOLOGY.BASE_AMOUNT, BigDecimal.valueOf(apology.compensation.baseAmount))
                 .set(PRE_APOLOGY.JETPACK_FUEL_DEDUCTION, BigDecimal.valueOf(apology.compensation.jetpackFuelDeduction))
                 .set(PRE_APOLOGY.HALO_RENTAL_FEE, BigDecimal.valueOf(apology.compensation.haloRentalFee))
@@ -54,7 +55,7 @@ class JooqPreApologyRepository(
     private fun Record.toPreApology() = PreApology(
         id = get(PRE_APOLOGY.ID)!!,
         visionId = get(PRE_APOLOGY.VISION_ID)!!,
-        perpetrator = Perpetrator(get(PRE_APOLOGY.PERPETRATOR)!!),
+        perpetrator = Perpetrator(get(PRE_APOLOGY.FIRST_NAME)!!, get(PRE_APOLOGY.PERPETRATOR)!!),
         compensation = Compensation(
             baseAmount = get(PRE_APOLOGY.BASE_AMOUNT)!!.toDouble(),
             jetpackFuelDeduction = get(PRE_APOLOGY.JETPACK_FUEL_DEDUCTION)!!.toDouble(),

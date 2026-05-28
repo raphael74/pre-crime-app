@@ -45,10 +45,13 @@ class PrecogDivision(
 }
 
 @ValueObject
-data class Perpetrator(val name: String) {
+data class Perpetrator(val firstName: String, val lastName: String) {
     init {
-        require(name.isNotBlank()) { "Perpetrator name cannot be blank" }
+        require(firstName.isNotBlank()) { "Perpetrator first name cannot be blank" }
+        require(lastName.isNotBlank()) { "Perpetrator last name cannot be blank" }
     }
+
+    val fullName: String get() = "$firstName $lastName"
 }
 
 @ValueObject

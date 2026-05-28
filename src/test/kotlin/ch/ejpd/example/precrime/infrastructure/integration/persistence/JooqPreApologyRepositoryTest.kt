@@ -25,7 +25,7 @@ class JooqPreApologyRepositoryTest {
         // GIVEN
         val apologyId = PreApologyId()
         val visionId = VisionId()
-        val perpetrator = Perpetrator("Danny Witwer")
+        val perpetrator = Perpetrator("Danny", "Witwer")
         val compensation = Compensation(10000.0, 450.0, 250.0, 9300.0)
         val apologyLetter = ApologyLetter("Dear Family, we are sorry.")
         val apology = PreApology(apologyId, visionId, perpetrator, compensation, apologyLetter)
@@ -38,7 +38,7 @@ class JooqPreApologyRepositoryTest {
         assertThat(retrieved).isNotNull
         assertThat(retrieved!!.id).isEqualTo(apologyId)
         assertThat(retrieved.visionId).isEqualTo(visionId)
-        assertThat(retrieved.perpetrator.name).isEqualTo("Danny Witwer")
+        assertThat(retrieved.perpetrator.fullName).isEqualTo("Danny Witwer")
         assertThat(retrieved.compensation.baseAmount).isEqualTo(10000.0)
         assertThat(retrieved.compensation.netPayout).isEqualTo(9300.0)
         assertThat(retrieved.apologyLetter.text).isEqualTo("Dear Family, we are sorry.")
@@ -52,7 +52,7 @@ class JooqPreApologyRepositoryTest {
         val apology1 = PreApology(
             id = PreApologyId(),
             visionId = VisionId(),
-            perpetrator = Perpetrator("Oldest"),
+            perpetrator = Perpetrator("Unknown", "Oldest"),
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 1"),
             createdAt = now.minusDays(2)
@@ -60,7 +60,7 @@ class JooqPreApologyRepositoryTest {
         val apology2 = PreApology(
             id = PreApologyId(),
             visionId = VisionId(),
-            perpetrator = Perpetrator("Newest"),
+            perpetrator = Perpetrator("Unknown", "Newest"),
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 2"),
             createdAt = now
@@ -68,7 +68,7 @@ class JooqPreApologyRepositoryTest {
         val apology3 = PreApology(
             id = PreApologyId(),
             visionId = VisionId(),
-            perpetrator = Perpetrator("Middle"),
+            perpetrator = Perpetrator("Unknown", "Middle"),
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 3"),
             createdAt = now.minusDays(1)
@@ -83,7 +83,7 @@ class JooqPreApologyRepositoryTest {
 
         // THEN
         assertThat(all).hasSize(3)
-        assertThat(all.map { it.perpetrator.name }).containsExactly("Newest", "Middle", "Oldest")
+        assertThat(all.map { it.perpetrator.lastName }).containsExactly("Newest", "Middle", "Oldest")
     }
 
     @Test
@@ -92,14 +92,14 @@ class JooqPreApologyRepositoryTest {
         val apology1 = PreApology(
             id = PreApologyId(),
             visionId = VisionId(),
-            perpetrator = Perpetrator("Danny Witwer"),
+            perpetrator = Perpetrator("Danny", "Witwer"),
             compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
             apologyLetter = ApologyLetter("Sorry 1")
         )
         val apology2 = PreApology(
             id = PreApologyId(),
             visionId = VisionId(),
-            perpetrator = Perpetrator("Arthur Pendelton"),
+            perpetrator = Perpetrator("Arthur", "Pendelton"),
             compensation = Compensation(50.0, 450.0, 250.0, -650.0),
             apologyLetter = ApologyLetter("Sorry 2")
         )
@@ -112,7 +112,7 @@ class JooqPreApologyRepositoryTest {
 
         // THEN
         assertThat(all).hasSize(2)
-        assertThat(all.map { it.perpetrator.name }).containsExactlyInAnyOrder("Danny Witwer", "Arthur Pendelton")
+        assertThat(all.map { it.perpetrator.fullName }).containsExactlyInAnyOrder("Danny Witwer", "Arthur Pendelton")
     }
 
     @Test

@@ -28,7 +28,8 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
             PreApologyResponse(
                 id = apology.id.value,
                 visionId = apology.visionId.value,
-                perpetrator = apology.perpetrator.name,
+                perpetrator = apology.perpetrator.lastName,
+                firstName = apology.perpetrator.firstName,
                 baseAmount = java.math.BigDecimal.valueOf(apology.compensation.baseAmount),
                 jetpackFuelDeduction = java.math.BigDecimal.valueOf(apology.compensation.jetpackFuelDeduction),
                 haloRentalFee = java.math.BigDecimal.valueOf(apology.compensation.haloRentalFee),
@@ -43,13 +44,14 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
     override fun createVision(createVisionRequest: CreateVisionRequest): ResponseEntity<CreateVisionResponse> {
         val visionId =
             applicationService.triggerVision(
+                createVisionRequest.firstName,
                 createVisionRequest.perpetrator,
                 CrimeType.valueOf(createVisionRequest.crimeType.value)
             )
         return ResponseEntity.status(HttpStatus.CREATED).body(
             CreateVisionResponse(
                 visionId = visionId.value,
-                message = "Vision triggered for ${createVisionRequest.perpetrator}. The Pre-Crime unit is on its way!"
+                message = "Vision triggered for ${createVisionRequest.firstName} ${createVisionRequest.perpetrator}. The Pre-Crime unit is on its way!"
             )
         )
     }

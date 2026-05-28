@@ -23,22 +23,23 @@ class AuditIntegrationTest(
     @Test
     fun `a foreseen crime and subsequent pre-arrest are logged in the audit log`() {
         // GIVEN: A crime is foreseen
-        val perpetrator = "Danny Witwer"
-        triggerVision(perpetrator, CreateVisionRequest.CrimeType.ASSAULT)
+        val firstName = "Danny"
+        val lastName = "Witwer"
+        triggerVision(firstName, lastName, CreateVisionRequest.CrimeType.ASSAULT)
 
         // THEN: Both CrimeForeseenEvent and PreArrestExecutedEvent should be in the audit log
         await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS).untilAsserted {
             val logs = getAuditLogs()
-            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload.contains(perpetrator) }
-            assertThat(logs).anyMatch { it.eventType == "PreArrestExecutedEvent" && it.payload.contains(perpetrator) }
+            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload.contains(lastName) }
+            assertThat(logs).anyMatch { it.eventType == "PreArrestExecutedEvent" && it.payload.contains(lastName) }
         }
     }
 
-    private fun triggerVision(perpetrator: String, crimeType: CreateVisionRequest.CrimeType) {
+    private fun triggerVision(firstName: String, lastName: String, crimeType: CreateVisionRequest.CrimeType) {
         restTestClient.post()
             .uri("/api/pre-crime/vision")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
-            .body(CreateVisionRequest(perpetrator, crimeType))
+            .body(CreateVisionRequest(lastName, firstName, crimeType))
             .exchange()
             .expectStatus().isCreated
     }

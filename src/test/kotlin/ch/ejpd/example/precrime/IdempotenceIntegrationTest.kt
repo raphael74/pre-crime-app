@@ -22,7 +22,7 @@ class IdempotenceIntegrationTest(
     fun `duplicate events should be processed only once`() {
         // GIVEN
         val visionId = VisionId()
-        val perpetrator = Perpetrator("Suspect")
+        val perpetrator = Perpetrator("Unknown", "Suspect")
         val event = CrimeForeseenEvent(visionId, perpetrator, CrimeType.THEFT, LocalDateTime.now())
         val idempotenceId = UUID.randomUUID().toString()
 

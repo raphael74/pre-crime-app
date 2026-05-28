@@ -9,7 +9,8 @@ CREATE TABLE vision
 (
     id                 UUID PRIMARY KEY,
     precog_division_id UUID      NOT NULL REFERENCES precog_division (id),
-    perpetrator        VARCHAR   NOT NULL,
+    first_name         VARCHAR   NOT NULL,
+    last_name          VARCHAR   NOT NULL,
     crime_type         VARCHAR   NOT NULL,
     foreseen_at        TIMESTAMP NOT NULL
 );
@@ -26,7 +27,8 @@ CREATE TABLE pre_arrest
     id                  UUID PRIMARY KEY,
     enforcement_unit_id UUID    NOT NULL REFERENCES law_enforcement_unit (id),
     vision_id           UUID    NOT NULL,
-    perpetrator         VARCHAR NOT NULL,
+    first_name          VARCHAR NOT NULL,
+    last_name           VARCHAR NOT NULL,
     status              VARCHAR NOT NULL
 );
 
@@ -54,6 +56,20 @@ CREATE TABLE inbox
     consumer_group VARCHAR                  NOT NULL,
     processed_at   TIMESTAMP WITH TIME ZONE NOT NULL,
     PRIMARY KEY (id, consumer_group)
+);
+
+CREATE TABLE pre_apology
+(
+    id                     UUID PRIMARY KEY,
+    vision_id              UUID                     NOT NULL,
+    first_name             VARCHAR                  NOT NULL,
+    last_name              VARCHAR                  NOT NULL,
+    base_amount            DECIMAL(10, 2)           NOT NULL,
+    jetpack_fuel_deduction DECIMAL(10, 2)           NOT NULL,
+    halo_rental_fee        DECIMAL(10, 2)           NOT NULL,
+    net_payout             DECIMAL(10, 2)           NOT NULL,
+    apology_text           VARCHAR                  NOT NULL,
+    created_at             TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 -- Seed singletons for the demo

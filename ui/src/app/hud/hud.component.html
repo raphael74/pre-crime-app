@@ -20,11 +20,13 @@
         <h2>Precog Input</h2>
         <br>
         <form #visionForm="ngForm" (ngSubmit)="triggerVision()" class="vision-form">
-            <label>Target First Name</label>
-            <input (ngModelChange)="firstName.set($event)" [ngModel]="firstName()" name="firstName"
+            <label>Perpetrator First Name</label>
+            <input (ngModelChange)="perpetratorFirstName.set($event)" [ngModel]="perpetratorFirstName()"
+                   name="firstName"
                    placeholder="First Name..." required>
-            <label>Target Last Name</label>
-            <input (ngModelChange)="perpetrator.set($event)" [ngModel]="perpetrator()" name="perpetrator"
+            <label>Perpetrator Last Name</label>
+            <input (ngModelChange)="perpetratorLastName.set($event)" [ngModel]="perpetratorLastName()"
+                   name="perpetrator"
                    placeholder="Last Name..." required>
             <label>Projected Crime</label>
             <select (ngModelChange)="crimeType.set($event)" [ngModel]="crimeType()" name="crimeType" required>
@@ -66,7 +68,7 @@
                 @for (apology of apologies(); track apology.id) {
                     <div class="apology-card">
                         <div class="apology-header">
-                            <span class="apology-perpetrator">{{ apology.firstName }} {{ apology.perpetrator }}</span>
+                            <span class="apology-perpetrator">{{ apology.firstName }} {{ apology.lastName }}</span>
                             <span [class.negative]="(apology.netPayout ?? 0) < 0"
                                   [class.positive]="(apology.netPayout ?? 0) >= 0"
                                   class="apology-payout">

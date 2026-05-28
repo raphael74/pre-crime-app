@@ -51,7 +51,7 @@ class PreCrimeScenarioTest(
             val apologies = getApologies()
             assertThat(apologies).hasSize(1)
             val apology = apologies.first()
-            assertThat(apology.perpetrator).isEqualTo(lastName)
+            assertThat(apology.lastName).isEqualTo(lastName)
             assertThat(apology.firstName).isEqualTo(firstName)
             assertThat(apology.baseAmount?.toDouble()).isEqualTo(10000.0)
             assertThat(apology.jetpackFuelDeduction?.toDouble()).isEqualTo(450.0)

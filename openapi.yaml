@@ -103,13 +103,13 @@ components:
     CreateVisionRequest:
       type: object
       required:
-        - perpetrator
-        - firstName
+        - perpetratorLastName
+        - perpetratorFirstName
         - crimeType
       properties:
-        perpetrator:
+        perpetratorLastName:
           type: string
-        firstName:
+        perpetratorFirstName:
           type: string
         crimeType:
           type: string
@@ -145,7 +145,7 @@ components:
         visionId:
           type: string
           format: uuid
-        perpetrator:
+        lastName:
           type: string
         firstName:
           type: string

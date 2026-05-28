@@ -53,8 +53,8 @@ describe('HudComponent', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-        expect(component.firstName()).toBe('');
-        expect(component.perpetrator()).toBe('');
+        expect(component.perpetratorFirstName()).toBe('');
+        expect(component.perpetratorLastName()).toBe('');
         expect(component.crimeType()).toBe('');
         expect(component.auditLogs()).toEqual([]);
         expect(component.crimesPrevented()).toBe(0);
@@ -99,8 +99,8 @@ describe('HudComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        component.firstName.set('John');
-        component.perpetrator.set('Doe');
+        component.perpetratorFirstName.set('John');
+        component.perpetratorLastName.set('Doe');
         component.crimeType.set('Murder');
 
         preCrimeServiceMock.createVision.and.returnValue(of({visionId: 'uuid', message: 'Success'}) as any);
@@ -112,8 +112,8 @@ describe('HudComponent', () => {
             perpetrator: 'Doe',
             crimeType: CreateVisionRequestCrimeTypeEnum.Murder
         });
-        expect(component.firstName()).toBe('');
-        expect(component.perpetrator()).toBe('');
+        expect(component.perpetratorFirstName()).toBe('');
+        expect(component.perpetratorLastName()).toBe('');
         expect(component.crimeType()).toBe('');
         expect(component.backendError()).toBeNull();
 
@@ -125,8 +125,8 @@ describe('HudComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        component.firstName.set('John');
-        component.perpetrator.set('Doe');
+        component.perpetratorFirstName.set('John');
+        component.perpetratorLastName.set('Doe');
         component.crimeType.set('Murder');
 
         preCrimeServiceMock.createVision.and.returnValue(throwError(() => new Error('Error')));

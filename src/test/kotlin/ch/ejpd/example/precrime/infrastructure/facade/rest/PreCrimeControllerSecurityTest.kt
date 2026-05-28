@@ -19,8 +19,8 @@ class PreCrimeControllerSecurityTest(@Autowired private val restTestClient: Rest
             .uri("/api/pre-crime/vision")
             .body(
                 CreateVisionRequest(
-                    perpetrator = "Anderton",
-                    firstName = "John",
+                    perpetratorLastName = "Anderton",
+                    perpetratorFirstName = "John",
                     crimeType = CreateVisionRequest.CrimeType.MURDER
                 )
             )
@@ -34,8 +34,8 @@ class PreCrimeControllerSecurityTest(@Autowired private val restTestClient: Rest
             .uri("/api/pre-crime/vision")
             .body(
                 CreateVisionRequest(
-                    perpetrator = "Anderton",
-                    firstName = "John",
+                    perpetratorLastName = "Anderton",
+                    perpetratorFirstName = "John",
                     crimeType = CreateVisionRequest.CrimeType.MURDER
                 )
             )

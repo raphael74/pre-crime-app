@@ -15,8 +15,8 @@ import {AuditService, CreateVisionRequestCrimeTypeEnum, PreCrimeService} from '.
     imports: [CommonModule, FormsModule],
 })
 export class HudComponent {
-    perpetrator = signal('');
-    firstName = signal('');
+    perpetratorLastName = signal('');
+    perpetratorFirstName = signal('');
     crimeType = signal('');
     backendError = signal<string | null>(null);
 
@@ -81,17 +81,21 @@ export class HudComponent {
     }
 
     triggerVision() {
-        const perp = this.perpetrator();
-        const firstName = this.firstName();
+        const perp = this.perpetratorLastName();
+        const firstName = this.perpetratorFirstName();
         const crimeType: CreateVisionRequestCrimeTypeEnum = this.getCrimeTypeFromString(this.crimeType());
         if (!perp || !firstName || !crimeType) return;
 
         this.backendError.set(null);
 
-        this.preCrimeService.createVision({perpetrator: perp, firstName: firstName, crimeType: crimeType}).subscribe({
+        this.preCrimeService.createVision({
+            perpetratorLastName: perp,
+            perpetratorFirstName: firstName,
+            crimeType: crimeType
+        }).subscribe({
             next: () => {
-                this.perpetrator.set('');
-                this.firstName.set('');
+                this.perpetratorLastName.set('');
+                this.perpetratorFirstName.set('');
                 this.crimeType.set('');
             },
             error: () => {

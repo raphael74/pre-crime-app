@@ -28,7 +28,7 @@ class JooqLawEnforcementRepository(
             PRE_ARREST.ID,
             PRE_ARREST.VISION_ID,
             PRE_ARREST.FIRST_NAME,
-            PRE_ARREST.PERPETRATOR,
+            PRE_ARREST.LAST_NAME,
             PRE_ARREST.STATUS
         )
             .from(PRE_ARREST)
@@ -67,7 +67,7 @@ class JooqLawEnforcementRepository(
                     .set(PRE_ARREST.ENFORCEMENT_UNIT_ID, unit.id)
                     .set(PRE_ARREST.VISION_ID, arrest.visionId)
                     .set(PRE_ARREST.FIRST_NAME, arrest.perpetrator.firstName)
-                    .set(PRE_ARREST.PERPETRATOR, arrest.perpetrator.lastName)
+                    .set(PRE_ARREST.LAST_NAME, arrest.perpetrator.lastName)
                     .set(PRE_ARREST.STATUS, arrest.status)
                     .execute()
             }
@@ -80,7 +80,7 @@ class JooqLawEnforcementRepository(
     private fun Record.toPreArrest() = PreArrest(
         get(PRE_ARREST.ID)!!,
         get(PRE_ARREST.VISION_ID)!!,
-        Perpetrator(get(PRE_ARREST.FIRST_NAME)!!, get(PRE_ARREST.PERPETRATOR)!!),
+        Perpetrator(get(PRE_ARREST.FIRST_NAME)!!, get(PRE_ARREST.LAST_NAME)!!),
         get(PRE_ARREST.STATUS)!!
     )
 

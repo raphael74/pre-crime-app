@@ -108,8 +108,8 @@ describe('HudComponent', () => {
         component.triggerVision();
 
         expect(preCrimeServiceMock.createVision).toHaveBeenCalledWith({
-            firstName: 'John',
-            perpetrator: 'Doe',
+            perpetratorFirstName: 'John',
+            perpetratorLastName: 'Doe',
             crimeType: CreateVisionRequestCrimeTypeEnum.Murder
         });
         expect(component.perpetratorFirstName()).toBe('');

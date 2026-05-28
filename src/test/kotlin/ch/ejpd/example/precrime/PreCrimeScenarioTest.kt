@@ -1,8 +1,11 @@
 package ch.ejpd.example.precrime
 
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
-import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
+import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
+import ch.ejpd.example.precrime.domain.vision.VisionId
+import ch.ejpd.example.precrime.domain.vision.VisionRepository
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionResponse
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.PreApologyResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.web.servlet.client.RestTestClient
+import org.springframework.test.web.servlet.client.returnResult
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -19,7 +23,8 @@ import java.util.concurrent.TimeUnit
 @AutoConfigureMockMvc
 class PreCrimeScenarioTest(
     @Autowired private val restTestClient: RestTestClient,
-    @Autowired private val precogRepository: PrecogDivisionRepository,
+    @Autowired private val visionRepository: VisionRepository,
+    @Autowired private val statisticRepository: StatisticRepository,
     @Autowired private val enforcementRepository: LawEnforcementRepository
 ) {
 
@@ -33,7 +38,7 @@ class PreCrimeScenarioTest(
         val lastName = "Doe"
         val crimeType =
             CreateVisionRequest.CrimeType.MURDER // Using "Murder" to trigger base amount calculations correctly
-        triggerVision(firstName, lastName, crimeType)
+        val visionId = triggerVision(firstName, lastName, crimeType)
 
         // THEN: The statistics should be updated via the bidirectional event flow
         await().pollInterval(1, TimeUnit.SECONDS).atMost(10, TimeUnit.SECONDS).untilAsserted {
@@ -41,8 +46,9 @@ class PreCrimeScenarioTest(
             assertThat(updatedCrimeCount).isEqualTo(initialCrimeCount + 1)
 
             // AND: The visions and pre-arrests are persisted in the aggregates
-            val division = precogRepository.findSingleton()
-            assertThat(division.visions).anyMatch { it.perpetrator.fullName == "$firstName $lastName" && it.crimeType.name == crimeType.value }
+            val vision = visionRepository.findById(visionId)
+            assertThat(vision?.perpetrator?.fullName).isEqualTo("$firstName $lastName")
+            assertThat(vision?.crimeType?.name).isEqualTo(crimeType.value)
 
             val unit = enforcementRepository.findSingleton()
             assertThat(unit.preArrests).anyMatch { it.perpetrator.fullName == "$firstName $lastName" }
@@ -77,13 +83,15 @@ class PreCrimeScenarioTest(
             .expectBody(Array<PreApologyResponse>::class.java).returnResult().responseBody?.toList() ?: emptyList()
     }
 
-    private fun triggerVision(firstName: String, lastName: String, crimeType: CreateVisionRequest.CrimeType) {
-        restTestClient.post()
+    private fun triggerVision(firstName: String, lastName: String, crimeType: CreateVisionRequest.CrimeType): VisionId {
+        val result = restTestClient.post()
             .uri("/api/pre-crime/vision")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .body(CreateVisionRequest(lastName, firstName, crimeType))
             .exchange()
             .expectStatus().isCreated
+            .returnResult<CreateVisionResponse>()
+        return VisionId(result.responseBody?.visionId!!)
     }
 
     private fun generateAuthorizationHeader(username: String, password: String): String {

@@ -2,7 +2,7 @@ package ch.ejpd.example.precrime.infrastructure.integration.template
 
 import ch.ejpd.example.precrime.domain.apology.Compensation
 import ch.ejpd.example.precrime.domain.apology.PreApologyLetterService
-import ch.ejpd.example.precrime.domain.precog.Vision
+import ch.ejpd.example.precrime.domain.vision.Vision
 import org.springframework.stereotype.Service
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.SpringTemplateEngine

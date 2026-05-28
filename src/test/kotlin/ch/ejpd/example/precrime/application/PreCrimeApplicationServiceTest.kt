@@ -6,9 +6,12 @@ import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
-import ch.ejpd.example.precrime.domain.precog.*
+import ch.ejpd.example.precrime.domain.statistic.Statistic
+import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
+import ch.ejpd.example.precrime.domain.vision.*
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -16,13 +19,15 @@ import java.time.LocalDateTime
 
 class PreCrimeApplicationServiceTest {
 
-    private val precogRepository = mockk<PrecogDivisionRepository>()
+    private val visionRepository = mockk<VisionRepository>()
+    private val statisticRepository = mockk<StatisticRepository>()
     private val enforcementRepository = mockk<LawEnforcementRepository>()
     private val preApologyRepository = mockk<PreApologyRepository>(relaxed = true)
     private val preEmptiveApologyDomainService = mockk<PreEmptiveApologyDomainService>()
     private val publisher = mockk<DomainEventPublisher>(relaxed = true)
     private val service = PreCrimeApplicationService(
-        precogRepository,
+        visionRepository,
+        statisticRepository,
         enforcementRepository,
         preApologyRepository,
         preEmptiveApologyDomainService,
@@ -30,42 +35,46 @@ class PreCrimeApplicationServiceTest {
     )
 
     @Test
-    fun `getPreventedCrimesCount should return count from singleton precog division`() {
+    fun `getPreventedCrimesCount should return count from singleton statistic`() {
         // GIVEN
-        val division = mockk<PrecogDivision>()
-        every { division.totalCrimesPrevented } returns 42
-        every { precogRepository.findSingleton() } returns division
+        val statistic = mockk<Statistic>()
+        every { statistic.totalCrimesPrevented } returns 42
+        every { statisticRepository.findSingleton() } returns statistic
 
         // WHEN
         val count = service.getPreventedCrimesCount()
 
         // THEN
         assertThat(count).isEqualTo(42)
-        verify { precogRepository.findSingleton() }
+        verify { statisticRepository.findSingleton() }
     }
 
     @Test
     fun `triggerVision should find singleton, foresee crime and save and publish`() {
         // GIVEN
-        val division = mockk<PrecogDivision>(relaxed = true)
-        every { precogRepository.findSingleton() } returns division
-        every { precogRepository.update(any()) } returns Unit
+        val vision = mockk<Vision>()
+        every { vision.id } returns VisionId()
+        every { vision.foreseeCrime() } returns Unit
+        every { vision.domainEvents } returns emptyList()
+        every { vision.clearDomainEvents() } returns Unit
+        mockkObject(VisionFactory.Companion)
+        every { VisionFactory.createVision(any(), any()) } returns vision
+        every { visionRepository.create(any()) } returns Unit
 
         // WHEN
         service.triggerVision("John", "Doe", CrimeType.MURDER)
 
         // THEN
         verify {
-            precogRepository.findSingleton()
-            division.foreseeCrime(Perpetrator("John", "Doe"), CrimeType.MURDER)
-            precogRepository.update(division)
+            visionRepository.create(any())
+            vision.foreseeCrime()
             publisher.publish(any())
-            division.clearDomainEvents()
+            vision.clearDomainEvents()
         }
     }
 
     @Test
-    fun `onCrimeForeseen should find singleton enforcement unit, execute pre-arrest and save and publish`() {
+    fun `onCrimeForeseen should create vision, execute pre-arrest and save and publish`() {
         // GIVEN
         val visionId = VisionId()
         val event = CrimeForeseenEvent(visionId, Perpetrator("John", "Doe"), CrimeType.MURDER, LocalDateTime.now())
@@ -87,19 +96,22 @@ class PreCrimeApplicationServiceTest {
     }
 
     @Test
-    fun `onPreArrestExecuted should find singleton precog division, record prevention and save and publish`() {
+    fun `onPreArrestExecuted should find singleton statistic, record prevention and save and publish`() {
         // GIVEN
         val visionId = VisionId()
         val event = PreArrestExecutedEvent(PreArrestId(), visionId, Perpetrator("John", "Doe"))
 
-        val vision = Vision(visionId, Perpetrator("John", "Doe"), CrimeType.MURDER, LocalDateTime.now())
-        val division = mockk<PrecogDivision>(relaxed = true)
-        every { division.visions } returns setOf(vision)
-        every { precogRepository.findSingleton() } returns division
-        every { precogRepository.update(any()) } returns Unit
+        val vision = Vision(
+            id = visionId,
+            perpetrator = Perpetrator("John", "Doe"),
+            crimeType = CrimeType.MURDER,
+            foreseenAt = LocalDateTime.now()
+        )
+        every { visionRepository.findById(any()) } returns vision
 
-        val unit = mockk<LawEnforcementUnit>()
-        every { enforcementRepository.findSingleton() } returns unit
+        val statistic = mockk<Statistic>(relaxed = true)
+        every { statisticRepository.findSingleton() } returns statistic
+        every { statisticRepository.update(any()) } returns Unit
 
         val apology = PreApology(
             visionId = visionId,
@@ -115,13 +127,13 @@ class PreCrimeApplicationServiceTest {
 
         // THEN
         verify {
-            precogRepository.findSingleton()
-            division.recordPrevention()
-            precogRepository.update(division)
+            statisticRepository.findSingleton()
+            statistic.recordPrevention()
+            statisticRepository.update(statistic)
             preEmptiveApologyDomainService.generateApology(vision)
             preApologyRepository.save(apology)
             publisher.publish(any())
-            division.clearDomainEvents()
+            apology.clearDomainEvents()
         }
     }
 }

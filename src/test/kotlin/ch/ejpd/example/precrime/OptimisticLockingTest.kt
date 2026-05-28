@@ -1,6 +1,6 @@
 package ch.ejpd.example.precrime
 
-import ch.ejpd.example.precrime.domain.precog.PrecogDivisionRepository
+import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.OptimisticLockingException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -9,24 +9,24 @@ import org.springframework.transaction.annotation.Transactional
 
 @IntegrationTest
 class OptimisticLockingTest(
-    @Autowired private val precogRepository: PrecogDivisionRepository
+    @Autowired private val statisticRepository: StatisticRepository
 ) {
 
     @Test
     @Transactional
     fun `concurrent update should throw OptimisticLockingException`() {
         // GIVEN
-        val division1 = precogRepository.findSingleton()
-        val division2 = precogRepository.findSingleton()
+        val statistic1 = statisticRepository.findSingleton()
+        val statistic2 = statisticRepository.findSingleton()
 
         // WHEN
-        division1.recordPrevention()
-        precogRepository.update(division1)
+        statistic1.recordPrevention()
+        statisticRepository.update(statistic1)
 
         // THEN
-        division2.recordPrevention()
+        statistic2.recordPrevention()
         assertThrows(OptimisticLockingException::class.java) {
-            precogRepository.update(division2)
+            statisticRepository.update(statistic2)
         }
     }
 }

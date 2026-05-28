@@ -5,8 +5,8 @@ import ch.ejpd.example.precrime.domain.enforcement.EnforcementUnitId
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestStatus
 import ch.ejpd.example.precrime.domain.enforcement.UnitName
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

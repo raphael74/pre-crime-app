@@ -2,7 +2,7 @@ package ch.ejpd.example.precrime.infrastructure.integration.event
 
 import ch.ejpd.example.precrime.domain.apology.PreApologyIssuedEvent
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
-import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
+import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORESEEN_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_APOLOGY_ISSUED_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC

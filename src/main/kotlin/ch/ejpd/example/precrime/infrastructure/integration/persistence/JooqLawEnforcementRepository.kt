@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.domain.enforcement.*
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.LAW_ENFORCEMENT_UNIT
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRE_ARREST
 import org.jooq.DSLContext

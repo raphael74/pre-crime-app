@@ -1,4 +1,4 @@
-package ch.ejpd.example.precrime.domain.precog
+package ch.ejpd.example.precrime.domain.vision
 
 import ch.ejpd.example.precrime.domain.AggregateVersion
 import org.jmolecules.ddd.annotation.*
@@ -8,39 +8,30 @@ import java.time.LocalDateTime
 import java.util.*
 
 @AggregateRoot
-class PrecogDivision(
-    @Identity val id: PrecogDivisionId = PrecogDivisionId(),
+class Vision(
+    @Identity val id: VisionId,
     var version: AggregateVersion = AggregateVersion(),
-    var totalCrimesPrevented: Int = 0,
-    visions: Set<Vision> = emptySet()
+    val perpetrator: Perpetrator,
+    val crimeType: CrimeType,
+    val foreseenAt: LocalDateTime
 ) {
-    private val _visions: MutableSet<Vision> = visions.toMutableSet()
     private val _events = mutableListOf<Any>()
 
-    val visions: Set<Vision> get() = _visions.toSet()
     val domainEvents: List<Any> get() = _events.toList()
 
     fun clearDomainEvents() {
         _events.clear()
     }
 
-    fun foreseeCrime(perpetrator: Perpetrator, crimeType: CrimeType): VisionId {
-        val vision = VisionFactory.createVision(perpetrator, crimeType)
-        _visions.add(vision)
-
+    fun foreseeCrime() {
         _events.add(
             CrimeForeseenEvent(
-                visionId = vision.id,
-                perpetrator = vision.perpetrator,
-                crimeType = vision.crimeType,
-                foreseenAt = vision.foreseenAt
+                visionId = id,
+                perpetrator = perpetrator,
+                crimeType = crimeType,
+                foreseenAt = foreseenAt
             )
         )
-        return vision.id
-    }
-
-    fun recordPrevention() {
-        this.totalCrimesPrevented++
     }
 }
 
@@ -72,27 +63,21 @@ enum class CrimeType(val value: String) {
     TAX_EVASION("Tax Evasion");
 }
 
-@Entity
-data class Vision(
-    @Identity val id: VisionId,
-    val perpetrator: Perpetrator,
-    val crimeType: CrimeType,
-    val foreseenAt: LocalDateTime
-)
-
 @Factory
 class VisionFactory {
     companion object {
         fun createVision(perpetrator: Perpetrator, crimeType: CrimeType): Vision {
             val visionId = VisionId()
             val foreseenAt = LocalDateTime.now().plusHours(2)
-            return Vision(visionId, perpetrator, crimeType, foreseenAt)
+            return Vision(
+                id = visionId,
+                perpetrator = perpetrator,
+                crimeType = crimeType,
+                foreseenAt = foreseenAt
+            )
         }
     }
 }
-
-@JvmInline
-value class PrecogDivisionId(val value: UUID = UUID.randomUUID()) : Identifier
 
 @JvmInline
 value class VisionId(val value: UUID = UUID.randomUUID()) : Identifier
@@ -106,8 +91,8 @@ data class CrimeForeseenEvent(
 )
 
 @Repository
-interface PrecogDivisionRepository {
-    fun findById(id: PrecogDivisionId): PrecogDivision?
-    fun update(division: PrecogDivision)
-    fun findSingleton(): PrecogDivision
+interface VisionRepository {
+    fun findById(id: VisionId): Vision?
+    fun create(vision: Vision)
+    fun update(vision: Vision)
 }

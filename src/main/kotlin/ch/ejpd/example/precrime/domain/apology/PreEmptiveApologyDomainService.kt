@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.domain.apology
 
-import ch.ejpd.example.precrime.domain.precog.CrimeType
-import ch.ejpd.example.precrime.domain.precog.Vision
+import ch.ejpd.example.precrime.domain.vision.CrimeType
+import ch.ejpd.example.precrime.domain.vision.Vision
 import org.jmolecules.ddd.annotation.Service
 
 @Service

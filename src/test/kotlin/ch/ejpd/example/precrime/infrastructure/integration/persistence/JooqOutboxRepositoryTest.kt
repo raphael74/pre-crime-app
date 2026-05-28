@@ -3,10 +3,10 @@ package ch.ejpd.example.precrime.infrastructure.integration.persistence
 import ch.ejpd.example.precrime.IntegrationTest
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
-import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
-import ch.ejpd.example.precrime.domain.precog.CrimeType
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
+import ch.ejpd.example.precrime.domain.vision.CrimeType
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

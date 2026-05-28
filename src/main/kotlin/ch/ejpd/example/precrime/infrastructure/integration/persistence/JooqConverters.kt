@@ -5,8 +5,8 @@ import ch.ejpd.example.precrime.domain.apology.PreApologyId
 import ch.ejpd.example.precrime.domain.audit.AuditEntryId
 import ch.ejpd.example.precrime.domain.enforcement.EnforcementUnitId
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
-import ch.ejpd.example.precrime.domain.precog.PrecogDivisionId
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.statistic.StatisticId
+import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.jooq.impl.AbstractConverter
 import java.util.*
 
@@ -16,10 +16,10 @@ class AggregateVersionConverter :
     override fun to(u: AggregateVersion?): Long? = u?.value
 }
 
-class PrecogDivisionIdConverter :
-    AbstractConverter<UUID, PrecogDivisionId>(UUID::class.java, PrecogDivisionId::class.java) {
-    override fun from(t: UUID?): PrecogDivisionId? = t?.let { PrecogDivisionId(it) }
-    override fun to(u: PrecogDivisionId?): UUID? = u?.value
+class StatisticIdConverter :
+    AbstractConverter<UUID, StatisticId>(UUID::class.java, StatisticId::class.java) {
+    override fun from(t: UUID?): StatisticId? = t?.let { StatisticId(it) }
+    override fun to(u: StatisticId?): UUID? = u?.value
 }
 
 class VisionIdConverter : AbstractConverter<UUID, VisionId>(UUID::class.java, VisionId::class.java) {

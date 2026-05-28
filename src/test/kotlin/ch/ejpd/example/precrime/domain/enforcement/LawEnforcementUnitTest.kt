@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.domain.enforcement
 
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

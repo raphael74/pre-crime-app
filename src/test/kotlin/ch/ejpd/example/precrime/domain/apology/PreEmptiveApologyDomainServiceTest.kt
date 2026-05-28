@@ -1,9 +1,9 @@
 package ch.ejpd.example.precrime.domain.apology
 
-import ch.ejpd.example.precrime.domain.precog.CrimeType
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.Vision
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.vision.CrimeType
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.Vision
+import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.infrastructure.integration.template.ThymeleafPreApologyLetterService
 import io.mockk.every
 import io.mockk.mockk

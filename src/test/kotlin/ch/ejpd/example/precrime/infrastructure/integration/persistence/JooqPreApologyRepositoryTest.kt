@@ -5,8 +5,8 @@ import ch.ejpd.example.precrime.domain.apology.ApologyLetter
 import ch.ejpd.example.precrime.domain.apology.Compensation
 import ch.ejpd.example.precrime.domain.apology.PreApology
 import ch.ejpd.example.precrime.domain.apology.PreApologyId
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

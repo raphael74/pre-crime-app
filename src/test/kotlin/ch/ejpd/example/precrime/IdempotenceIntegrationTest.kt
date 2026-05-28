@@ -1,10 +1,10 @@
 package ch.ejpd.example.precrime
 
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
-import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
-import ch.ejpd.example.precrime.domain.precog.CrimeType
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
+import ch.ejpd.example.precrime.domain.vision.CrimeType
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.infrastructure.facade.event.KafkaDomainEventConsumer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

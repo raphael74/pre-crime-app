@@ -3,7 +3,7 @@ package ch.ejpd.example.precrime.infrastructure.facade.event
 import ch.ejpd.example.precrime.application.AuditApplicationService
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
-import ch.ejpd.example.precrime.domain.precog.CrimeForeseenEvent
+import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics
 import ch.ejpd.example.precrime.infrastructure.integration.event.IDEMPOTENCE_ID_HEADER
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqInboxRepository

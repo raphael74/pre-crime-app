@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
-import ch.ejpd.example.precrime.domain.precog.CrimeType
+import ch.ejpd.example.precrime.domain.vision.CrimeType
 import ch.ejpd.example.precrime.infrastructure.facade.rest.api.PreCrimeApi
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionResponse

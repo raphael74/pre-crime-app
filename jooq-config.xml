@@ -30,14 +30,14 @@
                     <includeExpression>.*\.version</includeExpression>
                 </forcedType>
                 <forcedType>
-                    <userType>ch.ejpd.example.precrime.domain.precog.PrecogDivisionId</userType>
+                    <userType>ch.ejpd.example.precrime.domain.statistic.StatisticId</userType>
                     <converter>
-                        ch.ejpd.example.precrime.infrastructure.integration.persistence.PrecogDivisionIdConverter
+                        ch.ejpd.example.precrime.infrastructure.integration.persistence.StatisticIdConverter
                     </converter>
-                    <includeExpression>precog_division\.id|vision\.precog_division_id</includeExpression>
+                    <includeExpression>statistic\.id</includeExpression>
                 </forcedType>
                 <forcedType>
-                    <userType>ch.ejpd.example.precrime.domain.precog.VisionId</userType>
+                    <userType>ch.ejpd.example.precrime.domain.vision.VisionId</userType>
                     <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.VisionIdConverter
                     </converter>
                     <includeExpression>vision\.id|pre_arrest\.vision_id|pre_apology\.vision_id</includeExpression>
@@ -63,7 +63,8 @@
                 </forcedType>
                 <forcedType>
                     <userType>ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxId</userType>
-                    <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxIdConverter</converter>
+                    <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxIdConverter
+                    </converter>
                     <includeExpression>outbox\.id</includeExpression>
                 </forcedType>
                 <forcedType>
@@ -78,11 +79,12 @@
                 </forcedType>
                 <forcedType>
                     <userType>ch.ejpd.example.precrime.domain.apology.PreApologyId</userType>
-                    <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.PreApologyIdConverter</converter>
+                    <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.PreApologyIdConverter
+                    </converter>
                     <includeExpression>pre_apology\.id</includeExpression>
                 </forcedType>
                 <forcedType>
-                    <userType>ch.ejpd.example.precrime.domain.precog.CrimeType</userType>
+                    <userType>ch.ejpd.example.precrime.domain.vision.CrimeType</userType>
                     <enumConverter>true</enumConverter>
                     <includeExpression>vision\.crime_type</includeExpression>
                 </forcedType>

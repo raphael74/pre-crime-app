@@ -1,4 +1,4 @@
-CREATE TABLE precog_division
+CREATE TABLE statistic
 (
     id                     UUID PRIMARY KEY,
     version                BIGINT NOT NULL DEFAULT 0,
@@ -7,12 +7,12 @@ CREATE TABLE precog_division
 
 CREATE TABLE vision
 (
-    id                 UUID PRIMARY KEY,
-    precog_division_id UUID      NOT NULL REFERENCES precog_division (id),
-    first_name         VARCHAR   NOT NULL,
-    last_name          VARCHAR   NOT NULL,
-    crime_type         VARCHAR   NOT NULL,
-    foreseen_at        TIMESTAMP NOT NULL
+    id          UUID PRIMARY KEY,
+    version     BIGINT    NOT NULL DEFAULT 0,
+    first_name  VARCHAR   NOT NULL,
+    last_name   VARCHAR   NOT NULL,
+    crime_type  VARCHAR   NOT NULL,
+    foreseen_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE law_enforcement_unit
@@ -73,7 +73,7 @@ CREATE TABLE pre_apology
 );
 
 -- Seed singletons for the demo
-INSERT INTO precog_division (id, total_crimes_prevented)
+INSERT INTO statistic (id, total_crimes_prevented)
 VALUES ('00000000-0000-0000-0000-000000000001', 0);
 INSERT INTO law_enforcement_unit (id, unit_name)
 VALUES ('00000000-0000-0000-0000-000000000002', 'Pre-Crime Team Alpha');

@@ -6,7 +6,8 @@ import ch.ejpd.example.precrime.domain.apology.PreApologyRepository
 import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyDomainService
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
-import ch.ejpd.example.precrime.domain.precog.*
+import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
+import ch.ejpd.example.precrime.domain.vision.*
 import org.jmolecules.event.annotation.DomainEventHandler
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -16,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class PreCrimeApplicationService(
-    private val precogRepository: PrecogDivisionRepository,
+    private val visionRepository: VisionRepository,
+    private val statisticRepository: StatisticRepository,
     private val enforcementRepository: LawEnforcementRepository,
     private val preApologyRepository: PreApologyRepository,
     private val preEmptiveApologyDomainService: PreEmptiveApologyDomainService,
@@ -26,7 +28,7 @@ class PreCrimeApplicationService(
 
     @Transactional(readOnly = true)
     fun getPreventedCrimesCount(): Int {
-        return precogRepository.findSingleton().totalCrimesPrevented
+        return statisticRepository.findSingleton().totalCrimesPrevented
     }
 
     @Transactional(readOnly = true)
@@ -35,13 +37,13 @@ class PreCrimeApplicationService(
     }
 
     fun triggerVision(perpetratorFirstName: String, perpetratorLastName: String, crimeType: CrimeType): VisionId {
-        val division = precogRepository.findSingleton()
-        val visionId = division.foreseeCrime(Perpetrator(perpetratorFirstName, perpetratorLastName), crimeType)
-        precogRepository.update(division)
-        publisher.publish(division.domainEvents)
-        division.clearDomainEvents()
-        logger.info("[PrecogDivision] Foresee: $perpetratorFirstName $perpetratorLastName will commit ${crimeType.value}! Aggregate published event.")
-        return visionId
+        val vision = VisionFactory.createVision(Perpetrator(perpetratorFirstName, perpetratorLastName), crimeType)
+        visionRepository.create(vision)
+        vision.foreseeCrime()
+        publisher.publish(vision.domainEvents)
+        vision.clearDomainEvents()
+        logger.info("[Vision] Foresee: $perpetratorFirstName $perpetratorLastName will commit ${crimeType.value}! Aggregate published event.")
+        return vision.id
     }
 
     @DomainEventHandler
@@ -56,17 +58,15 @@ class PreCrimeApplicationService(
 
     @DomainEventHandler
     fun onPreArrestExecuted(event: PreArrestExecutedEvent) {
-        logger.info("[PrecogDivision] Received pre-arrest confirmation for ${event.perpetrator.fullName}. Updating stats.")
-        val division = precogRepository.findSingleton()
-        division.recordPrevention()
-        precogRepository.update(division)
-        publisher.publish(division.domainEvents)
-        division.clearDomainEvents()
-        logger.info("Stats: Total crimes 'prevented' via Minority Report logic: ${division.totalCrimesPrevented}")
+        logger.info("[LawEnforcement] Received pre-arrest confirmation for ${event.perpetrator.fullName}. Updating stats.")
+        val statistic = statisticRepository.findSingleton()
+        statistic.recordPrevention()
+        statisticRepository.update(statistic)
+        logger.info("Stats: Total crimes 'prevented' via Minority Report logic: ${statistic.totalCrimesPrevented}")
 
         // Generate and save pre-emptive apology & compensation statement
-        val vision = division.visions.find { it.id == event.visionId }
-            ?: throw IllegalStateException("Vision ${event.visionId} not found in division")
+        val vision = visionRepository.findById(event.visionId)
+            ?: throw IllegalStateException("Vision ${event.visionId} not found")
 
         val apology = preEmptiveApologyDomainService.generateApology(vision)
         preApologyRepository.save(apology)

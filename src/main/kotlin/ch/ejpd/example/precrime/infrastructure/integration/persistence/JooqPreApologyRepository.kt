@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.domain.apology.*
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRE_APOLOGY
 import org.jooq.DSLContext
 import org.jooq.Record

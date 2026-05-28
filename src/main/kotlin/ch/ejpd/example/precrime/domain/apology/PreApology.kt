@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.domain.apology
 
-import ch.ejpd.example.precrime.domain.precog.Perpetrator
-import ch.ejpd.example.precrime.domain.precog.VisionId
+import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.annotation.Repository

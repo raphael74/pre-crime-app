@@ -1,7 +1,6 @@
 package ch.ejpd.example.precrime
 
 import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
-import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.domain.vision.VisionRepository
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
@@ -13,7 +12,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
 import org.springframework.test.web.servlet.client.RestTestClient
-import org.springframework.test.web.servlet.client.returnResult
+import org.springframework.test.web.servlet.client.expectBody
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -22,7 +21,6 @@ import java.util.concurrent.TimeUnit
 class PreCrimeScenarioTest(
     @Autowired private val restTestClient: RestTestClient,
     @Autowired private val visionRepository: VisionRepository,
-    @Autowired private val statisticRepository: StatisticRepository,
     @Autowired private val enforcementRepository: LawEnforcementRepository
 ) {
 
@@ -70,7 +68,7 @@ class PreCrimeScenarioTest(
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .exchange()
             .expectStatus().isOk
-            .expectBody(Int::class.java).returnResult().responseBody ?: 0
+            .expectBody<Int>().returnResult().responseBody ?: 0
     }
 
     private fun getApologies(): List<PreApologyResponse> {
@@ -78,7 +76,7 @@ class PreCrimeScenarioTest(
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .exchange()
             .expectStatus().isOk
-            .expectBody(Array<PreApologyResponse>::class.java).returnResult().responseBody?.toList() ?: emptyList()
+            .expectBody<Array<PreApologyResponse>>().returnResult().responseBody?.toList() ?: emptyList()
     }
 
     private fun triggerVision(firstName: String, lastName: String, crimeType: CreateVisionRequest.CrimeType): VisionId {
@@ -88,8 +86,9 @@ class PreCrimeScenarioTest(
             .body(CreateVisionRequest(lastName, firstName, crimeType))
             .exchange()
             .expectStatus().isCreated
-            .returnResult<CreateVisionResponse>()
-        return VisionId(result.responseBody?.visionId!!)
+            .expectBody<CreateVisionResponse>().returnResult().responseBody
+
+        return VisionId(result?.visionId!!)
     }
 
     private fun generateAuthorizationHeader(username: String, password: String): String {

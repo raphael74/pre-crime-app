@@ -12,7 +12,6 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.web.servlet.client.RestTestClient
 import org.springframework.test.web.servlet.client.returnResult
 import java.util.*
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit
 
 @IntegrationTest
 @AutoConfigureRestTestClient
-@AutoConfigureMockMvc
 class PreCrimeScenarioTest(
     @Autowired private val restTestClient: RestTestClient,
     @Autowired private val visionRepository: VisionRepository,

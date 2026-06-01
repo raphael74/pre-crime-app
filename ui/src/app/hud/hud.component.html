@@ -74,6 +74,7 @@
                             </span>
                         </div>
                         <div class="apology-breakdown">
+                            <span>Date: {{ arrest.preArrestDate | date:'medium' }}</span>
                             <span>ID: {{ arrest.id?.substring(0, 8) }}...</span>
                             <span>Vision: {{ arrest.visionId?.substring(0, 8) }}...</span>
                         </div>

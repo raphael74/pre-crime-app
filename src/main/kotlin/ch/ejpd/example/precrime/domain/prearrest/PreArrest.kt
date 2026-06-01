@@ -8,6 +8,7 @@ import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.annotation.Repository
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
+import java.time.OffsetDateTime
 import java.util.*
 
 @AggregateRoot
@@ -16,6 +17,7 @@ class PreArrest(
     var version: AggregateVersion = AggregateVersion(),
     val visionId: VisionId,
     val perpetratorId: PerpetratorId,
+    val preArrestDate: OffsetDateTime = OffsetDateTime.now(),
     val status: PreArrestStatus = PreArrestStatus.ARRESTED_BEFORE_CRIME
 ) {
     private val _events = mutableListOf<Any>()

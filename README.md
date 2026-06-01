@@ -44,6 +44,7 @@ classDiagram
         PreArrestId id
         VisionId visionId
         PerpetratorId perpetratorId
+        OffsetDateTime preArrestDate
         PreArrestStatus status
     }
     class PreApology {

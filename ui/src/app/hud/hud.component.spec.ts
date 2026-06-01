@@ -2,7 +2,7 @@ import {ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick} from '
 import {HudComponent} from './hud.component';
 import {FormsModule} from '@angular/forms';
 import {of, Subject, throwError} from 'rxjs';
-import {AuditEntry, AuditService, CreateVisionRequestCrimeTypeEnum, PreCrimeService} from '../api';
+import {AuditEntry, AuditService, CreateVisionRequestCrimeTypeEnum, PreCrimeService, PreArrestResponseStatusEnum} from '../api';
 import {AuthService} from '../auth.service';
 import {Router} from '@angular/router';
 
@@ -23,9 +23,10 @@ describe('HudComponent', () => {
         auditServiceMock = jasmine.createSpyObj('AuditService', ['getLogs']);
         auditServiceMock.getLogs.and.returnValue(auditLogsSubject.asObservable() as any);
 
-        preCrimeServiceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'createVision', 'getApologies']);
+        preCrimeServiceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'createVision', 'getApologies', 'getArrests']);
         preCrimeServiceMock.getStats.and.returnValue(statsSubject.asObservable() as any);
         preCrimeServiceMock.getApologies.and.returnValue(of([]) as any);
+        preCrimeServiceMock.getArrests.and.returnValue(of([]) as any);
 
         authServiceMock = jasmine.createSpyObj('AuthService', ['logout']);
         routerMock = jasmine.createSpyObj('Router', ['navigate']);
@@ -73,6 +74,28 @@ describe('HudComponent', () => {
         tick(1000);
         statsSubject.next(43);
         expect(component.crimesPrevented()).toBe(43);
+        discardPeriodicTasks();
+    }));
+
+    it('should update pre-arrests periodically', fakeAsync(() => {
+        fixture = TestBed.createComponent(HudComponent);
+        component = fixture.componentInstance;
+        const arrestsSubject = new Subject<any[]>();
+        preCrimeServiceMock.getArrests.and.returnValue(arrestsSubject.asObservable() as any);
+        fixture.detectChanges();
+
+        tick(1000);
+        const mockArrests = [{
+            id: '1',
+            visionId: 'v1',
+            perpetratorId: 'p1',
+            firstName: 'John',
+            lastName: 'Doe',
+            preArrestDate: new Date().toISOString(),
+            status: PreArrestResponseStatusEnum.ArrestedBeforeCrime
+        }];
+        arrestsSubject.next(mockArrests);
+        expect(component.preArrests()).toEqual(mockArrests as any);
         discardPeriodicTasks();
     }));
 

@@ -21,6 +21,7 @@ class JooqPreArrestRepository(
             PRE_ARREST.VERSION,
             PRE_ARREST.VISION_ID,
             PRE_ARREST.PERPETRATOR_ID,
+            PRE_ARREST.PRE_ARREST_DATE,
             PRE_ARREST.STATUS
         )
             .from(PRE_ARREST)
@@ -55,6 +56,7 @@ class JooqPreArrestRepository(
                 .set(PRE_ARREST.VERSION, preArrest.version)
                 .set(PRE_ARREST.VISION_ID, preArrest.visionId)
                 .set(PRE_ARREST.PERPETRATOR_ID, preArrest.perpetratorId)
+                .set(PRE_ARREST.PRE_ARREST_DATE, preArrest.preArrestDate)
                 .set(PRE_ARREST.STATUS, preArrest.status)
                 .execute()
         }
@@ -66,9 +68,11 @@ class JooqPreArrestRepository(
             PRE_ARREST.VERSION,
             PRE_ARREST.VISION_ID,
             PRE_ARREST.PERPETRATOR_ID,
+            PRE_ARREST.PRE_ARREST_DATE,
             PRE_ARREST.STATUS
         )
             .from(PRE_ARREST)
+            .orderBy(PRE_ARREST.PRE_ARREST_DATE.desc())
             .fetch()
             .map { it.toPreArrest() }
     }
@@ -78,6 +82,7 @@ class JooqPreArrestRepository(
         version = get(PRE_ARREST.VERSION)!!,
         visionId = get(PRE_ARREST.VISION_ID)!!,
         perpetratorId = get(PRE_ARREST.PERPETRATOR_ID)!!,
+        preArrestDate = get(PRE_ARREST.PRE_ARREST_DATE)!!,
         status = get(PRE_ARREST.STATUS)!!
     )
 }

@@ -24,8 +24,10 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
             PreArrestResponse(
                 id = arrest.id.value,
                 visionId = arrest.visionId.value,
+                perpetratorId = arrest.perpetratorId.value,
                 firstName = perpetrator.firstName,
                 lastName = perpetrator.lastName,
+                preArrestDate = arrest.preArrestDate,
                 status = PreArrestResponse.Status.valueOf(arrest.status.name)
             )
         }

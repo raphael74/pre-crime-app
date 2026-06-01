@@ -24,11 +24,12 @@ CREATE TABLE vision
 
 CREATE TABLE pre_arrest
 (
-    id             UUID PRIMARY KEY,
-    version        BIGINT  NOT NULL DEFAULT 0,
-    vision_id      UUID    NOT NULL,
-    perpetrator_id UUID    NOT NULL REFERENCES perpetrator (id),
-    status         VARCHAR NOT NULL
+    id              UUID PRIMARY KEY,
+    version         BIGINT                   NOT NULL DEFAULT 0,
+    vision_id       UUID                     NOT NULL,
+    perpetrator_id  UUID                     NOT NULL REFERENCES perpetrator (id),
+    status          VARCHAR                  NOT NULL,
+    pre_arrest_date TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 CREATE TABLE audit_log

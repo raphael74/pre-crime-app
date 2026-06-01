@@ -8,9 +8,12 @@ import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestStatus
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
+import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @IntegrationTest
@@ -29,7 +32,8 @@ class JooqPreArrestRepositoryTest {
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         perpetratorRepository.save(perpetrator)
-        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetrator.id)
+        val preArrestDate = OffsetDateTime.now()
+        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetrator.id, preArrestDate = preArrestDate)
 
         // WHEN
         repository.save(preArrest)
@@ -40,19 +44,28 @@ class JooqPreArrestRepositoryTest {
         assertThat(result!!.id).isEqualTo(preArrest.id)
         assertThat(result.visionId).isEqualTo(visionId)
         assertThat(result.perpetratorId).isEqualTo(perpetrator.id)
+        assertThat(result.preArrestDate).isCloseTo(preArrestDate, within(1, ChronoUnit.SECONDS))
         assertThat(result.status).isEqualTo(PreArrestStatus.ARRESTED_BEFORE_CRIME)
     }
 
     @Test
-    fun `should find all pre-arrests`() {
+    fun `should find all pre-arrests sorted by date descending`() {
         // GIVEN
         val p1 = Perpetrator(firstName = "John", lastName = "Doe")
         val p2 = Perpetrator(firstName = "Jane", lastName = "Smith")
         perpetratorRepository.save(p1)
         perpetratorRepository.save(p2)
 
-        val preArrest1 = PreArrest(visionId = VisionId(), perpetratorId = p1.id)
-        val preArrest2 = PreArrest(visionId = VisionId(), perpetratorId = p2.id)
+        val preArrest1 = PreArrest(
+            visionId = VisionId(),
+            perpetratorId = p1.id,
+            preArrestDate = OffsetDateTime.now().minusDays(1)
+        )
+        val preArrest2 = PreArrest(
+            visionId = VisionId(),
+            perpetratorId = p2.id,
+            preArrestDate = OffsetDateTime.now()
+        )
         repository.save(preArrest1)
         repository.save(preArrest2)
 
@@ -61,7 +74,8 @@ class JooqPreArrestRepositoryTest {
 
         // THEN
         assertThat(results).hasSize(2)
-        assertThat(results.map { it.id }).containsExactlyInAnyOrder(preArrest1.id, preArrest2.id)
+        assertThat(results[0].id).isEqualTo(preArrest2.id)
+        assertThat(results[1].id).isEqualTo(preArrest1.id)
     }
 
     @Test

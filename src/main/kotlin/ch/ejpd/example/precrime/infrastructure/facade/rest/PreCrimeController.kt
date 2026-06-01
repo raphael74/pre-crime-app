@@ -6,6 +6,7 @@ import ch.ejpd.example.precrime.infrastructure.facade.rest.api.PreCrimeApi
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionResponse
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.PreApologyResponse
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.PreArrestResponse
 import ch.ejpd.example.precrime.infrastructure.facade.security.SecurityConfiguration.Companion.USER_ROLE
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,6 +17,20 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api")
 class PreCrimeController(private val applicationService: PreCrimeApplicationService) : PreCrimeApi {
+
+    @PreAuthorize("hasRole('$USER_ROLE')")
+    override fun getArrests(): ResponseEntity<List<PreArrestResponse>> {
+        val arrests = applicationService.getAllPreArrests().map { arrest ->
+            PreArrestResponse(
+                id = arrest.id.value,
+                visionId = arrest.visionId.value,
+                firstName = arrest.perpetrator.firstName,
+                lastName = arrest.perpetrator.lastName,
+                status = PreArrestResponse.Status.valueOf(arrest.status.name)
+            )
+        }
+        return ResponseEntity.ok(arrests)
+    }
 
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun getStats(): ResponseEntity<Int> {

@@ -4,8 +4,9 @@ import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.PreApology
 import ch.ejpd.example.precrime.domain.apology.PreApologyRepository
 import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyDomainService
-import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
+import ch.ejpd.example.precrime.domain.enforcement.PreArrest
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestRepository
 import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
 import ch.ejpd.example.precrime.domain.vision.*
 import org.jmolecules.event.annotation.DomainEventHandler
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class PreCrimeApplicationService(
     private val visionRepository: VisionRepository,
     private val statisticRepository: StatisticRepository,
-    private val enforcementRepository: LawEnforcementRepository,
+    private val preArrestRepository: PreArrestRepository,
     private val preApologyRepository: PreApologyRepository,
     private val preEmptiveApologyDomainService: PreEmptiveApologyDomainService,
     private val publisher: DomainEventPublisher
@@ -36,6 +37,11 @@ class PreCrimeApplicationService(
         return preApologyRepository.findAll()
     }
 
+    @Transactional(readOnly = true)
+    fun getAllPreArrests(): List<PreArrest> {
+        return preArrestRepository.findAll()
+    }
+
     fun triggerVision(perpetratorFirstName: String, perpetratorLastName: String, crimeType: CrimeType): VisionId {
         val vision = VisionFactory.createVision(Perpetrator(perpetratorFirstName, perpetratorLastName), crimeType)
         visionRepository.create(vision)
@@ -49,11 +55,10 @@ class PreCrimeApplicationService(
     @DomainEventHandler
     fun onCrimeForeseen(event: CrimeForeseenEvent) {
         logger.info("[LawEnforcement] Received vision: ${event.perpetrator.fullName} planning ${event.crimeType.value}. Deploying jetpacks!")
-        val unit = enforcementRepository.findSingleton()
-        unit.executePreArrest(event.visionId, event.perpetrator)
-        enforcementRepository.update(unit)
-        publisher.publish(unit.domainEvents)
-        unit.clearDomainEvents()
+        val preArrest = PreArrest(visionId = event.visionId, perpetrator = event.perpetrator)
+        preArrestRepository.save(preArrest)
+        publisher.publish(preArrest.domainEvents)
+        preArrest.clearDomainEvents()
     }
 
     @DomainEventHandler

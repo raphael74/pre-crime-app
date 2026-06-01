@@ -43,13 +43,6 @@
                     <includeExpression>vision\.id|pre_arrest\.vision_id|pre_apology\.vision_id</includeExpression>
                 </forcedType>
                 <forcedType>
-                    <userType>ch.ejpd.example.precrime.domain.enforcement.EnforcementUnitId</userType>
-                    <converter>
-                        ch.ejpd.example.precrime.infrastructure.integration.persistence.EnforcementUnitIdConverter
-                    </converter>
-                    <includeExpression>law_enforcement_unit\.id|pre_arrest\.enforcement_unit_id</includeExpression>
-                </forcedType>
-                <forcedType>
                     <userType>ch.ejpd.example.precrime.domain.enforcement.PreArrestId</userType>
                     <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.PreArrestIdConverter
                     </converter>

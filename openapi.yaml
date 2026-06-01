@@ -47,6 +47,21 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PreApologyResponse'
+  /pre-crime/arrests:
+    get:
+      summary: Get all pre-arrests
+      operationId: getArrests
+      tags:
+        - PreCrime
+      responses:
+        '200':
+          description: List of pre-arrests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreArrestResponse'
   /pre-crime/vision:
     post:
       summary: Trigger a vision
@@ -159,6 +174,25 @@ components:
           type: number
         apologyText:
           type: string
+    PreArrestResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        visionId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        status:
+          type: string
+          enum:
+            - ARRESTED_BEFORE_CRIME
+            - RELEASED
+            - ERRONEOUS_VISION
     UserResponse:
       type: object
       properties:

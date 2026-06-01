@@ -15,21 +15,14 @@ CREATE TABLE vision
     foreseen_at TIMESTAMP NOT NULL
 );
 
-CREATE TABLE law_enforcement_unit
-(
-    id        UUID PRIMARY KEY,
-    version   BIGINT  NOT NULL DEFAULT 0,
-    unit_name VARCHAR NOT NULL
-);
-
 CREATE TABLE pre_arrest
 (
-    id                  UUID PRIMARY KEY,
-    enforcement_unit_id UUID    NOT NULL REFERENCES law_enforcement_unit (id),
-    vision_id           UUID    NOT NULL,
-    first_name          VARCHAR NOT NULL,
-    last_name           VARCHAR NOT NULL,
-    status              VARCHAR NOT NULL
+    id         UUID PRIMARY KEY,
+    version    BIGINT  NOT NULL DEFAULT 0,
+    vision_id  UUID    NOT NULL,
+    first_name VARCHAR NOT NULL,
+    last_name  VARCHAR NOT NULL,
+    status     VARCHAR NOT NULL
 );
 
 CREATE TABLE audit_log
@@ -75,5 +68,3 @@ CREATE TABLE pre_apology
 -- Seed singletons for the demo
 INSERT INTO statistic (id, total_crimes_prevented)
 VALUES ('00000000-0000-0000-0000-000000000001', 0);
-INSERT INTO law_enforcement_unit (id, unit_name)
-VALUES ('00000000-0000-0000-0000-000000000002', 'Pre-Crime Team Alpha');

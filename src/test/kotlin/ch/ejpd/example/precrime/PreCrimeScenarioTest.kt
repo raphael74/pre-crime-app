@@ -1,6 +1,6 @@
 package ch.ejpd.example.precrime
 
-import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestRepository
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.domain.vision.VisionRepository
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 class PreCrimeScenarioTest(
     @Autowired private val restTestClient: RestTestClient,
     @Autowired private val visionRepository: VisionRepository,
-    @Autowired private val enforcementRepository: LawEnforcementRepository
+    @Autowired private val preArrestRepository: PreArrestRepository
 ) {
 
     @Test
@@ -46,8 +46,8 @@ class PreCrimeScenarioTest(
             assertThat(vision?.perpetrator?.fullName).isEqualTo("$firstName $lastName")
             assertThat(vision?.crimeType?.name).isEqualTo(crimeType.value)
 
-            val unit = enforcementRepository.findSingleton()
-            assertThat(unit.preArrests).anyMatch { it.perpetrator.fullName == "$firstName $lastName" }
+            val arrests = preArrestRepository.findAll()
+            assertThat(arrests).anyMatch { it.perpetrator.fullName == "$firstName $lastName" }
 
             // AND: A pre-emptive apology is generated and retrievable via REST API
             val apologies = getApologies()

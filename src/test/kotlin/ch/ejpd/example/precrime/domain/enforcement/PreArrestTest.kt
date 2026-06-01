@@ -5,29 +5,26 @@ import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class LawEnforcementUnitTest {
-
-    private val unit = LawEnforcementUnit()
+class PreArrestTest {
 
     @Test
-    fun `executePreArrest should add PreArrest to unit and record event`() {
+    fun `creating PreArrest should initialize with correct status and record event`() {
         // GIVEN
         val visionId = VisionId()
         val perpetrator = Perpetrator("John", "Doe")
 
         // WHEN
-        unit.executePreArrest(visionId, perpetrator)
+        val preArrest = PreArrest(visionId = visionId, perpetrator = perpetrator)
 
         // THEN
-        assertThat(unit.preArrests).hasSize(1)
-        val preArrest = unit.preArrests.first()
+        assertThat(preArrest.status).isEqualTo(PreArrestStatus.ARRESTED_BEFORE_CRIME)
         assertThat(preArrest.visionId).isEqualTo(visionId)
         assertThat(preArrest.perpetrator).isEqualTo(perpetrator)
-        assertThat(preArrest.status).isEqualTo(PreArrestStatus.ARRESTED_BEFORE_CRIME)
 
-        assertThat(unit.domainEvents).hasSize(1)
-        val event = unit.domainEvents.first() as PreArrestExecutedEvent
+        assertThat(preArrest.domainEvents).hasSize(1)
+        val event = preArrest.domainEvents.first() as PreArrestExecutedEvent
         assertThat(event.visionId).isEqualTo(visionId)
         assertThat(event.perpetrator).isEqualTo(perpetrator)
+        assertThat(event.preArrestId).isEqualTo(preArrest.id)
     }
 }

@@ -2,10 +2,10 @@ package ch.ejpd.example.precrime.application
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.*
-import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementRepository
-import ch.ejpd.example.precrime.domain.enforcement.LawEnforcementUnit
+import ch.ejpd.example.precrime.domain.enforcement.PreArrest
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
+import ch.ejpd.example.precrime.domain.enforcement.PreArrestRepository
 import ch.ejpd.example.precrime.domain.statistic.Statistic
 import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
 import ch.ejpd.example.precrime.domain.vision.*
@@ -24,14 +24,14 @@ class PreCrimeApplicationServiceTest {
 
     private val visionRepository = mockk<VisionRepository>()
     private val statisticRepository = mockk<StatisticRepository>()
-    private val enforcementRepository = mockk<LawEnforcementRepository>()
+    private val preArrestRepository = mockk<PreArrestRepository>()
     private val preApologyRepository = mockk<PreApologyRepository>(relaxed = true)
     private val preEmptiveApologyDomainService = mockk<PreEmptiveApologyDomainService>()
     private val publisher = mockk<DomainEventPublisher>(relaxed = true)
     private val service = PreCrimeApplicationService(
         visionRepository,
         statisticRepository,
-        enforcementRepository,
+        preArrestRepository,
         preApologyRepository,
         preEmptiveApologyDomainService,
         publisher
@@ -77,24 +77,21 @@ class PreCrimeApplicationServiceTest {
     }
 
     @Test
-    fun `onCrimeForeseen should create vision, execute pre-arrest and save and publish`() {
+    fun `onCrimeForeseen should save pre-arrest and publish event`() {
         // GIVEN
         val visionId = VisionId()
         val event = CrimeForeseenEvent(visionId, Perpetrator("John", "Doe"), CrimeType.MURDER, LocalDateTime.now())
-        val unit = mockk<LawEnforcementUnit>(relaxed = true)
-        every { enforcementRepository.findSingleton() } returns unit
-        every { enforcementRepository.update(any()) } returns Unit
+        every { preArrestRepository.save(any()) } returns Unit
 
         // WHEN
         service.onCrimeForeseen(event)
 
         // THEN
         verify {
-            enforcementRepository.findSingleton()
-            unit.executePreArrest(visionId, Perpetrator("John", "Doe"))
-            enforcementRepository.update(unit)
+            preArrestRepository.save(match {
+                it.visionId == visionId && it.perpetrator == Perpetrator("John", "Doe")
+            })
             publisher.publish(any())
-            unit.clearDomainEvents()
         }
     }
 

@@ -8,42 +8,99 @@ modern Kotlin/Spring Boot backend and an Angular frontend. It is themed around a
 The project demonstrates:
 
 - **Onion Architecture**: Strict separation between `domain`, `application`, and `infrastructure` layers.
-- **DDD Patterns**: Implementation of Aggregates, Entities, Value Objects, Domain Events, and Repositories using *
-  *jMolecules**.
+- **DDD Patterns**: Implementation of Aggregates, Entities, Value Objects, Domain Events, and Repositories using **jMolecules**.
 - **Event-Driven Communication**: Using **Kafka** for asynchronous communication between aggregates.
 - **Transactional Outbox Pattern**: Ensuring reliable event delivery without distributed transactions.
+- **OpenAPI-First**: API-first development with generated DTOs and Controller interfaces for both Backend and Frontend.
 
 ## Concept
 
 The application is loosely based on the movie **"Minority Report"**. It models a futuristic "Pre-Crime" department
 where:
 
-- **Precog Division**: Foresees future crimes and publishes visions.
-- **Law Enforcement**: Responds to these visions by executing "pre-arrests" before the crime occurs.
-- **Feedback Loop**: Successful arrests are reported back to update statistics.
+- **Vision (Precog Division)**: Foresees future crimes and publishes visions.
+- **Pre-Arrest (Law Enforcement)**: Responds to these visions by executing "pre-arrests" before the crime occurs.
+- **Statistic (Feedback Loop)**: Successful arrests are reported back to update global prevention statistics.
 - **Pre-emptive Apology**: Automatically issues apologies and "compensation" statements (with dystopian recovery fees) to the family of the pre-arrested individual.
+- **Perpetrator**: Management of individuals identified as potential future criminals.
+- **Audit**: Centralized auditing of all domain events.
 
-## Architecture Diagram
+## Domain Model
 
-The following diagram illustrates the main aggregates and the event-driven flow between them:
+The following diagram illustrates the core aggregates and their relationships via ID references:
+
+```mermaid
+classDiagram
+    direction LR
+    class Vision {
+        <<Aggregate Root>>
+        VisionId id
+        PerpetratorId perpetratorId
+        CrimeType crimeType
+        LocalDateTime foreseenAt
+    }
+    class PreArrest {
+        <<Aggregate Root>>
+        PreArrestId id
+        VisionId visionId
+        PerpetratorId perpetratorId
+        PreArrestStatus status
+    }
+    class PreApology {
+        <<Aggregate Root>>
+        PreApologyId id
+        VisionId visionId
+        PerpetratorId perpetratorId
+        Compensation compensation
+        ApologyLetter apologyLetter
+    }
+    class Perpetrator {
+        <<Aggregate Root>>
+        PerpetratorId id
+        String firstName
+        String lastName
+    }
+    class Statistic {
+        <<Aggregate Root>>
+        StatisticId id
+        Int totalCrimesPrevented
+    }
+    class AuditEntry {
+        <<Aggregate Root>>
+        AuditEntryId id
+        String eventType
+    }
+
+    Vision ..> Perpetrator : references
+    PreArrest ..> Vision : references
+    PreArrest ..> Perpetrator : references
+    PreApology ..> Vision : references
+    PreApology ..> Perpetrator : references
+```
+
+## Architecture & Flow
+
+The following sequence diagram illustrates the event-driven flow between aggregates:
 
 ```mermaid
 sequenceDiagram
-    participant P as Precog Division Aggregate
-    participant L as Law Enforcement Aggregate
-    participant A as Pre-Apology Aggregate
+    participant P as Vision (Precog)
+    participant L as Pre-Arrest (Law)
+    participant A as Pre-Apology
+    participant S as Statistic
     participant K as Kafka (Event Bus)
 
     Note over P: Crime Foreseen
     P->>K: CrimeForeseen Event
-    K-->>L: Consume CrimeForeseen
     
+    K-->>L: Consume CrimeForeseen
     Note over L: Execute Pre-Arrest
     L->>K: PreArrestExecuted Event
-    K-->>P: Consume PreArrestExecuted
     
-    Note over P: Record Prevention (Stats)
+    K-->>S: Consume PreArrestExecuted
+    Note over S: Record Prevention (Stats)
     
+    K-->>A: Consume PreArrestExecuted
     Note over A: Generate Apology & Billing
     A->>K: PreApologyIssued Event
 ```
@@ -87,12 +144,12 @@ Tests: `./mvnw test`
 
 ### Frontend
 
-Navigate to the `ui` directory and start the dev server:
+The frontend features a "HUD" (Heads-Up Display) aesthetic. Navigate to the `ui` directory and start the dev server:
 
 ```bash
 cd ui
 npm install
-npm generate-api
+npm run generate-api
 npm start
 ```
 
@@ -107,4 +164,6 @@ The UI will be available at `http://localhost:4200` (proxied to `/api` on `local
 - **Type-Safe SQL**: All database interactions use **jOOQ**.
 - **Reliable Messaging**: Never publish directly to Kafka from the application service. Use `DomainEventPublisher`,
   which persists events to the `outbox` table within the same transaction.
+- **OpenAPI First**: The REST API is defined in `openapi.yaml`. Backend controller interfaces and DTOs are generated
+  using the `openapi-generator-maven-plugin`.
 - **Kotlin Style**: Use idiomatic Kotlin (data classes, expressions, null safety).

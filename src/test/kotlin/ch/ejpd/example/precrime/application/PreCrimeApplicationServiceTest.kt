@@ -2,10 +2,9 @@ package ch.ejpd.example.precrime.application
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.*
-import ch.ejpd.example.precrime.domain.enforcement.PreArrest
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestRepository
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
 import ch.ejpd.example.precrime.domain.statistic.Statistic
 import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
 import ch.ejpd.example.precrime.domain.vision.*

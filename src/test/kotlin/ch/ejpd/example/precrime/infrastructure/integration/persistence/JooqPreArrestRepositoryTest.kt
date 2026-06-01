@@ -1,9 +1,9 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.IntegrationTest
-import ch.ejpd.example.precrime.domain.enforcement.PreArrest
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestStatus
+import ch.ejpd.example.precrime.domain.prearrest.PreArrest
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestStatus
 import ch.ejpd.example.precrime.domain.vision.Perpetrator
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.assertj.core.api.Assertions.assertThat

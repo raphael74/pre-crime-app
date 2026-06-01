@@ -1,4 +1,4 @@
-package ch.ejpd.example.precrime.domain.enforcement
+package ch.ejpd.example.precrime.domain.prearrest
 
 import ch.ejpd.example.precrime.domain.vision.Perpetrator
 import ch.ejpd.example.precrime.domain.vision.VisionId

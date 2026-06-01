@@ -1,8 +1,8 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.IntegrationTest
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestId
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
 import ch.ejpd.example.precrime.domain.vision.CrimeType
 import ch.ejpd.example.precrime.domain.vision.Perpetrator

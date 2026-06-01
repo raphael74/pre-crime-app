@@ -1,6 +1,6 @@
 package ch.ejpd.example.precrime
 
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestRepository
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
 import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
 import ch.ejpd.example.precrime.domain.vision.CrimeType
 import ch.ejpd.example.precrime.domain.vision.Perpetrator

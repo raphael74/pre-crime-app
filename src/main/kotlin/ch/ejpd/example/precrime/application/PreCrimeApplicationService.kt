@@ -4,9 +4,9 @@ import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.PreApology
 import ch.ejpd.example.precrime.domain.apology.PreApologyRepository
 import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyDomainService
-import ch.ejpd.example.precrime.domain.enforcement.PreArrest
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestExecutedEvent
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestRepository
+import ch.ejpd.example.precrime.domain.prearrest.PreArrest
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
 import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
 import ch.ejpd.example.precrime.domain.vision.*
 import org.jmolecules.event.annotation.DomainEventHandler

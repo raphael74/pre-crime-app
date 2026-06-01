@@ -1,6 +1,6 @@
 package ch.ejpd.example.precrime
 
-import ch.ejpd.example.precrime.domain.enforcement.PreArrestRepository
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.domain.vision.VisionRepository
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest

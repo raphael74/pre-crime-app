@@ -1,9 +1,11 @@
-package ch.ejpd.example.precrime.domain.enforcement
+package ch.ejpd.example.precrime.domain.prearrest
 
 import ch.ejpd.example.precrime.domain.AggregateVersion
 import ch.ejpd.example.precrime.domain.vision.Perpetrator
 import ch.ejpd.example.precrime.domain.vision.VisionId
-import org.jmolecules.ddd.annotation.*
+import org.jmolecules.ddd.annotation.AggregateRoot
+import org.jmolecules.ddd.annotation.Identity
+import org.jmolecules.ddd.annotation.Repository
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.util.*

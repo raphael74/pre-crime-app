@@ -81,6 +81,11 @@
                     <enumConverter>true</enumConverter>
                     <includeExpression>vision\.crime_type</includeExpression>
                 </forcedType>
+                <forcedType>
+                    <userType>ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId</userType>
+                    <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.PerpetratorIdConverter</converter>
+                    <includeExpression>perpetrator\.id|vision\.perpetrator_id|pre_arrest\.perpetrator_id|pre_apology\.perpetrator_id</includeExpression>
+                </forcedType>
             </forcedTypes>
 
         </database>

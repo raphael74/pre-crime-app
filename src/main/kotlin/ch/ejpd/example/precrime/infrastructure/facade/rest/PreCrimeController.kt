@@ -20,12 +20,12 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
 
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun getArrests(): ResponseEntity<List<PreArrestResponse>> {
-        val arrests = applicationService.getAllPreArrests().map { arrest ->
+        val arrests = applicationService.getAllPreArrests().map { (arrest, perpetrator) ->
             PreArrestResponse(
                 id = arrest.id.value,
                 visionId = arrest.visionId.value,
-                firstName = arrest.perpetrator.firstName,
-                lastName = arrest.perpetrator.lastName,
+                firstName = perpetrator.firstName,
+                lastName = perpetrator.lastName,
                 status = PreArrestResponse.Status.valueOf(arrest.status.name)
             )
         }
@@ -39,12 +39,12 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
 
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun getApologies(): ResponseEntity<List<PreApologyResponse>> {
-        val apologies = applicationService.getAllApologies().map { apology ->
+        val apologies = applicationService.getAllApologies().map { (apology, perpetrator) ->
             PreApologyResponse(
                 id = apology.id.value,
                 visionId = apology.visionId.value,
-                lastName = apology.perpetrator.lastName,
-                firstName = apology.perpetrator.firstName,
+                lastName = perpetrator.lastName,
+                firstName = perpetrator.firstName,
                 baseAmount = java.math.BigDecimal.valueOf(apology.compensation.baseAmount),
                 jetpackFuelDeduction = java.math.BigDecimal.valueOf(apology.compensation.jetpackFuelDeduction),
                 haloRentalFee = java.math.BigDecimal.valueOf(apology.compensation.haloRentalFee),

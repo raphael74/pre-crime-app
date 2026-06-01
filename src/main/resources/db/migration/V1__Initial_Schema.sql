@@ -5,24 +5,30 @@ CREATE TABLE statistic
     total_crimes_prevented INT             DEFAULT 0
 );
 
+CREATE TABLE perpetrator
+(
+    id         UUID PRIMARY KEY,
+    version    BIGINT  NOT NULL DEFAULT 0,
+    first_name VARCHAR NOT NULL,
+    last_name  VARCHAR NOT NULL
+);
+
 CREATE TABLE vision
 (
-    id          UUID PRIMARY KEY,
-    version     BIGINT    NOT NULL DEFAULT 0,
-    first_name  VARCHAR   NOT NULL,
-    last_name   VARCHAR   NOT NULL,
-    crime_type  VARCHAR   NOT NULL,
-    foreseen_at TIMESTAMP NOT NULL
+    id             UUID PRIMARY KEY,
+    version        BIGINT    NOT NULL DEFAULT 0,
+    perpetrator_id UUID      NOT NULL REFERENCES perpetrator (id),
+    crime_type     VARCHAR   NOT NULL,
+    foreseen_at    TIMESTAMP NOT NULL
 );
 
 CREATE TABLE pre_arrest
 (
-    id         UUID PRIMARY KEY,
-    version    BIGINT  NOT NULL DEFAULT 0,
-    vision_id  UUID    NOT NULL,
-    first_name VARCHAR NOT NULL,
-    last_name  VARCHAR NOT NULL,
-    status     VARCHAR NOT NULL
+    id             UUID PRIMARY KEY,
+    version        BIGINT  NOT NULL DEFAULT 0,
+    vision_id      UUID    NOT NULL,
+    perpetrator_id UUID    NOT NULL REFERENCES perpetrator (id),
+    status         VARCHAR NOT NULL
 );
 
 CREATE TABLE audit_log
@@ -55,8 +61,7 @@ CREATE TABLE pre_apology
 (
     id                     UUID PRIMARY KEY,
     vision_id              UUID                     NOT NULL,
-    first_name             VARCHAR                  NOT NULL,
-    last_name              VARCHAR                  NOT NULL,
+    perpetrator_id         UUID                     NOT NULL REFERENCES perpetrator (id),
     base_amount            DECIMAL(10, 2)           NOT NULL,
     jetpack_fuel_deduction DECIMAL(10, 2)           NOT NULL,
     halo_rental_fee        DECIMAL(10, 2)           NOT NULL,

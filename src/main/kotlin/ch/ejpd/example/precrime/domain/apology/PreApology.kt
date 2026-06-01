@@ -1,6 +1,6 @@
 package ch.ejpd.example.precrime.domain.apology
 
-import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
@@ -15,7 +15,7 @@ import java.util.*
 class PreApology(
     @Identity val id: PreApologyId = PreApologyId(),
     val visionId: VisionId,
-    val perpetrator: Perpetrator,
+    val perpetratorId: PerpetratorId,
     val compensation: Compensation,
     val apologyLetter: ApologyLetter,
     val createdAt: OffsetDateTime = OffsetDateTime.now()
@@ -32,7 +32,7 @@ class PreApology(
             PreApologyIssuedEvent(
                 apologyId = id,
                 visionId = visionId,
-                perpetrator = perpetrator,
+                perpetratorId = perpetratorId,
                 netPayout = compensation.netPayout
             )
         )
@@ -70,6 +70,6 @@ interface PreApologyRepository {
 data class PreApologyIssuedEvent(
     val apologyId: PreApologyId,
     val visionId: VisionId,
-    val perpetrator: Perpetrator,
+    val perpetratorId: PerpetratorId,
     val netPayout: Double
 )

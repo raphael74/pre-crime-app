@@ -1,7 +1,8 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
-import ch.ejpd.example.precrime.domain.prearrest.*
-import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.prearrest.PreArrest
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRE_ARREST
 import org.jooq.DSLContext
 import org.jooq.Record
@@ -19,8 +20,7 @@ class JooqPreArrestRepository(
             PRE_ARREST.ID,
             PRE_ARREST.VERSION,
             PRE_ARREST.VISION_ID,
-            PRE_ARREST.FIRST_NAME,
-            PRE_ARREST.LAST_NAME,
+            PRE_ARREST.PERPETRATOR_ID,
             PRE_ARREST.STATUS
         )
             .from(PRE_ARREST)
@@ -54,8 +54,7 @@ class JooqPreArrestRepository(
                 .set(PRE_ARREST.ID, preArrest.id)
                 .set(PRE_ARREST.VERSION, preArrest.version)
                 .set(PRE_ARREST.VISION_ID, preArrest.visionId)
-                .set(PRE_ARREST.FIRST_NAME, preArrest.perpetrator.firstName)
-                .set(PRE_ARREST.LAST_NAME, preArrest.perpetrator.lastName)
+                .set(PRE_ARREST.PERPETRATOR_ID, preArrest.perpetratorId)
                 .set(PRE_ARREST.STATUS, preArrest.status)
                 .execute()
         }
@@ -66,8 +65,7 @@ class JooqPreArrestRepository(
             PRE_ARREST.ID,
             PRE_ARREST.VERSION,
             PRE_ARREST.VISION_ID,
-            PRE_ARREST.FIRST_NAME,
-            PRE_ARREST.LAST_NAME,
+            PRE_ARREST.PERPETRATOR_ID,
             PRE_ARREST.STATUS
         )
             .from(PRE_ARREST)
@@ -79,7 +77,7 @@ class JooqPreArrestRepository(
         id = get(PRE_ARREST.ID)!!,
         version = get(PRE_ARREST.VERSION)!!,
         visionId = get(PRE_ARREST.VISION_ID)!!,
-        perpetrator = Perpetrator(get(PRE_ARREST.FIRST_NAME)!!, get(PRE_ARREST.LAST_NAME)!!),
+        perpetratorId = get(PRE_ARREST.PERPETRATOR_ID)!!,
         status = get(PRE_ARREST.STATUS)!!
     )
 }

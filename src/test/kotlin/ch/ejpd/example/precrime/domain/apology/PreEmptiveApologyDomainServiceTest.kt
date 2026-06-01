@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.domain.apology
 
+import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.vision.CrimeType
-import ch.ejpd.example.precrime.domain.vision.Perpetrator
 import ch.ejpd.example.precrime.domain.vision.Vision
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.infrastructure.integration.template.ThymeleafPreApologyLetterService
@@ -19,9 +19,10 @@ class PreEmptiveApologyDomainServiceTest {
     @Test
     fun `should calculate positive net compensation for a high-severity crime (murder)`() {
         // GIVEN
+        val perpetratorId = PerpetratorId()
         val vision = Vision(
             id = VisionId(),
-            perpetrator = Perpetrator("Danny", "Witwer"),
+            perpetratorId = perpetratorId,
             crimeType = CrimeType.MURDER,
             foreseenAt = LocalDateTime.now()
         )
@@ -31,7 +32,7 @@ class PreEmptiveApologyDomainServiceTest {
         val apology = service.generateApology(vision)
 
         // THEN
-        assertThat(apology.perpetrator.fullName).isEqualTo("Danny Witwer")
+        assertThat(apology.perpetratorId).isEqualTo(perpetratorId)
         assertThat(apology.compensation.baseAmount).isEqualTo(10000.0)
         assertThat(apology.compensation.jetpackFuelDeduction).isEqualTo(450.0)
         assertThat(apology.compensation.haloRentalFee).isEqualTo(250.0)
@@ -42,9 +43,10 @@ class PreEmptiveApologyDomainServiceTest {
     @Test
     fun `should calculate negative net compensation for a low-severity crime (jaywalking)`() {
         // GIVEN
+        val perpetratorId = PerpetratorId()
         val vision = Vision(
             id = VisionId(),
-            perpetrator = Perpetrator("Arthur", "Pendelton"),
+            perpetratorId = perpetratorId,
             crimeType = CrimeType.JAYWALKING,
             foreseenAt = LocalDateTime.now()
         )
@@ -54,7 +56,7 @@ class PreEmptiveApologyDomainServiceTest {
         val apology = service.generateApology(vision)
 
         // THEN
-        assertThat(apology.perpetrator.fullName).isEqualTo("Arthur Pendelton")
+        assertThat(apology.perpetratorId).isEqualTo(perpetratorId)
         assertThat(apology.compensation.baseAmount).isEqualTo(50.0)
         assertThat(apology.compensation.jetpackFuelDeduction).isEqualTo(450.0)
         assertThat(apology.compensation.haloRentalFee).isEqualTo(250.0)
@@ -67,7 +69,7 @@ class PreEmptiveApologyDomainServiceTest {
         // GIVEN
         val vision = Vision(
             id = VisionId(),
-            perpetrator = Perpetrator("John", "Doe"),
+            perpetratorId = PerpetratorId(),
             crimeType = CrimeType.LARCENY,
             foreseenAt = LocalDateTime.now()
         )

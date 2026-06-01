@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime
 
+import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.domain.vision.VisionRepository
@@ -21,7 +22,8 @@ import java.util.concurrent.TimeUnit
 class PreCrimeScenarioTest(
     @Autowired private val restTestClient: RestTestClient,
     @Autowired private val visionRepository: VisionRepository,
-    @Autowired private val preArrestRepository: PreArrestRepository
+    @Autowired private val preArrestRepository: PreArrestRepository,
+    @Autowired private val perpetratorRepository: PerpetratorRepository
 ) {
 
     @Test
@@ -43,11 +45,16 @@ class PreCrimeScenarioTest(
 
             // AND: The visions and pre-arrests are persisted in the aggregates
             val vision = visionRepository.findById(visionId)
-            assertThat(vision?.perpetrator?.fullName).isEqualTo("$firstName $lastName")
-            assertThat(vision?.crimeType?.name).isEqualTo(crimeType.value)
+            assertThat(vision).isNotNull
+            val perpetrator = perpetratorRepository.findById(vision!!.perpetratorId)
+            assertThat(perpetrator?.fullName).isEqualTo("$firstName $lastName")
+            assertThat(vision.crimeType.name).isEqualTo(crimeType.value)
 
             val arrests = preArrestRepository.findAll()
-            assertThat(arrests).anyMatch { it.perpetrator.fullName == "$firstName $lastName" }
+            assertThat(arrests).anyMatch {
+                val p = perpetratorRepository.findById(it.perpetratorId)
+                p?.fullName == "$firstName $lastName"
+            }
 
             // AND: A pre-emptive apology is generated and retrievable via REST API
             val apologies = getApologies()

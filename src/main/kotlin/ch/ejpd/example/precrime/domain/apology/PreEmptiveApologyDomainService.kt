@@ -28,7 +28,7 @@ class PreEmptiveApologyDomainService(
 
         val apology = PreApology(
             visionId = vision.id,
-            perpetrator = vision.perpetrator,
+            perpetratorId = vision.perpetratorId,
             compensation = compensation,
             apologyLetter = ApologyLetter(letterText)
         )

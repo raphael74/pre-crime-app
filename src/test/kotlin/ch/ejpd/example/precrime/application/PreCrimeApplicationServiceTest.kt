@@ -2,6 +2,8 @@ package ch.ejpd.example.precrime.application
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.*
+import ch.ejpd.example.precrime.domain.perpetrator.Perpetrator
+import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
@@ -25,6 +27,7 @@ class PreCrimeApplicationServiceTest {
     private val statisticRepository = mockk<StatisticRepository>()
     private val preArrestRepository = mockk<PreArrestRepository>()
     private val preApologyRepository = mockk<PreApologyRepository>(relaxed = true)
+    private val perpetratorRepository = mockk<PerpetratorRepository>()
     private val preEmptiveApologyDomainService = mockk<PreEmptiveApologyDomainService>()
     private val publisher = mockk<DomainEventPublisher>(relaxed = true)
     private val service = PreCrimeApplicationService(
@@ -32,6 +35,7 @@ class PreCrimeApplicationServiceTest {
         statisticRepository,
         preArrestRepository,
         preApologyRepository,
+        perpetratorRepository,
         preEmptiveApologyDomainService,
         publisher
     )
@@ -54,6 +58,9 @@ class PreCrimeApplicationServiceTest {
     @Test
     fun `triggerVision should find singleton, foresee crime and save and publish`() {
         // GIVEN
+        val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
+        every { perpetratorRepository.findByFirstAndLastName("John", "Doe") } returns perpetrator
+
         val vision = mockk<Vision>()
         every { vision.id } returns VisionId()
         every { vision.foreseeCrime() } returns Unit
@@ -68,6 +75,7 @@ class PreCrimeApplicationServiceTest {
 
         // THEN
         verify {
+            perpetratorRepository.findByFirstAndLastName("John", "Doe")
             visionRepository.create(any())
             vision.foreseeCrime()
             publisher.publish(any())
@@ -79,7 +87,9 @@ class PreCrimeApplicationServiceTest {
     fun `onCrimeForeseen should save pre-arrest and publish event`() {
         // GIVEN
         val visionId = VisionId()
-        val event = CrimeForeseenEvent(visionId, Perpetrator("John", "Doe"), CrimeType.MURDER, LocalDateTime.now())
+        val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
+        val event = CrimeForeseenEvent(visionId, perpetrator.id, CrimeType.MURDER, LocalDateTime.now())
+        every { perpetratorRepository.findById(perpetrator.id) } returns perpetrator
         every { preArrestRepository.save(any()) } returns Unit
 
         // WHEN
@@ -87,8 +97,9 @@ class PreCrimeApplicationServiceTest {
 
         // THEN
         verify {
+            perpetratorRepository.findById(perpetrator.id)
             preArrestRepository.save(match {
-                it.visionId == visionId && it.perpetrator == Perpetrator("John", "Doe")
+                it.visionId == visionId && it.perpetratorId == perpetrator.id
             })
             publisher.publish(any())
         }
@@ -98,15 +109,17 @@ class PreCrimeApplicationServiceTest {
     fun `onPreArrestExecuted should find singleton statistic, record prevention and save and publish`() {
         // GIVEN
         val visionId = VisionId()
-        val event = PreArrestExecutedEvent(PreArrestId(), visionId, Perpetrator("John", "Doe"))
+        val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
+        val event = PreArrestExecutedEvent(PreArrestId(), visionId, perpetrator.id)
 
         val vision = Vision(
             id = visionId,
-            perpetrator = Perpetrator("John", "Doe"),
+            perpetratorId = perpetrator.id,
             crimeType = CrimeType.MURDER,
             foreseenAt = LocalDateTime.now()
         )
         every { visionRepository.findById(any()) } returns vision
+        every { perpetratorRepository.findById(perpetrator.id) } returns perpetrator
 
         val statistic = mockk<Statistic>(relaxed = true)
         every { statisticRepository.findSingleton() } returns statistic
@@ -114,7 +127,7 @@ class PreCrimeApplicationServiceTest {
 
         val apology = PreApology(
             visionId = visionId,
-            perpetrator = Perpetrator("John", "Doe"),
+            perpetratorId = perpetrator.id,
             compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
             apologyLetter = ApologyLetter("Dear family...")
         ).apply { issue() }
@@ -126,6 +139,7 @@ class PreCrimeApplicationServiceTest {
 
         // THEN
         verify {
+            perpetratorRepository.findById(perpetrator.id)
             statisticRepository.findSingleton()
             statistic.recordPrevention()
             statisticRepository.update(statistic)

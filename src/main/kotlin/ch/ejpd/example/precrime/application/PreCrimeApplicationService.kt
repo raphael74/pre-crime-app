@@ -4,6 +4,8 @@ import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.PreApology
 import ch.ejpd.example.precrime.domain.apology.PreApologyRepository
 import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyDomainService
+import ch.ejpd.example.precrime.domain.perpetrator.Perpetrator
+import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
 import ch.ejpd.example.precrime.domain.prearrest.PreArrest
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
@@ -22,6 +24,7 @@ class PreCrimeApplicationService(
     private val statisticRepository: StatisticRepository,
     private val preArrestRepository: PreArrestRepository,
     private val preApologyRepository: PreApologyRepository,
+    private val perpetratorRepository: PerpetratorRepository,
     private val preEmptiveApologyDomainService: PreEmptiveApologyDomainService,
     private val publisher: DomainEventPublisher
 ) {
@@ -33,17 +36,32 @@ class PreCrimeApplicationService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllApologies(): List<PreApology> {
-        return preApologyRepository.findAll()
+    fun getAllApologies(): List<PreApologyWithPerpetrator> {
+        val apologies = preApologyRepository.findAll()
+        val perpetratorIds = apologies.map { it.perpetratorId }.toSet()
+        val perpetrators = perpetratorRepository.findByIds(perpetratorIds).associateBy { it.id }
+        return apologies.map { apology ->
+            PreApologyWithPerpetrator(apology, perpetrators[apology.perpetratorId]!!)
+        }
     }
 
     @Transactional(readOnly = true)
-    fun getAllPreArrests(): List<PreArrest> {
-        return preArrestRepository.findAll()
+    fun getAllPreArrests(): List<PreArrestWithPerpetrator> {
+        val arrests = preArrestRepository.findAll()
+        val perpetratorIds = arrests.map { it.perpetratorId }.toSet()
+        val perpetrators = perpetratorRepository.findByIds(perpetratorIds).associateBy { it.id }
+        return arrests.map { arrest ->
+            PreArrestWithPerpetrator(arrest, perpetrators[arrest.perpetratorId]!!)
+        }
     }
 
     fun triggerVision(perpetratorFirstName: String, perpetratorLastName: String, crimeType: CrimeType): VisionId {
-        val vision = VisionFactory.createVision(Perpetrator(perpetratorFirstName, perpetratorLastName), crimeType)
+        var perpetrator = perpetratorRepository.findByFirstAndLastName(perpetratorFirstName, perpetratorLastName)
+        if (perpetrator == null) {
+            perpetrator = Perpetrator(firstName = perpetratorFirstName, lastName = perpetratorLastName)
+            perpetratorRepository.save(perpetrator)
+        }
+        val vision = VisionFactory.createVision(perpetrator.id, crimeType)
         visionRepository.create(vision)
         vision.foreseeCrime()
         publisher.publish(vision.domainEvents)
@@ -54,8 +72,10 @@ class PreCrimeApplicationService(
 
     @DomainEventHandler
     fun onCrimeForeseen(event: CrimeForeseenEvent) {
-        logger.info("[LawEnforcement] Received vision: ${event.perpetrator.fullName} planning ${event.crimeType.value}. Deploying jetpacks!")
-        val preArrest = PreArrest(visionId = event.visionId, perpetrator = event.perpetrator)
+        val perpetrator = perpetratorRepository.findById(event.perpetratorId)
+            ?: throw IllegalStateException("Perpetrator ${event.perpetratorId} not found")
+        logger.info("[LawEnforcement] Received vision: ${perpetrator.fullName} planning ${event.crimeType.value}. Deploying jetpacks!")
+        val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId)
         preArrestRepository.save(preArrest)
         publisher.publish(preArrest.domainEvents)
         preArrest.clearDomainEvents()
@@ -63,7 +83,9 @@ class PreCrimeApplicationService(
 
     @DomainEventHandler
     fun onPreArrestExecuted(event: PreArrestExecutedEvent) {
-        logger.info("[LawEnforcement] Received pre-arrest confirmation for ${event.perpetrator.fullName}. Updating stats.")
+        val perpetrator = perpetratorRepository.findById(event.perpetratorId)
+            ?: throw IllegalStateException("Perpetrator ${event.perpetratorId} not found")
+        logger.info("[LawEnforcement] Received pre-arrest confirmation for ${perpetrator.fullName}. Updating stats.")
         val statistic = statisticRepository.findSingleton()
         statistic.recordPrevention()
         statisticRepository.update(statistic)
@@ -78,6 +100,9 @@ class PreCrimeApplicationService(
 
         publisher.publish(apology.domainEvents)
         apology.clearDomainEvents()
-        logger.info("[PreApologyService] Issued pre-emptive apology to ${apology.perpetrator.fullName}. Net payout: ${apology.compensation.netPayout}")
+        logger.info("[PreApologyService] Issued pre-emptive apology to ${perpetrator.fullName}. Net payout: ${apology.compensation.netPayout}")
     }
 }
+
+data class PreArrestWithPerpetrator(val preArrest: PreArrest, val perpetrator: Perpetrator)
+data class PreApologyWithPerpetrator(val apology: PreApology, val perpetrator: Perpetrator)

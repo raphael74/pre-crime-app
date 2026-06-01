@@ -160,6 +160,9 @@ components:
         visionId:
           type: string
           format: uuid
+        perpetratorId:
+          type: string
+          format: uuid
         lastName:
           type: string
         firstName:
@@ -181,6 +184,9 @@ components:
           type: string
           format: uuid
         visionId:
+          type: string
+          format: uuid
+        perpetratorId:
           type: string
           format: uuid
         firstName:

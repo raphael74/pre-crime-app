@@ -1,6 +1,5 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
-import ch.ejpd.example.precrime.domain.vision.Perpetrator
 import ch.ejpd.example.precrime.domain.vision.Vision
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.domain.vision.VisionRepository
@@ -20,8 +19,7 @@ class JooqVisionRepository(
         return dsl.select(
             VISION.ID,
             VISION.VERSION,
-            VISION.FIRST_NAME,
-            VISION.LAST_NAME,
+            VISION.PERPETRATOR_ID,
             VISION.CRIME_TYPE,
             VISION.FORESEEN_AT
         )
@@ -35,8 +33,7 @@ class JooqVisionRepository(
     override fun create(vision: Vision) {
         dsl.insertInto(VISION)
             .set(VISION.ID, vision.id)
-            .set(VISION.FIRST_NAME, vision.perpetrator.firstName)
-            .set(VISION.LAST_NAME, vision.perpetrator.lastName)
+            .set(VISION.PERPETRATOR_ID, vision.perpetratorId)
             .set(VISION.CRIME_TYPE, vision.crimeType)
             .set(VISION.FORESEEN_AT, vision.foreseenAt)
             .set(VISION.VERSION, vision.version)
@@ -46,8 +43,7 @@ class JooqVisionRepository(
     @Transactional(propagation = Propagation.MANDATORY)
     override fun update(vision: Vision) {
         val updatedRows = dsl.update(VISION)
-            .set(VISION.FIRST_NAME, vision.perpetrator.firstName)
-            .set(VISION.LAST_NAME, vision.perpetrator.lastName)
+            .set(VISION.PERPETRATOR_ID, vision.perpetratorId)
             .set(VISION.CRIME_TYPE, vision.crimeType)
             .set(VISION.FORESEEN_AT, vision.foreseenAt)
             .set(VISION.VERSION, vision.version.increment())
@@ -63,11 +59,11 @@ class JooqVisionRepository(
     }
 
     private fun Record.toVision() = Vision(
-        get(VISION.ID)!!,
-        get(VISION.VERSION)!!,
-        Perpetrator(get(VISION.FIRST_NAME)!!, get(VISION.LAST_NAME)!!),
-        get(VISION.CRIME_TYPE)!!,
-        get(VISION.FORESEEN_AT)!!
+        id = get(VISION.ID)!!,
+        version = get(VISION.VERSION)!!,
+        perpetratorId = get(VISION.PERPETRATOR_ID)!!,
+        crimeType = get(VISION.CRIME_TYPE)!!,
+        foreseenAt = get(VISION.FORESEEN_AT)!!
     )
 
 }

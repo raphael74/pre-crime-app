@@ -1,11 +1,11 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.IntegrationTest
+import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
 import ch.ejpd.example.precrime.domain.vision.CrimeType
-import ch.ejpd.example.precrime.domain.vision.Perpetrator
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -23,7 +23,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should create and read an outbox entry`() {
         // GIVEN
-        val testEvent = CrimeForeseenEvent(VisionId(), Perpetrator("Joe", "Doe"), CrimeType.MURDER, LocalDateTime.now())
+        val testEvent = CrimeForeseenEvent(VisionId(), PerpetratorId(), CrimeType.MURDER, LocalDateTime.now())
 
         // WHEN
         val id = outboxRepository.create(testEvent)
@@ -41,12 +41,12 @@ class JooqOutboxRepositoryTest {
         val id1 = outboxRepository.create(
             CrimeForeseenEvent(
                 VisionId(),
-                Perpetrator("Joe", "Doe"),
+                PerpetratorId(),
                 CrimeType.MURDER,
                 LocalDateTime.now()
             )
         )
-        val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("Jane", "Doe")))
+        val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), PerpetratorId()))
 
         // WHEN
         val pending = outboxRepository.findPendingForUpdate()
@@ -60,7 +60,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should mark record as processed`() {
         // GIVEN
-        val id = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), Perpetrator("Jane", "Doe")))
+        val id = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), PerpetratorId()))
 
         // WHEN
         outboxRepository.markAsProcessed(id)

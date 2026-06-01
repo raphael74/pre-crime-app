@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.domain.prearrest
 
 import ch.ejpd.example.precrime.domain.AggregateVersion
-import ch.ejpd.example.precrime.domain.vision.Perpetrator
+import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
@@ -15,7 +15,7 @@ class PreArrest(
     @Identity val id: PreArrestId = PreArrestId(),
     var version: AggregateVersion = AggregateVersion(),
     val visionId: VisionId,
-    val perpetrator: Perpetrator,
+    val perpetratorId: PerpetratorId,
     val status: PreArrestStatus = PreArrestStatus.ARRESTED_BEFORE_CRIME
 ) {
     private val _events = mutableListOf<Any>()
@@ -27,7 +27,7 @@ class PreArrest(
 
     init {
         if (status == PreArrestStatus.ARRESTED_BEFORE_CRIME) {
-            _events.add(PreArrestExecutedEvent(id, visionId, perpetrator))
+            _events.add(PreArrestExecutedEvent(id, visionId, perpetratorId))
         }
     }
 }
@@ -45,7 +45,7 @@ value class PreArrestId(val value: UUID = UUID.randomUUID()) : Identifier
 data class PreArrestExecutedEvent(
     val preArrestId: PreArrestId,
     val visionId: VisionId,
-    val perpetrator: Perpetrator
+    val perpetratorId: PerpetratorId
 )
 
 @Repository

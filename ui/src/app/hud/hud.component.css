@@ -319,6 +319,25 @@ button:hover {
     color: #ff4d4d;
 }
 
+.arrest-status {
+    font-size: 0.8em;
+    padding: 2px 6px;
+    border: 1px solid rgba(0, 242, 255, 0.3);
+    border-radius: 3px;
+    color: #00f2ff;
+    text-shadow: 0 0 5px #00f2ff;
+}
+
+.arrest-status.status-arrested {
+    background: rgba(0, 242, 255, 0.1);
+    border-color: #00f2ff;
+    box-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+}
+
+.arrest-card {
+    border-left: 3px solid #00f2ff;
+}
+
 .apology-text {
     font-size: 0.8em;
     line-height: 1.3;

@@ -46,6 +46,18 @@ export class HudComponent {
         {initialValue: 0}
     );
 
+    preArrests = toSignal(
+        interval(1000).pipe(
+            switchMap(() => this.preCrimeService.getArrests().pipe(
+                catchError(() => {
+                    this.backendError.set('PRE-ARREST LOG FETCH FAILED');
+                    return EMPTY;
+                })
+            ))
+        ),
+        {initialValue: []}
+    );
+
     apologies = toSignal(
         interval(1000).pipe(
             switchMap(() => this.preCrimeService.getApologies().pipe(

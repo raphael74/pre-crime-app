@@ -63,6 +63,28 @@
         </div>
 
         <div class="apologies-section">
+            <h2>Active Pre-Arrests</h2>
+            <div class="apology-list">
+                @for (arrest of preArrests(); track arrest.id) {
+                    <div class="apology-card arrest-card">
+                        <div class="apology-header">
+                            <span class="apology-perpetrator">{{ arrest.firstName }} {{ arrest.lastName }}</span>
+                            <span class="arrest-status" [class.status-arrested]="arrest.status === 'ARRESTED_BEFORE_CRIME'">
+                                {{ arrest.status }}
+                            </span>
+                        </div>
+                        <div class="apology-breakdown">
+                            <span>ID: {{ arrest.id?.substring(0, 8) }}...</span>
+                            <span>Vision: {{ arrest.visionId?.substring(0, 8) }}...</span>
+                        </div>
+                    </div>
+                } @empty {
+                    <div class="apologies-empty">NO ACTIVE ARRESTS...</div>
+                }
+            </div>
+        </div>
+
+        <div class="apologies-section">
             <h2>Pre-Emptive Apologies</h2>
             <div class="apology-list">
                 @for (apology of apologies(); track apology.id) {

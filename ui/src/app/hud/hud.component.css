@@ -232,6 +232,10 @@ button:hover {
     font-size: 0.8em;
 }
 
+.pre-arrest-btn {
+    padding: 5px 15px;
+}
+
 .log-payload {
     margin: 5px 0 15px 20px;
     color: #00f2ff;

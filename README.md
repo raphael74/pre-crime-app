@@ -8,7 +8,8 @@ modern Kotlin/Spring Boot backend and an Angular frontend. It is themed around a
 The project demonstrates:
 
 - **Onion Architecture**: Strict separation between `domain`, `application`, and `infrastructure` layers.
-- **DDD Patterns**: Implementation of Aggregates, Entities, Value Objects, Domain Events, and Repositories using **jMolecules**.
+- **DDD Patterns**: Implementation of Aggregates, Entities, Value Objects, Domain Events, and Repositories using *
+  *jMolecules**.
 - **Event-Driven Communication**: Using **Kafka** for asynchronous communication between aggregates.
 - **Transactional Outbox Pattern**: Ensuring reliable event delivery without distributed transactions.
 - **OpenAPI-First**: API-first development with generated DTOs and Controller interfaces for both Backend and Frontend.
@@ -22,7 +23,8 @@ where:
 - **Pre-Arrest (Law Enforcement)**: Responds to these visions by initiating a "pre-arrest" process, which must
   subsequently be confirmed (arrested) or cancelled.
 - **Statistic (Feedback Loop)**: Successful arrests are reported back to update global prevention statistics.
-- **Pre-emptive Apology**: Automatically issues apologies and "compensation" statements (with dystopian recovery fees) to the family of the pre-arrested individual.
+- **Pre-emptive Apology**: Automatically issues apologies and "compensation" statements (with dystopian recovery fees)
+  to the family of the pre-arrested individual.
 - **Perpetrator**: Management of individuals identified as potential future criminals.
 - **Audit**: Centralized auditing of all domain events.
 
@@ -34,22 +36,20 @@ The following diagram illustrates the core aggregates and their relationships vi
 classDiagram
     direction LR
     class Vision {
-        <<Aggregate Root>>
         VisionId id
         PerpetratorId perpetratorId
         CrimeType crimeType
         LocalDateTime foreseenAt
     }
     class PreArrest {
-        <<Aggregate Root>>
         PreArrestId id
         VisionId visionId
         PerpetratorId perpetratorId
+      OffsetDateTime preArrestIssueDate
         OffsetDateTime preArrestDate
         PreArrestStatus status
     }
     class PreApology {
-        <<Aggregate Root>>
         PreApologyId id
         VisionId visionId
         PerpetratorId perpetratorId
@@ -57,27 +57,24 @@ classDiagram
         ApologyLetter apologyLetter
     }
     class Perpetrator {
-        <<Aggregate Root>>
         PerpetratorId id
         String firstName
         String lastName
     }
     class Statistic {
-        <<Aggregate Root>>
         StatisticId id
         Int totalCrimesPrevented
     }
     class AuditEntry {
-        <<Aggregate Root>>
         AuditEntryId id
         String eventType
     }
 
-    Vision ..> Perpetrator : references
-    PreArrest ..> Vision : references
-    PreArrest ..> Perpetrator : references
-    PreApology ..> Vision : references
-    PreApology ..> Perpetrator : references
+  Vision ..> Perpetrator: references
+  PreArrest ..> Vision: references
+  PreArrest ..> Perpetrator: references
+  PreApology ..> Vision: references
+  PreApology ..> Perpetrator: references
 ```
 
 ## Architecture & Flow
@@ -91,11 +88,9 @@ sequenceDiagram
     participant A as Pre-Apology
     participant S as Statistic
     participant K as Kafka (Event Bus)
-
     Note over P: Crime Foreseen
-    P->>K: CrimeForeseen Event
-    
-    K-->>L: Consume CrimeForeseen
+  P ->> K: CrimeForeseen Event
+  K -->> L: Consume CrimeForeseen
   Note over L: Initiate Pre-Arrest (Pending)
 
   alt Confirmed

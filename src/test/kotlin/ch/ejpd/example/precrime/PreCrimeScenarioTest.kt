@@ -4,9 +4,7 @@ import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.domain.vision.VisionRepository
-import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
-import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionResponse
-import ch.ejpd.example.precrime.infrastructure.facade.rest.model.PreApologyResponse
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.*
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -30,6 +28,7 @@ class PreCrimeScenarioTest(
     fun `a future crime foreseen results in a pre-arrest and updated stats`() {
         // GIVEN: The department is operational
         val initialCrimeCount = getStats()
+        val initialPendingPreArrests = getPendingPreArrests().size
 
         // WHEN: Precogs foresee a crime
         val firstName = "John"
@@ -38,36 +37,43 @@ class PreCrimeScenarioTest(
             CreateVisionRequest.CrimeType.MURDER // Using "Murder" to trigger base amount calculations correctly
         val visionId = triggerVision(firstName, lastName, crimeType)
 
+        await().pollInterval(1, TimeUnit.SECONDS).atMost(10, TimeUnit.SECONDS).untilAsserted {
+            val updatedPendingArrests = getPendingPreArrests().size
+            assertThat(updatedPendingArrests).isEqualTo(initialPendingPreArrests + 1)
+        }
+
+        val pendingPreArrests = getPendingPreArrests()
+        triggerArrest(pendingPreArrests.first().id!!)
+
         // THEN: The statistics should be updated via the bidirectional event flow
         await().pollInterval(1, TimeUnit.SECONDS).atMost(10, TimeUnit.SECONDS).untilAsserted {
             val updatedCrimeCount = getStats()
             assertThat(updatedCrimeCount).isEqualTo(initialCrimeCount + 1)
-
-            // AND: The visions and pre-arrests are persisted in the aggregates
-            val vision = visionRepository.findById(visionId)
-            assertThat(vision).isNotNull
-            val perpetrator = perpetratorRepository.findById(vision!!.perpetratorId)
-            assertThat(perpetrator?.fullName).isEqualTo("$firstName $lastName")
-            assertThat(vision.crimeType.name).isEqualTo(crimeType.value)
-
-            val arrests = preArrestRepository.findAll()
-            assertThat(arrests).anyMatch {
-                val p = perpetratorRepository.findById(it.perpetratorId)
-                p?.fullName == "$firstName $lastName"
-            }
-
-            // AND: A pre-emptive apology is generated and retrievable via REST API
-            val apologies = getApologies()
-            assertThat(apologies).hasSize(1)
-            val apology = apologies.first()
-            assertThat(apology.lastName).isEqualTo(lastName)
-            assertThat(apology.firstName).isEqualTo(firstName)
-            assertThat(apology.baseAmount?.toDouble()).isEqualTo(10000.0)
-            assertThat(apology.jetpackFuelDeduction?.toDouble()).isEqualTo(450.0)
-            assertThat(apology.haloRentalFee?.toDouble()).isEqualTo(250.0)
-            assertThat(apology.netPayout?.toDouble()).isEqualTo(9300.0)
-            assertThat(apology.apologyText).contains("Dear Family of John Doe")
         }
+
+        // AND: The visions and pre-arrests are persisted in the aggregates
+        val vision = visionRepository.findById(visionId)
+        assertThat(vision).isNotNull
+        val perpetrator = perpetratorRepository.findById(vision!!.perpetratorId)
+        assertThat(perpetrator?.fullName).isEqualTo("$firstName $lastName")
+        assertThat(vision.crimeType.name).isEqualTo(crimeType.value)
+        val arrests = preArrestRepository.findAll()
+        assertThat(arrests).anyMatch {
+            val p = perpetratorRepository.findById(it.perpetratorId)
+            p?.fullName == "$firstName $lastName"
+        }
+
+        // AND: A pre-emptive apology is generated and retrievable via REST API
+        val apologies = getApologies()
+        assertThat(apologies).hasSize(1)
+        val apology = apologies.first()
+        assertThat(apology.lastName).isEqualTo(lastName)
+        assertThat(apology.firstName).isEqualTo(firstName)
+        assertThat(apology.baseAmount?.toDouble()).isEqualTo(10000.0)
+        assertThat(apology.jetpackFuelDeduction?.toDouble()).isEqualTo(450.0)
+        assertThat(apology.haloRentalFee?.toDouble()).isEqualTo(250.0)
+        assertThat(apology.netPayout?.toDouble()).isEqualTo(9300.0)
+        assertThat(apology.apologyText).contains("Dear Family of John Doe")
     }
 
     private fun getStats(): Int {
@@ -96,6 +102,23 @@ class PreCrimeScenarioTest(
             .expectBody<CreateVisionResponse>().returnResult().responseBody
 
         return VisionId(result?.visionId!!)
+    }
+
+    private fun triggerArrest(preArrestId: UUID) {
+        restTestClient.post()
+            .uri("/api/pre-crime/arrest-executed")
+            .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
+            .body(ArrestExecutedRequest(preArrestId))
+            .exchange()
+            .expectStatus().isOk
+    }
+
+    private fun getPendingPreArrests(): List<PreArrestResponse> {
+        return restTestClient.get().uri("/api/pre-crime/arrests-pending")
+            .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody<Array<PreArrestResponse>>().returnResult().responseBody?.toList() ?: emptyList()
     }
 
     private fun generateAuthorizationHeader(username: String, password: String): String {

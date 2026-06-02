@@ -47,10 +47,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PreApologyResponse'
-  /pre-crime/arrests:
+  /pre-crime/arrests-pending:
     get:
-      summary: Get all pre-arrests
-      operationId: getArrests
+      summary: Get all pending pre-arrests
+      operationId: getArrestsPending
       tags:
         - PreCrime
       responses:
@@ -62,6 +62,51 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PreArrestResponse'
+  /pre-crime/arrests-executed:
+    get:
+      summary: Get all executed pre-arrests
+      operationId: getArrestsExecuted
+      tags:
+        - PreCrime
+      responses:
+        '200':
+          description: List of pre-arrests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreArrestResponse'
+  /pre-crime/arrest-executed:
+    post:
+      summary: triggers an execution of the arrest
+      operationId: arrestExecuted
+      tags:
+        - PreCrime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrestExecutedRequest'
+      responses:
+        '200':
+          description: Arrest executed
+  /pre-crime/arrest-cancelled:
+    post:
+      summary: cancels an arrest
+      operationId: arrestCancelled
+      tags:
+        - PreCrime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrestCancelRequest'
+      responses:
+        '200':
+          description: Arrest executed
   /pre-crime/vision:
     post:
       summary: Trigger a vision
@@ -113,6 +158,22 @@ components:
       type: object
       properties:
         value:
+          type: string
+          format: uuid
+    ArrestExecutedRequest:
+      type: object
+      required:
+        - preArrestId
+      properties:
+        preArrestId:
+          type: string
+          format: uuid
+    ArrestCancelRequest:
+      type: object
+      required:
+        - preArrestId
+      properties:
+        preArrestId:
           type: string
           format: uuid
     CreateVisionRequest:
@@ -193,15 +254,18 @@ components:
           type: string
         lastName:
           type: string
+        preArrestIssuedDate:
+          type: string
+          format: date-time
         preArrestDate:
           type: string
           format: date-time
         status:
           type: string
           enum:
+            - PENDING
             - ARRESTED_BEFORE_CRIME
-            - RELEASED
-            - ERRONEOUS_VISION
+            - CANCELLED
     UserResponse:
       type: object
       properties:

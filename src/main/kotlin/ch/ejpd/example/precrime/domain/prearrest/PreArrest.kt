@@ -17,8 +17,9 @@ class PreArrest(
     var version: AggregateVersion = AggregateVersion(),
     val visionId: VisionId,
     val perpetratorId: PerpetratorId,
-    val preArrestDate: OffsetDateTime = OffsetDateTime.now(),
-    val status: PreArrestStatus = PreArrestStatus.ARRESTED_BEFORE_CRIME
+    val preArrestIssuedDate: OffsetDateTime = OffsetDateTime.now(),
+    var preArrestDate: OffsetDateTime? = null,
+    var status: PreArrestStatus = PreArrestStatus.PENDING
 ) {
     private val _events = mutableListOf<Any>()
     val domainEvents: List<Any> get() = _events.toList()
@@ -27,17 +28,22 @@ class PreArrest(
         _events.clear()
     }
 
-    init {
-        if (status == PreArrestStatus.ARRESTED_BEFORE_CRIME) {
-            _events.add(PreArrestExecutedEvent(id, visionId, perpetratorId))
-        }
+    fun executePreArrest() {
+        status = PreArrestStatus.ARRESTED_BEFORE_CRIME
+        preArrestDate = OffsetDateTime.now()
+        _events.add(PreArrestExecutedEvent(id, visionId, perpetratorId))
+    }
+
+    fun cancelPreArrest() {
+        status = PreArrestStatus.CANCELLED
+        _events.add(PreArrestCancelledEvent(id, visionId, perpetratorId))
     }
 }
 
 enum class PreArrestStatus {
+    PENDING,
     ARRESTED_BEFORE_CRIME,
-    RELEASED,
-    ERRONEOUS_VISION
+    CANCELLED
 }
 
 @JvmInline
@@ -50,9 +56,18 @@ data class PreArrestExecutedEvent(
     val perpetratorId: PerpetratorId
 )
 
+@DomainEvent
+data class PreArrestCancelledEvent(
+    val preArrestId: PreArrestId,
+    val visionId: VisionId,
+    val perpetratorId: PerpetratorId
+)
+
 @Repository
 interface PreArrestRepository {
     fun findById(id: PreArrestId): PreArrest?
     fun save(preArrest: PreArrest)
     fun findAll(): List<PreArrest>
+    fun findAllArrested(): List<PreArrest>
+    fun findAllPending(): List<PreArrest>
 }

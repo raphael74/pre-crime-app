@@ -19,7 +19,8 @@ The application is loosely based on the movie **"Minority Report"**. It models a
 where:
 
 - **Vision (Precog Division)**: Foresees future crimes and publishes visions.
-- **Pre-Arrest (Law Enforcement)**: Responds to these visions by executing "pre-arrests" before the crime occurs.
+- **Pre-Arrest (Law Enforcement)**: Responds to these visions by initiating a "pre-arrest" process, which must
+  subsequently be confirmed (arrested) or cancelled.
 - **Statistic (Feedback Loop)**: Successful arrests are reported back to update global prevention statistics.
 - **Pre-emptive Apology**: Automatically issues apologies and "compensation" statements (with dystopian recovery fees) to the family of the pre-arrested individual.
 - **Perpetrator**: Management of individuals identified as potential future criminals.
@@ -95,15 +96,18 @@ sequenceDiagram
     P->>K: CrimeForeseen Event
     
     K-->>L: Consume CrimeForeseen
-    Note over L: Execute Pre-Arrest
-    L->>K: PreArrestExecuted Event
-    
-    K-->>S: Consume PreArrestExecuted
+  Note over L: Initiate Pre-Arrest (Pending)
+
+  alt Confirmed
+    L ->> K: PreArrestExecuted Event
+    K -->> S: Consume PreArrestExecuted
     Note over S: Record Prevention (Stats)
-    
-    K-->>A: Consume PreArrestExecuted
+    K -->> A: Consume PreArrestExecuted
     Note over A: Generate Apology & Billing
-    A->>K: PreApologyIssued Event
+    A ->> K: PreApologyIssued Event
+  else Cancelled
+    L ->> K: PreArrestCancelled Event
+  end
 ```
 
 ## Technical Stack

@@ -72,7 +72,7 @@ class KafkaDomainEventConsumer(
         topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
     )
     @KafkaListener(
-        topics = [KafkaTopics.CRIME_FORESEEN_EVENT_TOPIC, KafkaTopics.PRE_ARREST_EXECUTED_EVENT_TOPIC, KafkaTopics.PRE_APOLOGY_ISSUED_EVENT_TOPIC],
+        topics = [KafkaTopics.CRIME_FORESEEN_EVENT_TOPIC, KafkaTopics.PRE_ARREST_EXECUTED_EVENT_TOPIC, KafkaTopics.PRE_APOLOGY_ISSUED_EVENT_TOPIC, KafkaTopics.PRE_ARREST_CANCELLED_EVENT_TOPIC],
         groupId = PRE_CRIME_AUDIT_GROUP
     )
     fun onPreCrimeEvent(

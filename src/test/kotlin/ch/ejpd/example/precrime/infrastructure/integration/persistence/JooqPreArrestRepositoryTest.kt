@@ -45,7 +45,7 @@ class JooqPreArrestRepositoryTest {
         assertThat(result.visionId).isEqualTo(visionId)
         assertThat(result.perpetratorId).isEqualTo(perpetrator.id)
         assertThat(result.preArrestDate).isCloseTo(preArrestDate, within(1, ChronoUnit.SECONDS))
-        assertThat(result.status).isEqualTo(PreArrestStatus.ARRESTED_BEFORE_CRIME)
+        assertThat(result.status).isEqualTo(PreArrestStatus.PENDING)
     }
 
     @Test
@@ -59,18 +59,20 @@ class JooqPreArrestRepositoryTest {
         val preArrest1 = PreArrest(
             visionId = VisionId(),
             perpetratorId = p1.id,
-            preArrestDate = OffsetDateTime.now().minusDays(1)
+            preArrestDate = OffsetDateTime.now().minusDays(1),
+            status = PreArrestStatus.ARRESTED_BEFORE_CRIME
         )
         val preArrest2 = PreArrest(
             visionId = VisionId(),
             perpetratorId = p2.id,
-            preArrestDate = OffsetDateTime.now()
+            preArrestDate = OffsetDateTime.now(),
+            status = PreArrestStatus.ARRESTED_BEFORE_CRIME
         )
         repository.save(preArrest1)
         repository.save(preArrest2)
 
         // WHEN
-        val results = repository.findAll()
+        val results = repository.findAllArrested()
 
         // THEN
         assertThat(results).hasSize(2)

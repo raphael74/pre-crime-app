@@ -8,6 +8,7 @@ import ch.ejpd.example.precrime.domain.perpetrator.Perpetrator
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
 import ch.ejpd.example.precrime.domain.prearrest.PreArrest
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
 import ch.ejpd.example.precrime.domain.statistic.StatisticRepository
 import ch.ejpd.example.precrime.domain.vision.*
@@ -46,8 +47,18 @@ class PreCrimeApplicationService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllPreArrests(): List<PreArrestWithPerpetrator> {
-        val arrests = preArrestRepository.findAll()
+    fun getAllPendingPreArrests(): List<PreArrestWithPerpetrator> {
+        val arrests = preArrestRepository.findAllPending()
+        val perpetratorIds = arrests.map { it.perpetratorId }.toSet()
+        val perpetrators = perpetratorRepository.findByIds(perpetratorIds).associateBy { it.id }
+        return arrests.map { arrest ->
+            PreArrestWithPerpetrator(arrest, perpetrators[arrest.perpetratorId]!!)
+        }
+    }
+
+    @Transactional(readOnly = true)
+    fun getAllExecutedPreArrests(): List<PreArrestWithPerpetrator> {
+        val arrests = preArrestRepository.findAllArrested()
         val perpetratorIds = arrests.map { it.perpetratorId }.toSet()
         val perpetrators = perpetratorRepository.findByIds(perpetratorIds).associateBy { it.id }
         return arrests.map { arrest ->
@@ -68,6 +79,25 @@ class PreCrimeApplicationService(
         vision.clearDomainEvents()
         logger.info("[Vision] Foresee: $perpetratorFirstName $perpetratorLastName will commit ${crimeType.value}! Aggregate published event.")
         return vision.id
+    }
+
+    fun executePreArrest(preArrestId: PreArrestId) {
+        val preArrest = preArrestRepository.findById(preArrestId)
+            ?: throw IllegalStateException("PreArrest $preArrestId not found")
+        preArrest.executePreArrest()
+        preArrestRepository.save(preArrest)
+        publisher.publish(preArrest.domainEvents)
+        preArrest.clearDomainEvents()
+    }
+
+
+    fun cancelPreArrest(preArrestId: PreArrestId) {
+        val preArrest = preArrestRepository.findById(preArrestId)
+            ?: throw IllegalStateException("PreArrest $preArrestId not found")
+        preArrest.cancelPreArrest()
+        preArrestRepository.save(preArrest)
+        publisher.publish(preArrest.domainEvents)
+        preArrest.clearDomainEvents()
     }
 
     @DomainEventHandler

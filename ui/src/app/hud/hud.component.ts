@@ -46,9 +46,21 @@ export class HudComponent {
         {initialValue: 0}
     );
 
-    preArrests = toSignal(
+    pendingPreArrests = toSignal(
         interval(1000).pipe(
-            switchMap(() => this.preCrimeService.getArrests().pipe(
+            switchMap(() => this.preCrimeService.getArrestsPending().pipe(
+                catchError(() => {
+                    this.backendError.set('PRE-ARREST LOG FETCH FAILED');
+                    return EMPTY;
+                })
+            ))
+        ),
+        {initialValue: []}
+    );
+
+    executedPreArrests = toSignal(
+        interval(1000).pipe(
+            switchMap(() => this.preCrimeService.getArrestsExecuted().pipe(
                 catchError(() => {
                     this.backendError.set('PRE-ARREST LOG FETCH FAILED');
                     return EMPTY;
@@ -114,6 +126,14 @@ export class HudComponent {
                 this.backendError.set('VISION TRANSMISSION FAILED');
             }
         });
+    }
+
+    executePreArrest(preArrestId: string) {
+        this.preCrimeService.arrestExecuted({preArrestId: preArrestId}).subscribe({})
+    }
+
+    cancelPreArrest(preArrestId: string) {
+        this.preCrimeService.arrestCancelled({preArrestId: preArrestId}).subscribe({})
     }
 
     private getCrimeTypeFromString(value: string): CreateVisionRequestCrimeTypeEnum {

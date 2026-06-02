@@ -1,14 +1,16 @@
 package ch.ejpd.example.precrime
 
-import ch.ejpd.example.precrime.domain.audit.AuditEntry
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.ArrestExecutedRequest
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.AuditEntry
 import ch.ejpd.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
+import ch.ejpd.example.precrime.infrastructure.facade.rest.model.PreArrestResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.web.servlet.client.RestTestClient
+import org.springframework.test.web.servlet.client.expectBody
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -28,8 +30,16 @@ class AuditIntegrationTest(
         // THEN: Both CrimeForeseenEvent and PreArrestExecutedEvent should be in the audit log
         await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS).untilAsserted {
             val logs = getAuditLogs()
-            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload.contains("perpetratorId") }
-            assertThat(logs).anyMatch { it.eventType == "PreArrestExecutedEvent" && it.payload.contains("perpetratorId") }
+            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload?.contains("perpetratorId") == true }
+        }
+
+        val pendingPreArrests = getPendingPreArrests()
+        triggerArrest(pendingPreArrests.first().id!!)
+
+        await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS).untilAsserted {
+            val logs = getAuditLogs()
+            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload?.contains("perpetratorId") == true }
+            assertThat(logs).anyMatch { it.eventType == "PreArrestExecutedEvent" && it.payload?.contains("perpetratorId") == true }
         }
     }
 
@@ -42,13 +52,29 @@ class AuditIntegrationTest(
             .expectStatus().isCreated
     }
 
+    private fun triggerArrest(preArrestId: UUID) {
+        restTestClient.post()
+            .uri("/api/pre-crime/arrest-executed")
+            .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
+            .body(ArrestExecutedRequest(preArrestId))
+            .exchange()
+            .expectStatus().isOk
+    }
+
+    private fun getPendingPreArrests(): List<PreArrestResponse> {
+        return restTestClient.get().uri("/api/pre-crime/arrests-pending")
+            .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody<Array<PreArrestResponse>>().returnResult().responseBody?.toList() ?: emptyList()
+    }
+
     private fun getAuditLogs(): List<AuditEntry> {
         return restTestClient.get().uri("/api/audit/logs")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .exchange()
             .expectStatus().isOk
-            .expectBody(object : ParameterizedTypeReference<List<AuditEntry>>() {}).returnResult().responseBody
-            ?: emptyList()
+            .expectBody<Array<AuditEntry>>().returnResult().responseBody?.toList() ?: emptyList()
     }
 
     private fun generateAuthorizationHeader(username: String, password: String): String {

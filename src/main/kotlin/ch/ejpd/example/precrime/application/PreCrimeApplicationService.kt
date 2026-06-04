@@ -66,16 +66,22 @@ class PreCrimeApplicationService(
         }
     }
 
-    fun triggerVision(perpetratorFirstName: String, perpetratorLastName: String, crimeType: CrimeType): VisionId {
-        var perpetrator = perpetratorRepository.findByFirstAndLastName(perpetratorFirstName, perpetratorLastName)
+    fun triggerVision(cmd: CreateVisionCommand): VisionId {
+        var perpetrator = perpetratorRepository.findByFirstAndLastName(
+            cmd.perpetratorFirstName,
+            cmd.perpetratorLastName
+        )
         if (perpetrator == null) {
-            perpetrator = Perpetrator(firstName = perpetratorFirstName, lastName = perpetratorLastName)
+            perpetrator = Perpetrator(
+                firstName = cmd.perpetratorFirstName,
+                lastName = cmd.perpetratorLastName
+            )
             perpetratorRepository.save(perpetrator)
         }
-        val vision = VisionFactory.createVision(perpetrator.id, crimeType, publisher)
+        val vision = VisionFactory.createVision(perpetrator.id, cmd.crimeType, publisher)
         visionRepository.create(vision)
         vision.foreseeCrime()
-        logger.info("[Vision] Foresee: $perpetratorFirstName $perpetratorLastName will commit ${crimeType.value}! Aggregate published event.")
+        logger.info("foresee: $cmd.perpetratorFirstName $cmd.perpetratorLastName will commit ${cmd.crimeType.value}! Aggregate published event.")
         return vision.id
     }
 
@@ -86,7 +92,6 @@ class PreCrimeApplicationService(
         preArrestRepository.save(preArrest)
     }
 
-
     fun cancelPreArrest(preArrestId: PreArrestId) {
         val preArrest = preArrestRepository.findById(preArrestId)
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
@@ -96,33 +101,42 @@ class PreCrimeApplicationService(
 
     @DomainEventHandler
     fun onCrimeForeseen(event: CrimeForeseenEvent) {
-        val perpetrator = perpetratorRepository.findById(event.perpetratorId)
-            ?: throw IllegalStateException("Perpetrator ${event.perpetratorId} not found")
-        logger.info("[LawEnforcement] Received vision: ${perpetrator.fullName} planning ${event.crimeType.value}. Deploying jetpacks!")
         val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId, publisher = publisher)
         preArrestRepository.save(preArrest)
     }
 
     @DomainEventHandler
     fun onPreArrestExecuted(event: PreArrestExecutedEvent) {
-        val perpetrator = perpetratorRepository.findById(event.perpetratorId)
-            ?: throw IllegalStateException("Perpetrator ${event.perpetratorId} not found")
-        logger.info("[LawEnforcement] Received pre-arrest confirmation for ${perpetrator.fullName}. Updating stats.")
+        updateStatistics()
+        createPreApology(event.visionId)
+
+    }
+
+    private fun updateStatistics() {
         val statistic = statisticRepository.findSingleton()
         statistic.recordPrevention()
         statisticRepository.update(statistic)
         logger.info("Stats: Total crimes 'prevented' via Minority Report logic: ${statistic.totalCrimesPrevented}")
 
+    }
+
+    private fun createPreApology(visionId: VisionId) {
         // Generate and save pre-emptive apology & compensation statement
-        val vision = visionRepository.findById(event.visionId)
-            ?: throw IllegalStateException("Vision ${event.visionId} not found")
+        val vision = visionRepository.findById(visionId)
+            ?: throw IllegalStateException("Vision ${visionId} not found")
 
         val apology = preEmptiveApologyDomainService.generateApology(vision)
         preApologyRepository.save(apology)
 
-        logger.info("[PreApologyService] Issued pre-emptive apology to ${perpetrator.fullName}. Net payout: ${apology.compensation.netPayout}")
+        logger.info("Issued pre-emptive apology to ${apology.perpetratorId}. Net payout: ${apology.compensation.netPayout}")
     }
 }
 
 data class PreArrestWithPerpetrator(val preArrest: PreArrest, val perpetrator: Perpetrator)
 data class PreApologyWithPerpetrator(val apology: PreApology, val perpetrator: Perpetrator)
+
+data class CreateVisionCommand(
+    val perpetratorFirstName: String,
+    val perpetratorLastName: String,
+    val crimeType: CrimeType
+)

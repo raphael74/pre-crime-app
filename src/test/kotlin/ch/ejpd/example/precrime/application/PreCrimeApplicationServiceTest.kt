@@ -67,9 +67,10 @@ class PreCrimeApplicationServiceTest {
         mockkObject(VisionFactory.Companion)
         every { VisionFactory.createVision(any(), any(), any()) } returns vision
         every { visionRepository.create(any()) } returns Unit
+        val cmd = CreateVisionCommand("John", "Doe", CrimeType.MURDER)
 
         // WHEN
-        service.triggerVision("John", "Doe", CrimeType.MURDER)
+        service.triggerVision(cmd)
 
         // THEN
         verify {
@@ -85,7 +86,6 @@ class PreCrimeApplicationServiceTest {
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         val event = CrimeForeseenEvent(visionId, perpetrator.id, CrimeType.MURDER, LocalDateTime.now())
-        every { perpetratorRepository.findById(perpetrator.id) } returns perpetrator
         every { preArrestRepository.save(any()) } returns Unit
 
         // WHEN
@@ -93,7 +93,6 @@ class PreCrimeApplicationServiceTest {
 
         // THEN
         verify {
-            perpetratorRepository.findById(perpetrator.id)
             preArrestRepository.save(match {
                 it.visionId == visionId && it.perpetratorId == perpetrator.id
             })
@@ -115,7 +114,6 @@ class PreCrimeApplicationServiceTest {
             publisher = publisher
         )
         every { visionRepository.findById(any()) } returns vision
-        every { perpetratorRepository.findById(perpetrator.id) } returns perpetrator
 
         val statistic = mockk<Statistic>(relaxed = true)
         every { statisticRepository.findSingleton() } returns statistic
@@ -136,7 +134,6 @@ class PreCrimeApplicationServiceTest {
 
         // THEN
         verify {
-            perpetratorRepository.findById(perpetrator.id)
             statisticRepository.findSingleton()
             statistic.recordPrevention()
             statisticRepository.update(statistic)

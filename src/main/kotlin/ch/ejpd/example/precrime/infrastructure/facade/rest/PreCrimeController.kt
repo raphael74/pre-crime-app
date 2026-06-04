@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.facade.rest
 
+import ch.ejpd.example.precrime.application.CreateVisionCommand
 import ch.ejpd.example.precrime.application.PreCrimeApplicationService
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.vision.CrimeType
@@ -88,16 +89,15 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
 
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun createVision(createVisionRequest: CreateVisionRequest): ResponseEntity<CreateVisionResponse> {
-        val visionId =
-            applicationService.triggerVision(
-                createVisionRequest.perpetratorFirstName,
-                createVisionRequest.perpetratorLastName,
-                CrimeType.valueOf(createVisionRequest.crimeType.value)
-            )
+        val cmd = CreateVisionCommand(
+            createVisionRequest.perpetratorFirstName,
+            createVisionRequest.perpetratorLastName,
+            CrimeType.valueOf(createVisionRequest.crimeType.value)
+        )
+        val visionId = applicationService.triggerVision(cmd)
         return ResponseEntity.status(HttpStatus.CREATED).body(
             CreateVisionResponse(
                 visionId = visionId.value,
-                message = "Vision triggered for ${createVisionRequest.perpetratorFirstName} ${createVisionRequest.perpetratorLastName}. The Pre-Crime unit is on its way!"
             )
         )
     }

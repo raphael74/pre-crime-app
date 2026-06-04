@@ -212,8 +212,6 @@ components:
         visionId:
           type: string
           format: uuid
-        message:
-          type: string
     PreApologyResponse:
       type: object
       properties:

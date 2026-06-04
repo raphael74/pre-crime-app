@@ -3,10 +3,8 @@ package ch.ejpd.example.precrime.domain.preapology
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
-import org.jmolecules.ddd.annotation.AggregateRoot
-import org.jmolecules.ddd.annotation.Identity
-import org.jmolecules.ddd.annotation.Repository
-import org.jmolecules.ddd.annotation.ValueObject
+import ch.ejpd.example.precrime.domain.vision.CrimeType
+import org.jmolecules.ddd.annotation.*
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.time.OffsetDateTime
@@ -55,6 +53,27 @@ data class Compensation(
     val netPayout: Double
 ) {
     fun isBillableToFamily(): Boolean = netPayout < 0
+}
+
+@Factory
+class CompensationFactory {
+    companion object {
+        fun createCompensation(crimeType: CrimeType): Compensation {
+
+            val baseAmount = when (crimeType) {
+                CrimeType.MURDER -> 10000.0
+                CrimeType.GRAND_THEFT_AUTO -> 5000.0
+                CrimeType.JAYWALKING -> 50.0
+                else -> 1000.0
+            }
+
+            val jetpackFuelDeduction = 450.0 // Standard deployment fee
+            val haloRentalFee = 250.0       // Stasis halo overnight fee
+            val netPayout = baseAmount - jetpackFuelDeduction - haloRentalFee
+
+            return Compensation(baseAmount, jetpackFuelDeduction, haloRentalFee, netPayout)
+        }
+    }
 }
 
 @ValueObject

@@ -16,7 +16,9 @@ class Perpetrator(
 ) {
     init {
         require(firstName.isNotBlank()) { "Perpetrator first name cannot be blank" }
+        require(firstName.length <= 80) { "Perpetrator first name cannot exceed 80 characters" }
         require(lastName.isNotBlank()) { "Perpetrator last name cannot be blank" }
+        require(lastName.length <= 80) { "Perpetrator last name cannot exceed 80 characters" }
     }
 
     val fullName: String get() = "$firstName $lastName"

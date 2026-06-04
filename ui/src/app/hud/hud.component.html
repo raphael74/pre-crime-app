@@ -24,10 +24,12 @@
                 <label>Perpetrator First Name</label>
                 <input (ngModelChange)="perpetratorFirstName.set($event)" [ngModel]="perpetratorFirstName()"
                        name="firstName"
+                       maxlength="80"
                        placeholder="First Name..." required>
                 <label>Perpetrator Last Name</label>
                 <input (ngModelChange)="perpetratorLastName.set($event)" [ngModel]="perpetratorLastName()"
                        name="perpetrator"
+                       maxlength="80"
                        placeholder="Last Name..." required>
                 <label>Projected Crime</label>
                 <select (ngModelChange)="crimeType.set($event)" [ngModel]="crimeType()" name="crimeType" required>

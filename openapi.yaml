@@ -185,8 +185,10 @@ components:
       properties:
         perpetratorLastName:
           type: string
+          maxLength: 80
         perpetratorFirstName:
           type: string
+          maxLength: 80
         crimeType:
           type: string
           enum:

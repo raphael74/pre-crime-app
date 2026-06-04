@@ -7,6 +7,7 @@ import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.annotation.Repository
+import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.time.OffsetDateTime
@@ -20,21 +21,29 @@ class PreArrest(
     val perpetratorId: PerpetratorId,
     val preArrestIssuedDate: OffsetDateTime = OffsetDateTime.now(),
     var preArrestDate: OffsetDateTime? = null,
-    var status: PreArrestStatus = PreArrestStatus.PENDING,
-    private val publisher: DomainEventPublisher
+    var status: PreArrestStatus = PreArrestStatus.PENDING
 ) {
+    private var publisher: DomainEventPublisher? = null
+
+    fun injectPublisher(publisher: DomainEventPublisher) {
+        this.publisher = publisher
+    }
+
     fun executePreArrest() {
+        val pub = requireNotNull(publisher) { "DomainEventPublisher has not been injected into PreArrest $id" }
         status = PreArrestStatus.ARRESTED_BEFORE_CRIME
         preArrestDate = OffsetDateTime.now()
-        publisher.publish(PreArrestExecutedEvent(id, visionId, perpetratorId))
+        pub.publish(PreArrestExecutedEvent(id, visionId, perpetratorId))
     }
 
     fun cancelPreArrest() {
+        val pub = requireNotNull(publisher) { "DomainEventPublisher has not been injected into PreArrest $id" }
         status = PreArrestStatus.CANCELLED
-        publisher.publish(PreArrestCancelledEvent(id, visionId, perpetratorId))
+        pub.publish(PreArrestCancelledEvent(id, visionId, perpetratorId))
     }
 }
 
+@ValueObject
 enum class PreArrestStatus {
     PENDING,
     ARRESTED_BEFORE_CRIME,

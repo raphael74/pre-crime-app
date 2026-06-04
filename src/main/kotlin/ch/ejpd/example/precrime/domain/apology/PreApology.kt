@@ -19,11 +19,17 @@ class PreApology(
     val perpetratorId: PerpetratorId,
     val compensation: Compensation,
     val apologyLetter: ApologyLetter,
-    val createdAt: OffsetDateTime = OffsetDateTime.now(),
-    private val publisher: DomainEventPublisher
+    val createdAt: OffsetDateTime = OffsetDateTime.now()
 ) {
+    private var publisher: DomainEventPublisher? = null
+
+    fun injectPublisher(publisher: DomainEventPublisher) {
+        this.publisher = publisher
+    }
+
     fun issue() {
-        publisher.publish(
+        val pub = requireNotNull(publisher) { "DomainEventPublisher has not been injected into PreApology $id" }
+        pub.publish(
             PreApologyIssuedEvent(
                 apologyId = id,
                 visionId = visionId,

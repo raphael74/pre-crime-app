@@ -61,11 +61,10 @@ class PreCrimeApplicationServiceTest {
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         every { perpetratorRepository.findByFirstAndLastName("John", "Doe") } returns perpetrator
 
-        val vision = mockk<Vision>()
+        val vision = mockk<Vision>(relaxUnitFun = true)
         every { vision.id } returns VisionId()
-        every { vision.foreseeCrime() } returns Unit
         mockkObject(VisionFactory.Companion)
-        every { VisionFactory.createVision(any(), any(), any()) } returns vision
+        every { VisionFactory.createVision(any(), any()) } returns vision
         every { visionRepository.create(any()) } returns Unit
         val cmd = CreateVisionCommand("John", "Doe", CrimeType.MURDER)
 
@@ -110,8 +109,7 @@ class PreCrimeApplicationServiceTest {
             id = visionId,
             perpetratorId = perpetrator.id,
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now(),
-            publisher = publisher
+            foreseenAt = LocalDateTime.now()
         )
         every { visionRepository.findById(any()) } returns vision
 
@@ -123,9 +121,8 @@ class PreCrimeApplicationServiceTest {
             visionId = visionId,
             perpetratorId = perpetrator.id,
             compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
-            apologyLetter = ApologyLetter("Dear family..."),
-            publisher = publisher
-        ).apply { issue() }
+            apologyLetter = ApologyLetter("Dear family...")
+        )
         every { preEmptiveApologyDomainService.generateApology(vision) } returns apology
         every { preApologyRepository.save(any()) } returns Unit
 

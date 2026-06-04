@@ -1,6 +1,5 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
-import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.vision.Vision
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import ch.ejpd.example.precrime.domain.vision.VisionRepository
@@ -13,8 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class JooqVisionRepository(
-    private val dsl: DSLContext,
-    private val publisher: DomainEventPublisher
+    private val dsl: DSLContext
 ) : VisionRepository {
 
     override fun findById(id: VisionId): Vision? {
@@ -65,8 +63,7 @@ class JooqVisionRepository(
         version = get(VISION.VERSION)!!,
         perpetratorId = get(VISION.PERPETRATOR_ID)!!,
         crimeType = get(VISION.CRIME_TYPE)!!,
-        foreseenAt = get(VISION.FORESEEN_AT)!!,
-        publisher = publisher
+        foreseenAt = get(VISION.FORESEEN_AT)!!
     )
 
 }

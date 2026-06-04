@@ -26,9 +26,8 @@ class PreEmptiveApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now(),
-            publisher = publisher
-        )
+            foreseenAt = LocalDateTime.now()
+        ).apply { injectPublisher(publisher) }
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN
@@ -51,9 +50,8 @@ class PreEmptiveApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.JAYWALKING,
-            foreseenAt = LocalDateTime.now(),
-            publisher = publisher
-        )
+            foreseenAt = LocalDateTime.now()
+        ).apply { injectPublisher(publisher) }
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN
@@ -75,9 +73,8 @@ class PreEmptiveApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = PerpetratorId(),
             crimeType = CrimeType.LARCENY,
-            foreseenAt = LocalDateTime.now(),
-            publisher = publisher
-        )
+            foreseenAt = LocalDateTime.now()
+        ).apply { injectPublisher(publisher) }
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
 

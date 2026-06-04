@@ -78,16 +78,18 @@ class PreCrimeApplicationService(
             )
             perpetratorRepository.save(perpetrator)
         }
-        val vision = VisionFactory.createVision(perpetrator.id, cmd.crimeType, publisher)
+        val vision = VisionFactory.createVision(perpetrator.id, cmd.crimeType)
+        vision.injectPublisher(publisher)
         visionRepository.create(vision)
         vision.foreseeCrime()
-        logger.info("foresee: $cmd.perpetratorFirstName $cmd.perpetratorLastName will commit ${cmd.crimeType.value}! Aggregate published event.")
+        logger.info("Foresee: $cmd.perpetratorFirstName $cmd.perpetratorLastName will commit ${cmd.crimeType.value}!")
         return vision.id
     }
 
     fun executePreArrest(preArrestId: PreArrestId) {
         val preArrest = preArrestRepository.findById(preArrestId)
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
+        preArrest.injectPublisher(publisher)
         preArrest.executePreArrest()
         preArrestRepository.save(preArrest)
     }
@@ -95,13 +97,14 @@ class PreCrimeApplicationService(
     fun cancelPreArrest(preArrestId: PreArrestId) {
         val preArrest = preArrestRepository.findById(preArrestId)
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
+        preArrest.injectPublisher(publisher)
         preArrest.cancelPreArrest()
         preArrestRepository.save(preArrest)
     }
 
     @DomainEventHandler
     fun onCrimeForeseen(event: CrimeForeseenEvent) {
-        val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId, publisher = publisher)
+        val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId)
         preArrestRepository.save(preArrest)
     }
 
@@ -123,7 +126,7 @@ class PreCrimeApplicationService(
     private fun createPreApology(visionId: VisionId) {
         // Generate and save pre-emptive apology & compensation statement
         val vision = visionRepository.findById(visionId)
-            ?: throw IllegalStateException("Vision ${visionId} not found")
+            ?: throw IllegalStateException("Vision $visionId not found")
 
         val apology = preEmptiveApologyDomainService.generateApology(vision)
         preApologyRepository.save(apology)

@@ -13,12 +13,11 @@ class PreArrestTest {
     @Test
     fun `creating PreArrest should initialize with correct status`() {
         // GIVEN
-        val publisher = mockk<DomainEventPublisher>(relaxed = true)
         val visionId = VisionId()
         val perpetratorId = PerpetratorId()
 
         // WHEN
-        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetratorId, publisher = publisher)
+        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetratorId)
 
         // THEN
         assertThat(preArrest.status).isEqualTo(PreArrestStatus.PENDING)
@@ -33,7 +32,8 @@ class PreArrestTest {
         val publisher = mockk<DomainEventPublisher>(relaxed = true)
         val visionId = VisionId()
         val perpetratorId = PerpetratorId()
-        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetratorId, publisher = publisher)
+        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetratorId)
+        preArrest.injectPublisher(publisher)
 
         // WHEN
         preArrest.executePreArrest()

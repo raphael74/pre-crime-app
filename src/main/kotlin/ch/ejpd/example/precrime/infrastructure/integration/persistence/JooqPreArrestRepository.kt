@@ -1,6 +1,5 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
-import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.prearrest.PreArrest
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
@@ -14,8 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class JooqPreArrestRepository(
-    private val dsl: DSLContext,
-    private val publisher: DomainEventPublisher
+    private val dsl: DSLContext
 ) : PreArrestRepository {
 
     override fun findById(id: PreArrestId): PreArrest? {
@@ -125,7 +123,6 @@ class JooqPreArrestRepository(
         perpetratorId = get(PRE_ARREST.PERPETRATOR_ID)!!,
         preArrestIssuedDate = get(PRE_ARREST.PRE_ARREST_ISSUED_DATE)!!,
         preArrestDate = get(PRE_ARREST.PRE_ARREST_DATE),
-        status = get(PRE_ARREST.STATUS)!!,
-        publisher = publisher
+        status = get(PRE_ARREST.STATUS)!!
     )
 }

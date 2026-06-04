@@ -15,11 +15,17 @@ class Vision(
     var version: AggregateVersion = AggregateVersion(),
     val perpetratorId: PerpetratorId,
     val crimeType: CrimeType,
-    val foreseenAt: LocalDateTime,
-    private val publisher: DomainEventPublisher
+    val foreseenAt: LocalDateTime
 ) {
+    private var publisher: DomainEventPublisher? = null
+
+    fun injectPublisher(publisher: DomainEventPublisher) {
+        this.publisher = publisher
+    }
+
     fun foreseeCrime() {
-        publisher.publish(
+        val pub = requireNotNull(publisher) { "DomainEventPublisher has not been injected into Vision $id" }
+        pub.publish(
             CrimeForeseenEvent(
                 visionId = id,
                 perpetratorId = perpetratorId,
@@ -51,15 +57,14 @@ enum class CrimeType(val value: String) {
 @Factory
 class VisionFactory {
     companion object {
-        fun createVision(perpetratorId: PerpetratorId, crimeType: CrimeType, publisher: DomainEventPublisher): Vision {
+        fun createVision(perpetratorId: PerpetratorId, crimeType: CrimeType): Vision {
             val visionId = VisionId()
             val foreseenAt = LocalDateTime.now().plusHours(2)
             return Vision(
                 id = visionId,
                 perpetratorId = perpetratorId,
                 crimeType = crimeType,
-                foreseenAt = foreseenAt,
-                publisher = publisher
+                foreseenAt = foreseenAt
             )
         }
     }

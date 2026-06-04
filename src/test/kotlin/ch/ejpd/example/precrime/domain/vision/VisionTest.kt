@@ -17,9 +17,8 @@ class VisionTest {
             id = VisionId(),
             perpetratorId = PerpetratorId(),
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now(),
-            publisher = publisher
-        )
+            foreseenAt = LocalDateTime.now()
+        ).apply { injectPublisher(publisher) }
 
         // WHEN
         vision.foreseeCrime()

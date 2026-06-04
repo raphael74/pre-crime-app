@@ -32,9 +32,9 @@ class PreEmptiveApologyDomainService(
             visionId = vision.id,
             perpetratorId = vision.perpetratorId,
             compensation = compensation,
-            apologyLetter = ApologyLetter(letterText),
-            publisher = publisher
+            apologyLetter = ApologyLetter(letterText)
         )
+        apology.injectPublisher(publisher)
         apology.issue()
         return apology
     }

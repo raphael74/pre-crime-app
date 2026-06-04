@@ -1,9 +1,9 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.domain.AggregateVersion
-import ch.ejpd.example.precrime.domain.apology.PreApologyId
 import ch.ejpd.example.precrime.domain.audit.AuditEntryId
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
+import ch.ejpd.example.precrime.domain.preapology.PreApologyId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.statistic.StatisticId
 import ch.ejpd.example.precrime.domain.vision.VisionId

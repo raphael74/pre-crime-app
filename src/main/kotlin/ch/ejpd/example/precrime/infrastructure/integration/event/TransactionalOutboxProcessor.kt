@@ -1,6 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.integration.event
 
-import ch.ejpd.example.precrime.domain.apology.PreApologyIssuedEvent
+import ch.ejpd.example.precrime.domain.preapology.PreApologyIssuedEvent
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestCancelledEvent
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent

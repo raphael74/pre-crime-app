@@ -74,7 +74,7 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
         val apologies = applicationService.getAllApologies().map { (apology, perpetrator) ->
             PreApologyResponse(
                 id = apology.id.value,
-                visionId = apology.visionId.value,
+                preArrestId = apology.preArrestId.value,
                 lastName = perpetrator.lastName,
                 firstName = perpetrator.firstName,
                 baseAmount = java.math.BigDecimal.valueOf(apology.compensation.baseAmount),

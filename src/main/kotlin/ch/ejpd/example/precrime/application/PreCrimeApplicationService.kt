@@ -1,11 +1,12 @@
 package ch.ejpd.example.precrime.application
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
-import ch.ejpd.example.precrime.domain.apology.PreApology
-import ch.ejpd.example.precrime.domain.apology.PreApologyRepository
-import ch.ejpd.example.precrime.domain.apology.PreEmptiveApologyDomainService
 import ch.ejpd.example.precrime.domain.perpetrator.Perpetrator
+import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
+import ch.ejpd.example.precrime.domain.preapology.PreApology
+import ch.ejpd.example.precrime.domain.preapology.PreApologyDomainService
+import ch.ejpd.example.precrime.domain.preapology.PreApologyRepository
 import ch.ejpd.example.precrime.domain.prearrest.PreArrest
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
@@ -26,7 +27,7 @@ class PreCrimeApplicationService(
     private val preArrestRepository: PreArrestRepository,
     private val preApologyRepository: PreApologyRepository,
     private val perpetratorRepository: PerpetratorRepository,
-    private val preEmptiveApologyDomainService: PreEmptiveApologyDomainService,
+    private val preApologyDomainService: PreApologyDomainService,
     private val publisher: DomainEventPublisher
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -111,8 +112,7 @@ class PreCrimeApplicationService(
     @DomainEventHandler
     fun onPreArrestExecuted(event: PreArrestExecutedEvent) {
         updateStatistics()
-        createPreApology(event.visionId)
-
+        createPreApology(event.perpetratorId, event.preArrestId, event.visionId)
     }
 
     private fun updateStatistics() {
@@ -123,15 +123,17 @@ class PreCrimeApplicationService(
 
     }
 
-    private fun createPreApology(visionId: VisionId) {
+    private fun createPreApology(perpetratorId: PerpetratorId, preArrestId: PreArrestId, visionId: VisionId) {
         // Generate and save pre-emptive apology & compensation statement
         val vision = visionRepository.findById(visionId)
             ?: throw IllegalStateException("Vision $visionId not found")
 
-        val apology = preEmptiveApologyDomainService.generateApology(vision)
-        preApologyRepository.save(apology)
+        val preApology = preApologyDomainService.generatePreApology(preArrestId, perpetratorId, vision.crimeType)
+        preApology.injectPublisher(publisher)
+        preApology.issue()
+        preApologyRepository.save(preApology)
 
-        logger.info("Issued pre-emptive apology to ${apology.perpetratorId}. Net payout: ${apology.compensation.netPayout}")
+        logger.info("Issued pre-emptive apology to ${preApology.perpetratorId}. Net payout: ${preApology.compensation.netPayout}")
     }
 }
 

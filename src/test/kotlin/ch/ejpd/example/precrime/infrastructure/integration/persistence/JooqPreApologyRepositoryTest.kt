@@ -1,13 +1,13 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.IntegrationTest
-import ch.ejpd.example.precrime.domain.apology.ApologyLetter
-import ch.ejpd.example.precrime.domain.apology.Compensation
-import ch.ejpd.example.precrime.domain.apology.PreApology
-import ch.ejpd.example.precrime.domain.apology.PreApologyId
 import ch.ejpd.example.precrime.domain.perpetrator.Perpetrator
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
-import ch.ejpd.example.precrime.domain.vision.VisionId
+import ch.ejpd.example.precrime.domain.preapology.ApologyLetter
+import ch.ejpd.example.precrime.domain.preapology.Compensation
+import ch.ejpd.example.precrime.domain.preapology.PreApology
+import ch.ejpd.example.precrime.domain.preapology.PreApologyId
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,13 +28,13 @@ class JooqPreApologyRepositoryTest {
     fun `should persist and retrieve pre-emptive apology`() {
         // GIVEN
         val apologyId = PreApologyId()
-        val visionId = VisionId()
+        val preArrestId = PreArrestId()
         val perpetrator = Perpetrator(firstName = "Danny", lastName = "Witwer")
         perpetratorRepository.save(perpetrator)
         val compensation = Compensation(10000.0, 450.0, 250.0, 9300.0)
         val apologyLetter = ApologyLetter("Dear Family, we are sorry.")
         val apology =
-            PreApology(apologyId, visionId, perpetrator.id, compensation, apologyLetter)
+            PreApology(apologyId, preArrestId, perpetrator.id, compensation, apologyLetter)
 
         // WHEN
         repository.save(apology)
@@ -43,7 +43,7 @@ class JooqPreApologyRepositoryTest {
         val retrieved = repository.findById(apologyId)
         assertThat(retrieved).isNotNull
         assertThat(retrieved!!.id).isEqualTo(apologyId)
-        assertThat(retrieved.visionId).isEqualTo(visionId)
+        assertThat(retrieved.preArrestId).isEqualTo(preArrestId)
         assertThat(retrieved.perpetratorId).isEqualTo(perpetrator.id)
         assertThat(retrieved.compensation.baseAmount).isEqualTo(10000.0)
         assertThat(retrieved.compensation.netPayout).isEqualTo(9300.0)
@@ -64,7 +64,7 @@ class JooqPreApologyRepositoryTest {
         val now = java.time.OffsetDateTime.now()
         val apology1 = PreApology(
             id = PreApologyId(),
-            visionId = VisionId(),
+            preArrestId = PreArrestId(),
             perpetratorId = p1.id,
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 1"),
@@ -72,7 +72,7 @@ class JooqPreApologyRepositoryTest {
         )
         val apology2 = PreApology(
             id = PreApologyId(),
-            visionId = VisionId(),
+            preArrestId = PreArrestId(),
             perpetratorId = p2.id,
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 2"),
@@ -80,7 +80,7 @@ class JooqPreApologyRepositoryTest {
         )
         val apology3 = PreApology(
             id = PreApologyId(),
-            visionId = VisionId(),
+            preArrestId = PreArrestId(),
             perpetratorId = p3.id,
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 3"),
@@ -109,14 +109,14 @@ class JooqPreApologyRepositoryTest {
 
         val apology1 = PreApology(
             id = PreApologyId(),
-            visionId = VisionId(),
+            preArrestId = PreArrestId(),
             perpetratorId = p1.id,
             compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
             apologyLetter = ApologyLetter("Sorry 1")
         )
         val apology2 = PreApology(
             id = PreApologyId(),
-            visionId = VisionId(),
+            preArrestId = PreArrestId(),
             perpetratorId = p2.id,
             compensation = Compensation(50.0, 450.0, 250.0, -650.0),
             apologyLetter = ApologyLetter("Sorry 2")

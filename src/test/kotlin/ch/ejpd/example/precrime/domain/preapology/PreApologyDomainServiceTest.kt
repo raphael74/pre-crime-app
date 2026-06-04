@@ -1,7 +1,7 @@
-package ch.ejpd.example.precrime.domain.apology
+package ch.ejpd.example.precrime.domain.preapology
 
-import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
+import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.vision.CrimeType
 import ch.ejpd.example.precrime.domain.vision.Vision
 import ch.ejpd.example.precrime.domain.vision.VisionId
@@ -12,26 +12,26 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-class PreEmptiveApologyDomainServiceTest {
+class PreApologyDomainServiceTest {
 
     private val letterService = mockk<ThymeleafPreApologyLetterService>()
-    private val publisher = mockk<DomainEventPublisher>(relaxed = true)
-    private val service = PreEmptiveApologyDomainService(letterService, publisher)
+    private val service = PreApologyDomainService(letterService)
 
     @Test
     fun `should calculate positive net compensation for a high-severity crime (murder)`() {
         // GIVEN
         val perpetratorId = PerpetratorId()
+        val preArrestId = PreArrestId()
         val vision = Vision(
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.MURDER,
             foreseenAt = LocalDateTime.now()
-        ).apply { injectPublisher(publisher) }
+        )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN
-        val apology = service.generateApology(vision)
+        val apology = service.generatePreApology(preArrestId, perpetratorId, vision.crimeType)
 
         // THEN
         assertThat(apology.perpetratorId).isEqualTo(perpetratorId)
@@ -46,16 +46,17 @@ class PreEmptiveApologyDomainServiceTest {
     fun `should calculate negative net compensation for a low-severity crime (jaywalking)`() {
         // GIVEN
         val perpetratorId = PerpetratorId()
+        val preArrestId = PreArrestId()
         val vision = Vision(
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.JAYWALKING,
             foreseenAt = LocalDateTime.now()
-        ).apply { injectPublisher(publisher) }
+        )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN
-        val apology = service.generateApology(vision)
+        val apology = service.generatePreApology(preArrestId, perpetratorId, vision.crimeType)
 
         // THEN
         assertThat(apology.perpetratorId).isEqualTo(perpetratorId)
@@ -69,17 +70,18 @@ class PreEmptiveApologyDomainServiceTest {
     @Test
     fun `should calculate correct compensation for an unmapped default crime`() {
         // GIVEN
+        val perpetratorId = PerpetratorId()
+        val preArrestId = PreArrestId()
         val vision = Vision(
             id = VisionId(),
-            perpetratorId = PerpetratorId(),
+            perpetratorId = perpetratorId,
             crimeType = CrimeType.LARCENY,
             foreseenAt = LocalDateTime.now()
-        ).apply { injectPublisher(publisher) }
+        )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
-
         // WHEN
-        val apology = service.generateApology(vision)
+        val apology = service.generatePreApology(preArrestId, perpetratorId, vision.crimeType)
 
         // THEN
         assertThat(apology.compensation.baseAmount).isEqualTo(1000.0)

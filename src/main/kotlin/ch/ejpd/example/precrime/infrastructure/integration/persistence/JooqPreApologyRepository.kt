@@ -1,6 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
-import ch.ejpd.example.precrime.domain.apology.*
+import ch.ejpd.example.precrime.domain.preapology.*
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRE_APOLOGY
 import org.jooq.DSLContext
 import org.jooq.Record
@@ -31,7 +31,7 @@ class JooqPreApologyRepository(
         if (!exists) {
             dsl.insertInto(PRE_APOLOGY)
                 .set(PRE_APOLOGY.ID, apology.id)
-                .set(PRE_APOLOGY.VISION_ID, apology.visionId)
+                .set(PRE_APOLOGY.PRE_ARREST_ID, apology.preArrestId)
                 .set(PRE_APOLOGY.PERPETRATOR_ID, apology.perpetratorId)
                 .set(PRE_APOLOGY.BASE_AMOUNT, BigDecimal.valueOf(apology.compensation.baseAmount))
                 .set(PRE_APOLOGY.JETPACK_FUEL_DEDUCTION, BigDecimal.valueOf(apology.compensation.jetpackFuelDeduction))
@@ -52,7 +52,7 @@ class JooqPreApologyRepository(
 
     private fun Record.toPreApology() = PreApology(
         id = get(PRE_APOLOGY.ID)!!,
-        visionId = get(PRE_APOLOGY.VISION_ID)!!,
+        preArrestId = get(PRE_APOLOGY.PRE_ARREST_ID)!!,
         perpetratorId = get(PRE_APOLOGY.PERPETRATOR_ID)!!,
         compensation = Compensation(
             baseAmount = get(PRE_APOLOGY.BASE_AMOUNT)!!.toDouble(),

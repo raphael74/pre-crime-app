@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.IntegrationTest
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.ApologyLetter
 import ch.ejpd.example.precrime.domain.apology.Compensation
 import ch.ejpd.example.precrime.domain.apology.PreApology
@@ -24,6 +25,9 @@ class JooqPreApologyRepositoryTest {
     @Autowired
     private lateinit var perpetratorRepository: PerpetratorRepository
 
+    @Autowired
+    private lateinit var publisher: DomainEventPublisher
+
     @Test
     fun `should persist and retrieve pre-emptive apology`() {
         // GIVEN
@@ -33,7 +37,7 @@ class JooqPreApologyRepositoryTest {
         perpetratorRepository.save(perpetrator)
         val compensation = Compensation(10000.0, 450.0, 250.0, 9300.0)
         val apologyLetter = ApologyLetter("Dear Family, we are sorry.")
-        val apology = PreApology(apologyId, visionId, perpetrator.id, compensation, apologyLetter)
+        val apology = PreApology(apologyId, visionId, perpetrator.id, compensation, apologyLetter, publisher = publisher)
 
         // WHEN
         repository.save(apology)
@@ -67,7 +71,8 @@ class JooqPreApologyRepositoryTest {
             perpetratorId = p1.id,
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 1"),
-            createdAt = now.minusDays(2)
+            createdAt = now.minusDays(2),
+            publisher = publisher
         )
         val apology2 = PreApology(
             id = PreApologyId(),
@@ -75,7 +80,8 @@ class JooqPreApologyRepositoryTest {
             perpetratorId = p2.id,
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 2"),
-            createdAt = now
+            createdAt = now,
+            publisher = publisher
         )
         val apology3 = PreApology(
             id = PreApologyId(),
@@ -83,7 +89,8 @@ class JooqPreApologyRepositoryTest {
             perpetratorId = p3.id,
             compensation = Compensation(100.0, 0.0, 0.0, 100.0),
             apologyLetter = ApologyLetter("Sorry 3"),
-            createdAt = now.minusDays(1)
+            createdAt = now.minusDays(1),
+            publisher = publisher
         )
 
         repository.save(apology1)
@@ -111,14 +118,16 @@ class JooqPreApologyRepositoryTest {
             visionId = VisionId(),
             perpetratorId = p1.id,
             compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
-            apologyLetter = ApologyLetter("Sorry 1")
+            apologyLetter = ApologyLetter("Sorry 1"),
+            publisher = publisher
         )
         val apology2 = PreApology(
             id = PreApologyId(),
             visionId = VisionId(),
             perpetratorId = p2.id,
             compensation = Compensation(50.0, 450.0, 250.0, -650.0),
-            apologyLetter = ApologyLetter("Sorry 2")
+            apologyLetter = ApologyLetter("Sorry 2"),
+            publisher = publisher
         )
 
         repository.save(apology1)

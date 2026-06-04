@@ -1,36 +1,39 @@
 package ch.ejpd.example.precrime.domain.prearrest
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.vision.VisionId
+import io.mockk.mockk
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class PreArrestTest {
 
     @Test
-    fun `creating PreArrest should initialize with correct status and record event`() {
+    fun `creating PreArrest should initialize with correct status`() {
         // GIVEN
+        val publisher = mockk<DomainEventPublisher>(relaxed = true)
         val visionId = VisionId()
         val perpetratorId = PerpetratorId()
 
         // WHEN
-        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetratorId)
+        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetratorId, publisher = publisher)
 
         // THEN
         assertThat(preArrest.status).isEqualTo(PreArrestStatus.PENDING)
         assertThat(preArrest.visionId).isEqualTo(visionId)
         assertThat(preArrest.perpetratorId).isEqualTo(perpetratorId)
-
-        assertThat(preArrest.domainEvents).hasSize(0)
     }
 
 
     @Test
-    fun `executing PreArrest should change to correct status and record event`() {
+    fun `executing PreArrest should change to correct status and publish event`() {
         // GIVEN
+        val publisher = mockk<DomainEventPublisher>(relaxed = true)
         val visionId = VisionId()
         val perpetratorId = PerpetratorId()
-        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetratorId)
+        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetratorId, publisher = publisher)
 
         // WHEN
         preArrest.executePreArrest()
@@ -41,10 +44,12 @@ class PreArrestTest {
         assertThat(preArrest.perpetratorId).isEqualTo(perpetratorId)
         assertThat { preArrest.preArrestDate }.isNotNull()
 
-        assertThat(preArrest.domainEvents).hasSize(1)
-        val event = preArrest.domainEvents.first() as PreArrestExecutedEvent
-        assertThat(event.visionId).isEqualTo(visionId)
-        assertThat(event.perpetratorId).isEqualTo(perpetratorId)
-        assertThat(event.preArrestId).isEqualTo(preArrest.id)
+        verify {
+            publisher.publish(
+                match<PreArrestExecutedEvent> {
+                    it.visionId == visionId && it.perpetratorId == perpetratorId && it.preArrestId == preArrest.id
+                }
+            )
+        }
     }
 }

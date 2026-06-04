@@ -1,12 +1,14 @@
 package ch.ejpd.example.precrime.domain.apology
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.vision.CrimeType
 import ch.ejpd.example.precrime.domain.vision.Vision
 import org.jmolecules.ddd.annotation.Service
 
 @Service
 class PreEmptiveApologyDomainService(
-    private val preApologyLetterService: PreApologyLetterService
+    private val preApologyLetterService: PreApologyLetterService,
+    private val publisher: DomainEventPublisher
 ) {
 
     fun generateApology(vision: Vision): PreApology {
@@ -30,7 +32,8 @@ class PreEmptiveApologyDomainService(
             visionId = vision.id,
             perpetratorId = vision.perpetratorId,
             compensation = compensation,
-            apologyLetter = ApologyLetter(letterText)
+            apologyLetter = ApologyLetter(letterText),
+            publisher = publisher
         )
         apology.issue()
         return apology

@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
 import ch.ejpd.example.precrime.IntegrationTest
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.Perpetrator
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
 import ch.ejpd.example.precrime.domain.prearrest.PreArrest
@@ -26,6 +27,9 @@ class JooqPreArrestRepositoryTest {
     @Autowired
     private lateinit var perpetratorRepository: PerpetratorRepository
 
+    @Autowired
+    private lateinit var publisher: DomainEventPublisher
+
     @Test
     fun `should save and find pre-arrest`() {
         // GIVEN
@@ -33,7 +37,7 @@ class JooqPreArrestRepositoryTest {
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         perpetratorRepository.save(perpetrator)
         val preArrestDate = OffsetDateTime.now()
-        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetrator.id, preArrestDate = preArrestDate)
+        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetrator.id, preArrestDate = preArrestDate, publisher = publisher)
 
         // WHEN
         repository.save(preArrest)
@@ -60,13 +64,15 @@ class JooqPreArrestRepositoryTest {
             visionId = VisionId(),
             perpetratorId = p1.id,
             preArrestDate = OffsetDateTime.now().minusDays(1),
-            status = PreArrestStatus.ARRESTED_BEFORE_CRIME
+            status = PreArrestStatus.ARRESTED_BEFORE_CRIME,
+            publisher = publisher
         )
         val preArrest2 = PreArrest(
             visionId = VisionId(),
             perpetratorId = p2.id,
             preArrestDate = OffsetDateTime.now(),
-            status = PreArrestStatus.ARRESTED_BEFORE_CRIME
+            status = PreArrestStatus.ARRESTED_BEFORE_CRIME,
+            publisher = publisher
         )
         repository.save(preArrest1)
         repository.save(preArrest2)

@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.apology.*
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.PRE_APOLOGY
 import org.jooq.DSLContext
@@ -11,7 +12,8 @@ import java.math.BigDecimal
 
 @Component
 class JooqPreApologyRepository(
-    private val dsl: DSLContext
+    private val dsl: DSLContext,
+    private val publisher: DomainEventPublisher
 ) : PreApologyRepository {
 
     override fun findById(id: PreApologyId): PreApology? {
@@ -61,6 +63,7 @@ class JooqPreApologyRepository(
             netPayout = get(PRE_APOLOGY.NET_PAYOUT)!!.toDouble()
         ),
         apologyLetter = ApologyLetter(get(PRE_APOLOGY.APOLOGY_TEXT)!!),
-        createdAt = get(PRE_APOLOGY.CREATED_AT)!!
+        createdAt = get(PRE_APOLOGY.CREATED_AT)!!,
+        publisher = publisher
     )
 }

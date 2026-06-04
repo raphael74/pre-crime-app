@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.domain.apology
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.vision.CrimeType
 import ch.ejpd.example.precrime.domain.vision.Vision
@@ -14,7 +15,8 @@ import java.time.LocalDateTime
 class PreEmptiveApologyDomainServiceTest {
 
     private val letterService = mockk<ThymeleafPreApologyLetterService>()
-    private val service = PreEmptiveApologyDomainService(letterService)
+    private val publisher = mockk<DomainEventPublisher>(relaxed = true)
+    private val service = PreEmptiveApologyDomainService(letterService, publisher)
 
     @Test
     fun `should calculate positive net compensation for a high-severity crime (murder)`() {
@@ -24,7 +26,8 @@ class PreEmptiveApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = LocalDateTime.now(),
+            publisher = publisher
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
@@ -48,7 +51,8 @@ class PreEmptiveApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.JAYWALKING,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = LocalDateTime.now(),
+            publisher = publisher
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
@@ -71,7 +75,8 @@ class PreEmptiveApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = PerpetratorId(),
             crimeType = CrimeType.LARCENY,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = LocalDateTime.now(),
+            publisher = publisher
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 

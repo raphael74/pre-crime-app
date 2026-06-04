@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.domain.apology
 
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
@@ -18,17 +19,11 @@ class PreApology(
     val perpetratorId: PerpetratorId,
     val compensation: Compensation,
     val apologyLetter: ApologyLetter,
-    val createdAt: OffsetDateTime = OffsetDateTime.now()
+    val createdAt: OffsetDateTime = OffsetDateTime.now(),
+    private val publisher: DomainEventPublisher
 ) {
-    private val _events = mutableListOf<Any>()
-    val domainEvents: List<Any> get() = _events.toList()
-
-    fun clearDomainEvents() {
-        _events.clear()
-    }
-
     fun issue() {
-        _events.add(
+        publisher.publish(
             PreApologyIssuedEvent(
                 apologyId = id,
                 visionId = visionId,

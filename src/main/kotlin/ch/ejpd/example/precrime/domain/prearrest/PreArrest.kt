@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.domain.prearrest
 
 import ch.ejpd.example.precrime.domain.AggregateVersion
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
@@ -19,24 +20,18 @@ class PreArrest(
     val perpetratorId: PerpetratorId,
     val preArrestIssuedDate: OffsetDateTime = OffsetDateTime.now(),
     var preArrestDate: OffsetDateTime? = null,
-    var status: PreArrestStatus = PreArrestStatus.PENDING
+    var status: PreArrestStatus = PreArrestStatus.PENDING,
+    private val publisher: DomainEventPublisher
 ) {
-    private val _events = mutableListOf<Any>()
-    val domainEvents: List<Any> get() = _events.toList()
-
-    fun clearDomainEvents() {
-        _events.clear()
-    }
-
     fun executePreArrest() {
         status = PreArrestStatus.ARRESTED_BEFORE_CRIME
         preArrestDate = OffsetDateTime.now()
-        _events.add(PreArrestExecutedEvent(id, visionId, perpetratorId))
+        publisher.publish(PreArrestExecutedEvent(id, visionId, perpetratorId))
     }
 
     fun cancelPreArrest() {
         status = PreArrestStatus.CANCELLED
-        _events.add(PreArrestCancelledEvent(id, visionId, perpetratorId))
+        publisher.publish(PreArrestCancelledEvent(id, visionId, perpetratorId))
     }
 }
 

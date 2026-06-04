@@ -72,11 +72,9 @@ class PreCrimeApplicationService(
             perpetrator = Perpetrator(firstName = perpetratorFirstName, lastName = perpetratorLastName)
             perpetratorRepository.save(perpetrator)
         }
-        val vision = VisionFactory.createVision(perpetrator.id, crimeType)
+        val vision = VisionFactory.createVision(perpetrator.id, crimeType, publisher)
         visionRepository.create(vision)
         vision.foreseeCrime()
-        publisher.publish(vision.domainEvents)
-        vision.clearDomainEvents()
         logger.info("[Vision] Foresee: $perpetratorFirstName $perpetratorLastName will commit ${crimeType.value}! Aggregate published event.")
         return vision.id
     }
@@ -86,8 +84,6 @@ class PreCrimeApplicationService(
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.executePreArrest()
         preArrestRepository.save(preArrest)
-        publisher.publish(preArrest.domainEvents)
-        preArrest.clearDomainEvents()
     }
 
 
@@ -96,8 +92,6 @@ class PreCrimeApplicationService(
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.cancelPreArrest()
         preArrestRepository.save(preArrest)
-        publisher.publish(preArrest.domainEvents)
-        preArrest.clearDomainEvents()
     }
 
     @DomainEventHandler
@@ -105,10 +99,8 @@ class PreCrimeApplicationService(
         val perpetrator = perpetratorRepository.findById(event.perpetratorId)
             ?: throw IllegalStateException("Perpetrator ${event.perpetratorId} not found")
         logger.info("[LawEnforcement] Received vision: ${perpetrator.fullName} planning ${event.crimeType.value}. Deploying jetpacks!")
-        val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId)
+        val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId, publisher = publisher)
         preArrestRepository.save(preArrest)
-        publisher.publish(preArrest.domainEvents)
-        preArrest.clearDomainEvents()
     }
 
     @DomainEventHandler
@@ -128,8 +120,6 @@ class PreCrimeApplicationService(
         val apology = preEmptiveApologyDomainService.generateApology(vision)
         preApologyRepository.save(apology)
 
-        publisher.publish(apology.domainEvents)
-        apology.clearDomainEvents()
         logger.info("[PreApologyService] Issued pre-emptive apology to ${perpetrator.fullName}. Net payout: ${apology.compensation.netPayout}")
     }
 }

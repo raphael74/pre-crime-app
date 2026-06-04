@@ -1,6 +1,7 @@
 package ch.ejpd.example.precrime.domain.vision
 
 import ch.ejpd.example.precrime.domain.AggregateVersion
+import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import org.jmolecules.ddd.annotation.*
 import org.jmolecules.ddd.types.Identifier
@@ -14,18 +15,11 @@ class Vision(
     var version: AggregateVersion = AggregateVersion(),
     val perpetratorId: PerpetratorId,
     val crimeType: CrimeType,
-    val foreseenAt: LocalDateTime
+    val foreseenAt: LocalDateTime,
+    private val publisher: DomainEventPublisher
 ) {
-    private val _events = mutableListOf<Any>()
-
-    val domainEvents: List<Any> get() = _events.toList()
-
-    fun clearDomainEvents() {
-        _events.clear()
-    }
-
     fun foreseeCrime() {
-        _events.add(
+        publisher.publish(
             CrimeForeseenEvent(
                 visionId = id,
                 perpetratorId = perpetratorId,
@@ -57,14 +51,15 @@ enum class CrimeType(val value: String) {
 @Factory
 class VisionFactory {
     companion object {
-        fun createVision(perpetratorId: PerpetratorId, crimeType: CrimeType): Vision {
+        fun createVision(perpetratorId: PerpetratorId, crimeType: CrimeType, publisher: DomainEventPublisher): Vision {
             val visionId = VisionId()
             val foreseenAt = LocalDateTime.now().plusHours(2)
             return Vision(
                 id = visionId,
                 perpetratorId = perpetratorId,
                 crimeType = crimeType,
-                foreseenAt = foreseenAt
+                foreseenAt = foreseenAt,
+                publisher = publisher
             )
         }
     }

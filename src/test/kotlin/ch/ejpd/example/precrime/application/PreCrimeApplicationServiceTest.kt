@@ -56,7 +56,7 @@ class PreCrimeApplicationServiceTest {
     }
 
     @Test
-    fun `triggerVision should find singleton, foresee crime and save and publish`() {
+    fun `triggerVision should find singleton, foresee crime and save`() {
         // GIVEN
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         every { perpetratorRepository.findByFirstAndLastName("John", "Doe") } returns perpetrator
@@ -64,10 +64,8 @@ class PreCrimeApplicationServiceTest {
         val vision = mockk<Vision>()
         every { vision.id } returns VisionId()
         every { vision.foreseeCrime() } returns Unit
-        every { vision.domainEvents } returns emptyList()
-        every { vision.clearDomainEvents() } returns Unit
         mockkObject(VisionFactory.Companion)
-        every { VisionFactory.createVision(any(), any()) } returns vision
+        every { VisionFactory.createVision(any(), any(), any()) } returns vision
         every { visionRepository.create(any()) } returns Unit
 
         // WHEN
@@ -78,13 +76,11 @@ class PreCrimeApplicationServiceTest {
             perpetratorRepository.findByFirstAndLastName("John", "Doe")
             visionRepository.create(any())
             vision.foreseeCrime()
-            publisher.publish(any())
-            vision.clearDomainEvents()
         }
     }
 
     @Test
-    fun `onCrimeForeseen should save pre-arrest and publish event`() {
+    fun `onCrimeForeseen should save pre-arrest`() {
         // GIVEN
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
@@ -101,12 +97,11 @@ class PreCrimeApplicationServiceTest {
             preArrestRepository.save(match {
                 it.visionId == visionId && it.perpetratorId == perpetrator.id
             })
-            publisher.publish(any())
         }
     }
 
     @Test
-    fun `onPreArrestExecuted should find singleton statistic, record prevention and save and publish`() {
+    fun `onPreArrestExecuted should find singleton statistic, record prevention and save`() {
         // GIVEN
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
@@ -116,7 +111,8 @@ class PreCrimeApplicationServiceTest {
             id = visionId,
             perpetratorId = perpetrator.id,
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = LocalDateTime.now(),
+            publisher = publisher
         )
         every { visionRepository.findById(any()) } returns vision
         every { perpetratorRepository.findById(perpetrator.id) } returns perpetrator
@@ -129,7 +125,8 @@ class PreCrimeApplicationServiceTest {
             visionId = visionId,
             perpetratorId = perpetrator.id,
             compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
-            apologyLetter = ApologyLetter("Dear family...")
+            apologyLetter = ApologyLetter("Dear family..."),
+            publisher = publisher
         ).apply { issue() }
         every { preEmptiveApologyDomainService.generateApology(vision) } returns apology
         every { preApologyRepository.save(any()) } returns Unit
@@ -145,8 +142,6 @@ class PreCrimeApplicationServiceTest {
             statisticRepository.update(statistic)
             preEmptiveApologyDomainService.generateApology(vision)
             preApologyRepository.save(apology)
-            publisher.publish(any())
-            apology.clearDomainEvents()
         }
     }
 }

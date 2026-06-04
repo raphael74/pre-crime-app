@@ -37,7 +37,8 @@ class JooqPreApologyRepositoryTest {
         perpetratorRepository.save(perpetrator)
         val compensation = Compensation(10000.0, 450.0, 250.0, 9300.0)
         val apologyLetter = ApologyLetter("Dear Family, we are sorry.")
-        val apology = PreApology(apologyId, visionId, perpetrator.id, compensation, apologyLetter, publisher = publisher)
+        val apology =
+            PreApology(apologyId, visionId, perpetrator.id, compensation, apologyLetter, publisher = publisher)
 
         // WHEN
         repository.save(apology)

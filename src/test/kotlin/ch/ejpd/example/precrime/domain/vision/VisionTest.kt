@@ -29,8 +29,8 @@ class VisionTest {
             publisher.publish(
                 match<CrimeForeseenEvent> {
                     it.visionId == vision.id &&
-                        it.perpetratorId == vision.perpetratorId &&
-                        it.crimeType == vision.crimeType
+                            it.perpetratorId == vision.perpetratorId &&
+                            it.crimeType == vision.crimeType
                 }
             )
         }

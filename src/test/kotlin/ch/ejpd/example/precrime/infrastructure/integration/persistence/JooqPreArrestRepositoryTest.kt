@@ -37,7 +37,12 @@ class JooqPreArrestRepositoryTest {
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         perpetratorRepository.save(perpetrator)
         val preArrestDate = OffsetDateTime.now()
-        val preArrest = PreArrest(visionId = visionId, perpetratorId = perpetrator.id, preArrestDate = preArrestDate, publisher = publisher)
+        val preArrest = PreArrest(
+            visionId = visionId,
+            perpetratorId = perpetrator.id,
+            preArrestDate = preArrestDate,
+            publisher = publisher
+        )
 
         // WHEN
         repository.save(preArrest)

@@ -31,6 +31,7 @@ class AuditIntegrationTest(
         await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS).untilAsserted {
             val logs = getAuditLogs()
             assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload?.contains("perpetratorId") == true }
+            assertThat(getPendingPreArrests()).isNotEmpty
         }
 
         val pendingPreArrests = getPendingPreArrests()

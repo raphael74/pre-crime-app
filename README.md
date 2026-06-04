@@ -79,6 +79,43 @@ classDiagram
 
 ## Architecture & Flow
 
+### Onion Architecture
+
+The project follows the **Onion Architecture** pattern, ensuring that the core domain is independent of external
+concerns. This is enforced using **jMolecules** annotations and **ArchUnit**.
+
+```mermaid
+flowchart TD
+  subgraph Infrastructure["Infrastructure Ring"]
+    direction TB
+    Rest["@RestController (Facade)"]
+    RepoImpl["jOOQ / SQL (Persistence)"]
+    Kafka["Kafka / Messaging (Integration)"]
+    Security["Spring Security (Security)"]
+  end
+
+  subgraph Application["Application Ring"]
+    direction TB
+    AppService["@Service (Orchestration)"]
+    EventHandler["@DomainEventHandler (Side Effects)"]
+  end
+
+  subgraph Domain["Domain Ring"]
+    direction TB
+    AR["@AggregateRoot"]
+    VO["@ValueObject"]
+    DE["@DomainEvent"]
+    Rep["@Repository (Interface)"]
+    Fact["@Factory"]
+  end
+
+  Infrastructure --> Application
+  Application --> Domain
+  Infrastructure -.->|Implements Interfaces| Domain
+```
+
+### Event Flow
+
 The following sequence diagram illustrates the event-driven flow between aggregates:
 
 ```mermaid
@@ -107,14 +144,14 @@ sequenceDiagram
 
 ## Technical Stack
 
-| Component            | Technology                                |
-|----------------------|-------------------------------------------|
-| **Backend**          | Kotlin 2.3.21, Java 25, Spring Boot 4.0.6 |
-| **Frontend**         | Angular 21, TypeScript, Vanilla CSS       |
-| **Persistence**      | PostgreSQL 18, jOOQ, Flyway               |
-| **Messaging**        | Kafka 4.2.0                               |
-| **Testing**          | JUnit 5, ArchUnit, jMolecules-test        |
-| **Containerization** | Docker Compose                            |
+| Component            | Technology                               |
+|----------------------|------------------------------------------|
+| **Backend**          | Kotlin 2.4.0, Java 25, Spring Boot 4.0.6 |
+| **Frontend**         | Angular 21, TypeScript, Vanilla CSS      |
+| **Persistence**      | PostgreSQL 18, jOOQ, Flyway              |
+| **Messaging**        | Kafka 4.2.0                              |
+| **Testing**          | JUnit 5, ArchUnit, jMolecules-test       |
+| **Containerization** | Docker Compose                           |
 
 ## Building and Running
 

@@ -23,23 +23,26 @@ class PreArrest(
     var preArrestDate: OffsetDateTime? = null,
     var status: PreArrestStatus = PreArrestStatus.PENDING
 ) {
-    private var publisher: DomainEventPublisher? = null
+    private var _publisher: DomainEventPublisher? = null
 
     fun injectPublisher(publisher: DomainEventPublisher) {
-        this.publisher = publisher
+        this._publisher = publisher
     }
 
+    private val publisher: DomainEventPublisher
+        get() = requireNotNull(_publisher) {
+            "DomainEventPublisher has not been injected into PreArrest $id"
+        }
+
     fun executePreArrest() {
-        val pub = requireNotNull(publisher) { "DomainEventPublisher has not been injected into PreArrest $id" }
         status = PreArrestStatus.ARRESTED_BEFORE_CRIME
         preArrestDate = OffsetDateTime.now()
-        pub.publish(PreArrestExecutedEvent(id, visionId, perpetratorId))
+        publisher.publish(PreArrestExecutedEvent(id, visionId, perpetratorId))
     }
 
     fun cancelPreArrest() {
-        val pub = requireNotNull(publisher) { "DomainEventPublisher has not been injected into PreArrest $id" }
         status = PreArrestStatus.CANCELLED
-        pub.publish(PreArrestCancelledEvent(id, visionId, perpetratorId))
+        publisher.publish(PreArrestCancelledEvent(id, visionId, perpetratorId))
     }
 }
 

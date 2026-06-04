@@ -4,6 +4,7 @@ import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import io.mockk.mockk
 import io.mockk.verify
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -33,5 +34,21 @@ class VisionTest {
                 }
             )
         }
+    }
+
+    @Test
+    fun `foreseeCrime should throw when publisher not injected`() {
+        // GIVEN
+        val vision = Vision(
+            id = VisionId(),
+            perpetratorId = PerpetratorId(),
+            crimeType = CrimeType.MURDER,
+            foreseenAt = LocalDateTime.now()
+        )
+
+        // WHEN + THEN
+        assertThatThrownBy { vision.foreseeCrime() }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("DomainEventPublisher has not been injected into Vision")
     }
 }

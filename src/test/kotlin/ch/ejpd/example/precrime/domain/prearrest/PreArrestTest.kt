@@ -6,6 +6,7 @@ import ch.ejpd.example.precrime.domain.vision.VisionId
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class PreArrestTest {
@@ -25,6 +26,16 @@ class PreArrestTest {
         assertThat(preArrest.perpetratorId).isEqualTo(perpetratorId)
     }
 
+    @Test
+    fun `executePreArrest should throw when publisher not injected`() {
+        // GIVEN
+        val preArrest = PreArrest(visionId = VisionId(), perpetratorId = PerpetratorId())
+
+        // WHEN + THEN
+        assertThatThrownBy { preArrest.executePreArrest() }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("DomainEventPublisher has not been injected into PreArrest")
+    }
 
     @Test
     fun `executing PreArrest should change to correct status and publish event`() {

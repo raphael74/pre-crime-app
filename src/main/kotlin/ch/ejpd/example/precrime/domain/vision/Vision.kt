@@ -17,15 +17,19 @@ class Vision(
     val crimeType: CrimeType,
     val foreseenAt: LocalDateTime
 ) {
-    private var publisher: DomainEventPublisher? = null
+    private var _publisher: DomainEventPublisher? = null
 
     fun injectPublisher(publisher: DomainEventPublisher) {
-        this.publisher = publisher
+        this._publisher = publisher
     }
 
+    private val publisher: DomainEventPublisher
+        get() = requireNotNull(_publisher) {
+            "DomainEventPublisher has not been injected into Vision $id"
+        }
+
     fun foreseeCrime() {
-        val pub = requireNotNull(publisher) { "DomainEventPublisher has not been injected into Vision $id" }
-        pub.publish(
+        publisher.publish(
             CrimeForeseenEvent(
                 visionId = id,
                 perpetratorId = perpetratorId,

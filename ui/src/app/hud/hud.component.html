@@ -54,8 +54,8 @@
                     </div>
                     <div class="apology-breakdown">
                         <span>Date: {{ arrest.preArrestIssuedDate | date:'medium' }}</span>
-                        <span>ID: {{ arrest.id?.substring(0, 8) }}...</span>
-                        <span>Vision: {{ arrest.visionId?.substring(0, 8) }}...</span>
+                        <span>ID: {{ arrest.id.substring(0, 8) }}...</span>
+                        <span>Vision: {{ arrest.visionId.substring(0, 8) }}...</span>
                     </div>
                     <div class="apology-breakdown">
                     <span>
@@ -108,8 +108,8 @@
                     </div>
                     <div class="apology-breakdown">
                         <span>Date: {{ arrest.preArrestDate | date:'medium' }}</span>
-                        <span>ID: {{ arrest.id?.substring(0, 8) }}...</span>
-                        <span>Vision: {{ arrest.visionId?.substring(0, 8) }}...</span>
+                        <span>ID: {{ arrest.id.substring(0, 8) }}...</span>
+                        <span>Vision: {{ arrest.visionId.substring(0, 8) }}...</span>
                     </div>
                 </div>
                 } @empty {
@@ -125,10 +125,10 @@
                 <div class="apology-card">
                     <div class="apology-header">
                         <span class="apology-perpetrator">{{ apology.firstName }} {{ apology.lastName }}</span>
-                        <span [class.negative]="(apology.netPayout ?? 0) < 0"
-                              [class.positive]="(apology.netPayout ?? 0) >= 0"
+                        <span [class.negative]="apology.netPayout < 0"
+                              [class.positive]="apology.netPayout >= 0"
                               class="apology-payout">
-                                {{ (apology.netPayout ?? 0) >= 0 ? '+' : '' }}{{ apology.netPayout | currency:'USD' }}
+                                {{ (apology.netPayout) >= 0 ? '+' : '' }}{{ apology.netPayout | currency:'USD' }}
                             </span>
                     </div>
                     <div class="apology-text">{{ apology.apologyText }}</div>

@@ -43,7 +43,7 @@ class PreCrimeScenarioTest(
         }
 
         val pendingPreArrests = getPendingPreArrests()
-        triggerArrest(pendingPreArrests.first().id!!)
+        triggerArrest(pendingPreArrests.first().id)
 
         // THEN: The statistics should be updated via the bidirectional event flow
         await().pollInterval(1, TimeUnit.SECONDS).atMost(10, TimeUnit.SECONDS).untilAsserted {
@@ -69,10 +69,10 @@ class PreCrimeScenarioTest(
         val apology = apologies.first()
         assertThat(apology.lastName).isEqualTo(lastName)
         assertThat(apology.firstName).isEqualTo(firstName)
-        assertThat(apology.baseAmount?.toDouble()).isEqualTo(10000.0)
-        assertThat(apology.jetpackFuelDeduction?.toDouble()).isEqualTo(450.0)
-        assertThat(apology.haloRentalFee?.toDouble()).isEqualTo(250.0)
-        assertThat(apology.netPayout?.toDouble()).isEqualTo(9300.0)
+        assertThat(apology.baseAmount.toDouble()).isEqualTo(10000.0)
+        assertThat(apology.jetpackFuelDeduction.toDouble()).isEqualTo(450.0)
+        assertThat(apology.haloRentalFee.toDouble()).isEqualTo(250.0)
+        assertThat(apology.netPayout.toDouble()).isEqualTo(9300.0)
         assertThat(apology.apologyText).contains("Dear Family of John Doe")
     }
 

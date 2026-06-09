@@ -30,17 +30,17 @@ class AuditIntegrationTest(
         // THEN: Both CrimeForeseenEvent and PreArrestExecutedEvent should be in the audit log
         await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS).untilAsserted {
             val logs = getAuditLogs()
-            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload?.contains("perpetratorId") == true }
+            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload.contains("perpetratorId") == true }
             assertThat(getPendingPreArrests()).isNotEmpty
         }
 
         val pendingPreArrests = getPendingPreArrests()
-        triggerArrest(pendingPreArrests.first().id!!)
+        triggerArrest(pendingPreArrests.first().id)
 
         await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS).untilAsserted {
             val logs = getAuditLogs()
-            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload?.contains("perpetratorId") == true }
-            assertThat(logs).anyMatch { it.eventType == "PreArrestExecutedEvent" && it.payload?.contains("perpetratorId") == true }
+            assertThat(logs).anyMatch { it.eventType == "CrimeForeseenEvent" && it.payload.contains("perpetratorId") == true }
+            assertThat(logs).anyMatch { it.eventType == "PreArrestExecutedEvent" && it.payload.contains("perpetratorId") == true }
         }
     }
 

@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.0.4
 info:
   title: Pre-Crime API
   description: API for the Pre-Crime department.
@@ -144,6 +144,11 @@ components:
   schemas:
     AuditEntry:
       type: object
+      required:
+        - id
+        - eventType
+        - payload
+        - recordedAt
       properties:
         id:
           $ref: '#/components/schemas/AuditEntryId'
@@ -156,6 +161,8 @@ components:
           format: date-time
     AuditEntryId:
       type: object
+      required:
+        - value
       properties:
         value:
           type: string
@@ -208,12 +215,25 @@ components:
             - TAX_EVASION
     CreateVisionResponse:
       type: object
+      required:
+        - visionId
       properties:
         visionId:
           type: string
           format: uuid
     PreApologyResponse:
       type: object
+      required:
+        - id
+        - preArrestId
+        - perpetratorId
+        - lastName
+        - firstName
+        - baseAmount
+        - jetpackFuelDeduction
+        - haloRentalFee
+        - netPayout
+        - apologyText
       properties:
         id:
           type: string
@@ -240,6 +260,14 @@ components:
           type: string
     PreArrestResponse:
       type: object
+      required:
+        - id
+        - visionId
+        - perpetratorId
+        - firstName
+        - lastName
+        - preArrestIssuedDate
+        - status
       properties:
         id:
           type: string
@@ -260,6 +288,7 @@ components:
         preArrestDate:
           type: string
           format: date-time
+          nullable: true
         status:
           type: string
           enum:
@@ -268,6 +297,8 @@ components:
             - CANCELLED
     UserResponse:
       type: object
+      required:
+        - username
       properties:
         username:
           type: string

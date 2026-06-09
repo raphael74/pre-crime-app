@@ -10,10 +10,9 @@ import java.util.*
 
 @IntegrationTest
 @Transactional
-class JooqStatisticRepositoryTest {
-
-    @Autowired
-    private lateinit var repository: JooqStatisticRepository
+class JooqStatisticRepositoryTest(
+    @Autowired private var repository: JooqStatisticRepository
+) {
 
     private val SINGLETON_ID = StatisticId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 

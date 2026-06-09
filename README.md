@@ -77,6 +77,75 @@ classDiagram
   PreApology ..> Perpetrator: references
 ```
 
+## Database Schema
+
+```mermaid
+erDiagram
+    perpetrator {
+        uuid id PK
+        bigint version
+        varchar first_name
+        varchar last_name
+    }
+    vision {
+        uuid id PK
+        bigint version
+        uuid perpetrator_id FK
+        varchar crime_type
+        timestamp foreseen_at
+    }
+    pre_arrest {
+        uuid id PK
+        bigint version
+        uuid vision_id FK
+        uuid perpetrator_id FK
+        varchar status
+        timestamptz pre_arrest_issued_date
+        timestamptz pre_arrest_date "nullable"
+    }
+    pre_apology {
+        uuid id PK
+        uuid pre_arrest_id FK
+        uuid perpetrator_id FK
+        decimal base_amount
+        decimal jetpack_fuel_deduction
+        decimal halo_rental_fee
+        decimal net_payout
+        varchar apology_text
+        timestamptz created_at
+    }
+    statistic {
+        uuid id PK
+        bigint version
+        int total_crimes_prevented
+    }
+    audit_log {
+        uuid id PK
+        varchar event_type
+        json payload
+        timestamptz recorded_at
+    }
+    outbox {
+        uuid id PK
+        varchar event_class
+        json event
+        varchar status
+        timestamptz created_at
+        timestamptz processed_at "nullable"
+    }
+    inbox {
+        uuid id PK
+        varchar consumer_group PK
+        timestamptz processed_at
+    }
+
+    perpetrator ||--o{ vision : ""
+    perpetrator ||--o{ pre_arrest : ""
+    perpetrator ||--o{ pre_apology : ""
+    vision ||--o{ pre_arrest : ""
+    pre_arrest ||--o{ pre_apology : ""
+```
+
 ## Architecture & Flow
 
 ### Onion Architecture

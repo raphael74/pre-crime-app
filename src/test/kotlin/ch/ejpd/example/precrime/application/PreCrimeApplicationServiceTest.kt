@@ -18,7 +18,7 @@ import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @ExtendWith(MockKExtension::class)
 class PreCrimeApplicationServiceTest {
@@ -84,15 +84,15 @@ class PreCrimeApplicationServiceTest {
         // GIVEN
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
-        val event = CrimeForeseenEvent(visionId, perpetrator.id, CrimeType.MURDER, LocalDateTime.now())
-        every { preArrestRepository.save(any()) } returns Unit
+        val event = CrimeForeseenEvent(visionId, perpetrator.id, CrimeType.MURDER, OffsetDateTime.now())
+        every { preArrestRepository.create(any()) } returns Unit
 
         // WHEN
         service.onCrimeForeseen(event)
 
         // THEN
         verify {
-            preArrestRepository.save(match {
+            preArrestRepository.create(match {
                 it.visionId == visionId && it.perpetratorId == perpetrator.id
             })
         }
@@ -110,7 +110,7 @@ class PreCrimeApplicationServiceTest {
             id = visionId,
             perpetratorId = perpetrator.id,
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = OffsetDateTime.now()
         )
         every { visionRepository.findById(any()) } returns vision
 

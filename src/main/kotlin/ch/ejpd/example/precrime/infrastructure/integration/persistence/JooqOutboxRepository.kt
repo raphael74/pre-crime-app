@@ -43,6 +43,7 @@ class JooqOutboxRepository(
     }
 
     override fun findPendingForUpdate(): List<Outbox> {
+        // Use pessimistic locking
         return dsl.select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
             .from(OUTBOX)
             .where(OUTBOX.STATUS.eq(OutboxState.PENDING))

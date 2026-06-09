@@ -13,13 +13,10 @@ import org.springframework.transaction.annotation.Transactional
 
 @IntegrationTest
 @Transactional
-class JooqPerpetratorRepositoryCachingTest {
-
-    @Autowired
-    private lateinit var perpetratorRepository: PerpetratorRepository
-
-    @Autowired
-    private lateinit var cacheManager: CacheManager
+class JooqPerpetratorRepositoryCachingTest(
+    @Autowired private var perpetratorRepository: PerpetratorRepository,
+    @Autowired private var cacheManager: CacheManager
+) {
 
     @Test
     fun `should cache perpetrator findById`() {

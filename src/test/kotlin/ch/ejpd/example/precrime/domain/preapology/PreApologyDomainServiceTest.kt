@@ -10,7 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 class PreApologyDomainServiceTest {
 
@@ -26,7 +26,7 @@ class PreApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = OffsetDateTime.now()
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
@@ -51,7 +51,7 @@ class PreApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.JAYWALKING,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = OffsetDateTime.now()
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
@@ -76,7 +76,7 @@ class PreApologyDomainServiceTest {
             id = VisionId(),
             perpetratorId = perpetratorId,
             crimeType = CrimeType.LARCENY,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = OffsetDateTime.now()
         )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 

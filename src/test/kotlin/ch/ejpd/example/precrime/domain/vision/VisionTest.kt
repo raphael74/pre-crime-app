@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 class VisionTest {
 
@@ -18,7 +18,7 @@ class VisionTest {
             id = VisionId(),
             perpetratorId = PerpetratorId(),
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = OffsetDateTime.now()
         ).apply { injectPublisher(publisher) }
 
         // WHEN
@@ -43,7 +43,7 @@ class VisionTest {
             id = VisionId(),
             perpetratorId = PerpetratorId(),
             crimeType = CrimeType.MURDER,
-            foreseenAt = LocalDateTime.now()
+            foreseenAt = OffsetDateTime.now()
         )
 
         // WHEN + THEN

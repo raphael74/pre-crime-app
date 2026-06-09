@@ -90,7 +90,7 @@ class PreCrimeApplicationService(
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.injectPublisher(publisher)
         preArrest.executePreArrest()
-        preArrestRepository.save(preArrest)
+        preArrestRepository.create(preArrest)
     }
 
     fun cancelPreArrest(preArrestId: PreArrestId) {
@@ -99,13 +99,13 @@ class PreCrimeApplicationService(
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.injectPublisher(publisher)
         preArrest.cancelPreArrest()
-        preArrestRepository.save(preArrest)
+        preArrestRepository.create(preArrest)
     }
 
     @DomainEventHandler
     fun onCrimeForeseen(event: CrimeForeseenEvent) {
         val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId)
-        preArrestRepository.save(preArrest)
+        preArrestRepository.create(preArrest)
     }
 
     @DomainEventHandler

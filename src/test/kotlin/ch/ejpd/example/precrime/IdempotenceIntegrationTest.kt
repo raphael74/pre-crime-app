@@ -3,14 +3,12 @@ package ch.ejpd.example.precrime
 import ch.ejpd.example.precrime.domain.perpetrator.Perpetrator
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorRepository
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestRepository
-import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
-import ch.ejpd.example.precrime.domain.vision.CrimeType
-import ch.ejpd.example.precrime.domain.vision.VisionId
+import ch.ejpd.example.precrime.domain.vision.*
 import ch.ejpd.example.precrime.infrastructure.facade.event.KafkaDomainEventConsumer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.util.*
 
 @IntegrationTest
@@ -18,7 +16,8 @@ import java.util.*
 class IdempotenceIntegrationTest(
     @Autowired private val consumer: KafkaDomainEventConsumer,
     @Autowired private val preArrestRepository: PreArrestRepository,
-    @Autowired private val perpetratorRepository: PerpetratorRepository
+    @Autowired private val perpetratorRepository: PerpetratorRepository,
+    @Autowired private val visionRepository: VisionRepository
 ) {
 
     @Test
@@ -27,8 +26,15 @@ class IdempotenceIntegrationTest(
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "Unknown", lastName = "Suspect")
         perpetratorRepository.create(perpetrator)
+        val vision = Vision(
+            id = visionId,
+            perpetratorId = perpetrator.id,
+            crimeType = CrimeType.THEFT,
+            foreseenAt = OffsetDateTime.now()
+        )
+        visionRepository.create(vision)
 
-        val event = CrimeForeseenEvent(visionId, perpetrator.id, CrimeType.THEFT, LocalDateTime.now())
+        val event = CrimeForeseenEvent(visionId, perpetrator.id, CrimeType.THEFT, OffsetDateTime.now())
         val idempotenceId = UUID.randomUUID().toString()
 
         // WHEN: Process the event for the first time

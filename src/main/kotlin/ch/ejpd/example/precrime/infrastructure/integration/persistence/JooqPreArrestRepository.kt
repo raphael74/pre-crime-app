@@ -34,7 +34,7 @@ class JooqPreArrestRepository(
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    override fun save(preArrest: PreArrest) {
+    override fun create(preArrest: PreArrest) {
         val exists = dsl.fetchExists(
             dsl.selectOne()
                 .from(PRE_ARREST)

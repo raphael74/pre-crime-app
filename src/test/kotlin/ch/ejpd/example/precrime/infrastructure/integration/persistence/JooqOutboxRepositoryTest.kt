@@ -11,7 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @IntegrationTest
 @Transactional
@@ -23,7 +23,7 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should create and read an outbox entry`() {
         // GIVEN
-        val testEvent = CrimeForeseenEvent(VisionId(), PerpetratorId(), CrimeType.MURDER, LocalDateTime.now())
+        val testEvent = PreArrestExecutedEvent(PreArrestId(), VisionId(), PerpetratorId())
 
         // WHEN
         val id = outboxRepository.create(testEvent)
@@ -43,7 +43,7 @@ class JooqOutboxRepositoryTest {
                 VisionId(),
                 PerpetratorId(),
                 CrimeType.MURDER,
-                LocalDateTime.now()
+                OffsetDateTime.now()
             )
         )
         val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), PerpetratorId()))

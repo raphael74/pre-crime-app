@@ -16,17 +16,17 @@ CREATE TABLE perpetrator
 CREATE TABLE vision
 (
     id             UUID PRIMARY KEY,
-    version        BIGINT    NOT NULL DEFAULT 0,
-    perpetrator_id UUID      NOT NULL REFERENCES perpetrator (id),
-    crime_type     VARCHAR   NOT NULL,
-    foreseen_at    TIMESTAMP NOT NULL
+    version        BIGINT                   NOT NULL DEFAULT 0,
+    perpetrator_id UUID                     NOT NULL REFERENCES perpetrator (id),
+    crime_type     VARCHAR                  NOT NULL,
+    foreseen_at    TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 CREATE TABLE pre_arrest
 (
     id                     UUID PRIMARY KEY,
     version                BIGINT                   NOT NULL DEFAULT 0,
-    vision_id              UUID                     NOT NULL,
+    vision_id              UUID                     NOT NULL REFERENCES vision (id),
     perpetrator_id         UUID                     NOT NULL REFERENCES perpetrator (id),
     status                 VARCHAR                  NOT NULL,
     pre_arrest_issued_date TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE inbox
 CREATE TABLE pre_apology
 (
     id                     UUID PRIMARY KEY,
-    pre_arrest_id          UUID                     NOT NULL,
+    pre_arrest_id          UUID                     NOT NULL REFERENCES pre_arrest (id),
     perpetrator_id         UUID                     NOT NULL REFERENCES perpetrator (id),
     base_amount            DECIMAL(10, 2)           NOT NULL,
     jetpack_fuel_deduction DECIMAL(10, 2)           NOT NULL,

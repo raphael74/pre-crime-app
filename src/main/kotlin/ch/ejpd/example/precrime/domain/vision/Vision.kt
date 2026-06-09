@@ -9,16 +9,16 @@ import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.util.*
 
 @AggregateRoot
 class Vision(
-    @Identity val id: VisionId,
+    @Identity val id: VisionId = VisionId(),
     var version: AggregateVersion = AggregateVersion(),
     val perpetratorId: PerpetratorId,
     val crimeType: CrimeType,
-    val foreseenAt: LocalDateTime
+    val foreseenAt: OffsetDateTime
 ) {
     private var _publisher: DomainEventPublisher? = null
 
@@ -66,7 +66,7 @@ class VisionFactory {
     companion object {
         fun createVision(perpetratorId: PerpetratorId, crimeType: CrimeType): Vision {
             val visionId = VisionId()
-            val foreseenAt = LocalDateTime.now().plusHours(2)
+            val foreseenAt = OffsetDateTime.now().plusHours(2)
             return Vision(
                 id = visionId,
                 perpetratorId = perpetratorId,
@@ -85,5 +85,5 @@ data class CrimeForeseenEvent(
     val visionId: VisionId,
     val perpetratorId: PerpetratorId,
     val crimeType: CrimeType,
-    val foreseenAt: LocalDateTime
+    val foreseenAt: OffsetDateTime
 )

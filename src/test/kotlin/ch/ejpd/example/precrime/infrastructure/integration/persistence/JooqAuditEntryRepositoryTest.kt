@@ -11,10 +11,9 @@ import java.time.temporal.ChronoUnit
 
 @IntegrationTest
 @Transactional
-class JooqAuditEntryRepositoryTest {
-
-    @Autowired
-    private lateinit var repository: JooqAuditEntryRepository
+class JooqAuditEntryRepositoryTest(
+    @Autowired private var repository: JooqAuditEntryRepository
+) {
 
     @Test
     fun `should save and find all audit entries`() {

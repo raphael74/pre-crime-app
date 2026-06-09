@@ -1,7 +1,7 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
+import ch.ejpd.example.precrime.infrastructure.integration.event.Outbox
 import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxId
-import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxRecord
 import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxRepository
 import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxState
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.OUTBOX
@@ -34,7 +34,7 @@ class JooqOutboxRepository(
         return id
     }
 
-    override fun findById(id: OutboxId): OutboxRecord? {
+    override fun findById(id: OutboxId): Outbox? {
         return dsl.select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
             .from(OUTBOX)
             .where(OUTBOX.ID.eq(id))
@@ -42,7 +42,7 @@ class JooqOutboxRepository(
             ?.toOutboxRecord()
     }
 
-    override fun findPendingForUpdate(): List<OutboxRecord> {
+    override fun findPendingForUpdate(): List<Outbox> {
         return dsl.select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
             .from(OUTBOX)
             .where(OUTBOX.STATUS.eq(OutboxState.PENDING))
@@ -61,7 +61,7 @@ class JooqOutboxRepository(
             .execute()
     }
 
-    private fun Record.toOutboxRecord() = OutboxRecord(
+    private fun Record.toOutboxRecord() = Outbox(
         id = get(OUTBOX.ID)!!,
         event = convertToEvent(get(OUTBOX.EVENT)!!.data(), Class.forName(get(OUTBOX.EVENT_CLASS)!!)),
         status = get(OUTBOX.STATUS)!!

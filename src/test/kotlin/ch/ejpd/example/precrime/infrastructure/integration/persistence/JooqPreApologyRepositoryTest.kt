@@ -55,7 +55,7 @@ class JooqPreApologyRepositoryTest(
             PreApology(apologyId, preArrest.id, perpetrator.id, compensation, apologyLetter)
 
         // WHEN
-        repository.save(preApology)
+        repository.create(preApology)
 
         // THEN
         val retrieved = repository.findById(apologyId)
@@ -119,9 +119,9 @@ class JooqPreApologyRepositoryTest(
             createdAt = now.minusDays(1)
         )
 
-        repository.save(apology1)
-        repository.save(apology2)
-        repository.save(apology3)
+        repository.create(apology1)
+        repository.create(apology2)
+        repository.create(apology3)
 
         // WHEN
         val all = repository.findAll()
@@ -164,8 +164,8 @@ class JooqPreApologyRepositoryTest(
             apologyLetter = ApologyLetter("Sorry 2")
         )
 
-        repository.save(apology1)
-        repository.save(apology2)
+        repository.create(apology1)
+        repository.create(apology2)
 
         // WHEN
         val all = repository.findAll()

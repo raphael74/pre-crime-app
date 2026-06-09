@@ -90,7 +90,7 @@ class PreCrimeApplicationService(
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.injectPublisher(publisher)
         preArrest.executePreArrest()
-        preArrestRepository.create(preArrest)
+        preArrestRepository.update(preArrest)
     }
 
     fun cancelPreArrest(preArrestId: PreArrestId) {
@@ -99,7 +99,7 @@ class PreCrimeApplicationService(
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.injectPublisher(publisher)
         preArrest.cancelPreArrest()
-        preArrestRepository.create(preArrest)
+        preArrestRepository.update(preArrest)
     }
 
     @DomainEventHandler
@@ -130,7 +130,7 @@ class PreCrimeApplicationService(
         val preApology = preApologyDomainService.generatePreApology(preArrestId, perpetratorId, vision.crimeType)
         preApology.injectPublisher(publisher)
         preApology.issue()
-        preApologyRepository.save(preApology)
+        preApologyRepository.create(preApology)
 
         logger.info("Issued pre-emptive apology to ${preApology.perpetratorId}. Net payout: ${preApology.compensation.netPayout}")
     }

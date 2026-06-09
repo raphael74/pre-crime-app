@@ -22,25 +22,18 @@ class JooqPreApologyRepository(
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    override fun save(apology: PreApology) {
-        val exists = dsl.fetchExists(
-            dsl.selectOne()
-                .from(PRE_APOLOGY)
-                .where(PRE_APOLOGY.ID.eq(apology.id))
-        )
-        if (!exists) {
-            dsl.insertInto(PRE_APOLOGY)
-                .set(PRE_APOLOGY.ID, apology.id)
-                .set(PRE_APOLOGY.PRE_ARREST_ID, apology.preArrestId)
-                .set(PRE_APOLOGY.PERPETRATOR_ID, apology.perpetratorId)
-                .set(PRE_APOLOGY.BASE_AMOUNT, BigDecimal.valueOf(apology.compensation.baseAmount))
-                .set(PRE_APOLOGY.JETPACK_FUEL_DEDUCTION, BigDecimal.valueOf(apology.compensation.jetpackFuelDeduction))
-                .set(PRE_APOLOGY.HALO_RENTAL_FEE, BigDecimal.valueOf(apology.compensation.haloRentalFee))
-                .set(PRE_APOLOGY.NET_PAYOUT, BigDecimal.valueOf(apology.compensation.netPayout))
-                .set(PRE_APOLOGY.APOLOGY_TEXT, apology.apologyLetter.text)
-                .set(PRE_APOLOGY.CREATED_AT, apology.createdAt)
-                .execute()
-        }
+    override fun create(apology: PreApology) {
+        dsl.insertInto(PRE_APOLOGY)
+            .set(PRE_APOLOGY.ID, apology.id)
+            .set(PRE_APOLOGY.PRE_ARREST_ID, apology.preArrestId)
+            .set(PRE_APOLOGY.PERPETRATOR_ID, apology.perpetratorId)
+            .set(PRE_APOLOGY.BASE_AMOUNT, BigDecimal.valueOf(apology.compensation.baseAmount))
+            .set(PRE_APOLOGY.JETPACK_FUEL_DEDUCTION, BigDecimal.valueOf(apology.compensation.jetpackFuelDeduction))
+            .set(PRE_APOLOGY.HALO_RENTAL_FEE, BigDecimal.valueOf(apology.compensation.haloRentalFee))
+            .set(PRE_APOLOGY.NET_PAYOUT, BigDecimal.valueOf(apology.compensation.netPayout))
+            .set(PRE_APOLOGY.APOLOGY_TEXT, apology.apologyLetter.text)
+            .set(PRE_APOLOGY.CREATED_AT, apology.createdAt)
+            .execute()
     }
 
     override fun findAll(): List<PreApology> {

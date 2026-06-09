@@ -131,7 +131,7 @@ class PreCrimeApplicationServiceTest {
                 vision.crimeType
             )
         } returns apology
-        every { preApologyRepository.save(any()) } returns Unit
+        every { preApologyRepository.create(any()) } returns Unit
 
         // WHEN
         service.onPreArrestExecuted(event)
@@ -142,7 +142,7 @@ class PreCrimeApplicationServiceTest {
             statistic.recordPrevention()
             statisticRepository.update(statistic)
             preApologyDomainService.generatePreApology(preArrestId, perpetrator.id, vision.crimeType)
-            preApologyRepository.save(apology)
+            preApologyRepository.create(apology)
         }
     }
 }

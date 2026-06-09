@@ -62,7 +62,7 @@ CREATE TABLE inbox
 CREATE TABLE pre_apology
 (
     id                     UUID PRIMARY KEY,
-    pre_arrest_id UUID NOT NULL,
+    pre_arrest_id          UUID                     NOT NULL,
     perpetrator_id         UUID                     NOT NULL REFERENCES perpetrator (id),
     base_amount            DECIMAL(10, 2)           NOT NULL,
     jetpack_fuel_deduction DECIMAL(10, 2)           NOT NULL,

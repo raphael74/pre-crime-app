@@ -1,5 +1,9 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
+import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxId
+import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxRecord
+import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxRepository
+import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxState
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.OUTBOX
 import org.jooq.DSLContext
 import org.jooq.JSON
@@ -9,15 +13,15 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 import java.time.OffsetDateTime
-import java.util.*
 
 @Component
 class JooqOutboxRepository(
     private val dsl: DSLContext,
     private val objectMapper: ObjectMapper
-) {
+) : OutboxRepository {
+
     @Transactional(propagation = Propagation.MANDATORY)
-    fun create(event: Any): OutboxId {
+    override fun create(event: Any): OutboxId {
 
         val id = OutboxId()
         dsl.insertInto(OUTBOX)
@@ -30,7 +34,7 @@ class JooqOutboxRepository(
         return id
     }
 
-    fun findById(id: OutboxId): OutboxRecord? {
+    override fun findById(id: OutboxId): OutboxRecord? {
         return dsl.select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
             .from(OUTBOX)
             .where(OUTBOX.ID.eq(id))
@@ -38,7 +42,7 @@ class JooqOutboxRepository(
             ?.toOutboxRecord()
     }
 
-    fun findPendingForUpdate(): List<OutboxRecord> {
+    override fun findPendingForUpdate(): List<OutboxRecord> {
         return dsl.select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
             .from(OUTBOX)
             .where(OUTBOX.STATUS.eq(OutboxState.PENDING))
@@ -49,7 +53,7 @@ class JooqOutboxRepository(
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    fun markAsProcessed(id: OutboxId) {
+    override fun markAsProcessed(id: OutboxId) {
         dsl.update(OUTBOX)
             .set(OUTBOX.STATUS, OutboxState.PROCESSED)
             .set(OUTBOX.PROCESSED_AT, OffsetDateTime.now())
@@ -68,12 +72,3 @@ class JooqOutboxRepository(
     }
 }
 
-data class OutboxId(val value: UUID = UUID.randomUUID())
-
-enum class OutboxState { PENDING, PROCESSED }
-
-data class OutboxRecord(
-    val id: OutboxId,
-    val event: Any,
-    val status: OutboxState
-)

@@ -1,5 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.integration.persistence
 
+import ch.ejpd.example.precrime.infrastructure.facade.event.InboxRepository
 import ch.ejpd.example.precrime.infrastructure.integration.persistence.jooq.tables.references.INBOX
 import org.jooq.DSLContext
 import org.springframework.stereotype.Component
@@ -9,8 +10,9 @@ import java.util.*
 @Component
 class JooqInboxRepository(
     private val dsl: DSLContext
-) {
-    fun insertIfNotExists(id: UUID, consumerGroup: String): Boolean {
+) : InboxRepository {
+
+    override fun insertIfNotExists(id: UUID, consumerGroup: String): Boolean {
         // Use a manual check + insert to be safe with H2's problematic MERGE/ON CONFLICT support
         // since we are in a transaction anyway.
         val exists = dsl.fetchExists(

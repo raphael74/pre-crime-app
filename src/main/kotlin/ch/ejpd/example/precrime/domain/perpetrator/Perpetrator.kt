@@ -3,7 +3,6 @@ package ch.ejpd.example.precrime.domain.perpetrator
 import ch.ejpd.example.precrime.domain.AggregateVersion
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
-import org.jmolecules.ddd.annotation.Repository
 import org.jmolecules.ddd.types.Identifier
 import java.util.*
 
@@ -26,12 +25,3 @@ class Perpetrator(
 
 @JvmInline
 value class PerpetratorId(val value: UUID = UUID.randomUUID()) : Identifier
-
-@Repository
-interface PerpetratorRepository {
-    fun findById(id: PerpetratorId): Perpetrator?
-    fun findByIds(ids: Collection<PerpetratorId>): List<Perpetrator>
-    fun findByFirstAndLastName(firstName: String, lastName: String): Perpetrator?
-    fun save(perpetrator: Perpetrator)
-    fun findAll(): List<Perpetrator>
-}

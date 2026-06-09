@@ -6,7 +6,6 @@ import ch.ejpd.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics
 import ch.ejpd.example.precrime.infrastructure.integration.event.IDEMPOTENCE_ID_HEADER
-import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqInboxRepository
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.BackOff
@@ -28,7 +27,7 @@ private const val PRE_CRIME_AUDIT_GROUP = "pre-crime-audit-group"
 class KafkaDomainEventConsumer(
     private val applicationService: PreCrimeApplicationService,
     private val auditService: AuditApplicationService,
-    private val inboxRepository: JooqInboxRepository,
+    private val inboxRepository: InboxRepository,
     private val objectMapper: ObjectMapper
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)

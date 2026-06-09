@@ -69,6 +69,7 @@ class JooqPerpetratorRepository(
 
     override fun findAll(): List<Perpetrator> {
         return dsl.selectFrom(PERPETRATOR)
+            .orderBy(PERPETRATOR.FIRST_NAME, PERPETRATOR.LAST_NAME)
             .fetch()
             .map { it.toPerpetrator() }
     }

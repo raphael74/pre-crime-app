@@ -3,7 +3,10 @@ package ch.ejpd.example.precrime.domain.vision
 import ch.ejpd.example.precrime.domain.AggregateVersion
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
-import org.jmolecules.ddd.annotation.*
+import org.jmolecules.ddd.annotation.AggregateRoot
+import org.jmolecules.ddd.annotation.Factory
+import org.jmolecules.ddd.annotation.Identity
+import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.time.LocalDateTime
@@ -84,10 +87,3 @@ data class CrimeForeseenEvent(
     val crimeType: CrimeType,
     val foreseenAt: LocalDateTime
 )
-
-@Repository
-interface VisionRepository {
-    fun findById(id: VisionId): Vision?
-    fun create(vision: Vision)
-    fun update(vision: Vision)
-}

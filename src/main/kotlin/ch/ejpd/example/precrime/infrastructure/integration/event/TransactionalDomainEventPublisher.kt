@@ -1,7 +1,6 @@
 package ch.ejpd.example.precrime.infrastructure.integration.event
 
 import ch.ejpd.example.precrime.domain.DomainEventPublisher
-import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqOutboxRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
@@ -9,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class TransactionalDomainEventPublisher(
-    private val outboxRepository: JooqOutboxRepository
+    private val outboxRepository: OutboxRepository
 ) : DomainEventPublisher {
     private val logger = LoggerFactory.getLogger(javaClass)
 

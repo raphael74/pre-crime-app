@@ -7,6 +7,7 @@ import ch.ejpd.example.precrime.domain.preapology.PreApologyId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.statistic.StatisticId
 import ch.ejpd.example.precrime.domain.vision.VisionId
+import ch.ejpd.example.precrime.infrastructure.integration.event.OutboxId
 import org.jooq.impl.AbstractConverter
 import java.util.*
 

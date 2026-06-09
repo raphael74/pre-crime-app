@@ -8,8 +8,6 @@ import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORES
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_APOLOGY_ISSUED_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_CANCELLED_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
-import ch.ejpd.example.precrime.infrastructure.integration.persistence.JooqOutboxRepository
-import ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxId
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -21,7 +19,7 @@ const val IDEMPOTENCE_ID_HEADER = "x-idempotence-id"
 
 @Component
 class TransactionalOutboxProcessor(
-    private val outboxRepository: JooqOutboxRepository,
+    private val outboxRepository: OutboxRepository,
     private val kafkaTemplate: KafkaTemplate<String, Any>
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)

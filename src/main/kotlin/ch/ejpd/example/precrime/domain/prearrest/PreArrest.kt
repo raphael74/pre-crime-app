@@ -6,7 +6,6 @@ import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
-import org.jmolecules.ddd.annotation.Repository
 import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
@@ -70,11 +69,3 @@ data class PreArrestCancelledEvent(
     val perpetratorId: PerpetratorId
 )
 
-@Repository
-interface PreArrestRepository {
-    fun findById(id: PreArrestId): PreArrest?
-    fun save(preArrest: PreArrest)
-    fun findAll(): List<PreArrest>
-    fun findAllArrested(): List<PreArrest>
-    fun findAllPending(): List<PreArrest>
-}

@@ -4,7 +4,10 @@ import ch.ejpd.example.precrime.domain.DomainEventPublisher
 import ch.ejpd.example.precrime.domain.perpetrator.PerpetratorId
 import ch.ejpd.example.precrime.domain.prearrest.PreArrestId
 import ch.ejpd.example.precrime.domain.vision.CrimeType
-import org.jmolecules.ddd.annotation.*
+import org.jmolecules.ddd.annotation.AggregateRoot
+import org.jmolecules.ddd.annotation.Factory
+import org.jmolecules.ddd.annotation.Identity
+import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.time.OffsetDateTime
@@ -81,13 +84,6 @@ data class ApologyLetter(val text: String) {
     init {
         require(text.isNotBlank()) { "Letter text cannot be blank" }
     }
-}
-
-@Repository
-interface PreApologyRepository {
-    fun save(apology: PreApology)
-    fun findById(id: PreApologyId): PreApology?
-    fun findAll(): List<PreApology>
 }
 
 @DomainEvent

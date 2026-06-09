@@ -55,7 +55,7 @@
                     <includeExpression>audit_log\.id</includeExpression>
                 </forcedType>
                 <forcedType>
-                    <userType>ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxId</userType>
+                    <userType>ch.ejpd.example.precrime.infrastructure.integration.event.OutboxId</userType>
                     <converter>ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxIdConverter
                     </converter>
                     <includeExpression>outbox\.id</includeExpression>
@@ -66,7 +66,7 @@
                     <includeExpression>pre_arrest\.status</includeExpression>
                 </forcedType>
                 <forcedType>
-                    <userType>ch.ejpd.example.precrime.infrastructure.integration.persistence.OutboxState</userType>
+                    <userType>ch.ejpd.example.precrime.infrastructure.integration.event.OutboxState</userType>
                     <enumConverter>true</enumConverter>
                     <includeExpression>outbox\.status</includeExpression>
                 </forcedType>

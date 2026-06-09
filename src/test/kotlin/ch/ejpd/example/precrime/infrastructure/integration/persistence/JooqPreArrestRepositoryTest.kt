@@ -31,7 +31,7 @@ class JooqPreArrestRepositoryTest {
         // GIVEN
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
-        perpetratorRepository.save(perpetrator)
+        perpetratorRepository.create(perpetrator)
         val preArrestDate = OffsetDateTime.now()
         val preArrest = PreArrest(
             visionId = visionId,
@@ -57,8 +57,8 @@ class JooqPreArrestRepositoryTest {
         // GIVEN
         val p1 = Perpetrator(firstName = "John", lastName = "Doe")
         val p2 = Perpetrator(firstName = "Jane", lastName = "Smith")
-        perpetratorRepository.save(p1)
-        perpetratorRepository.save(p2)
+        perpetratorRepository.create(p1)
+        perpetratorRepository.create(p2)
 
         val preArrest1 = PreArrest(
             visionId = VisionId(),

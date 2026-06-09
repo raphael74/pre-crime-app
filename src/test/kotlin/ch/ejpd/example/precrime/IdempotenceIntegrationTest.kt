@@ -26,7 +26,7 @@ class IdempotenceIntegrationTest(
         // GIVEN
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "Unknown", lastName = "Suspect")
-        perpetratorRepository.save(perpetrator)
+        perpetratorRepository.create(perpetrator)
 
         val event = CrimeForeseenEvent(visionId, perpetrator.id, CrimeType.THEFT, LocalDateTime.now())
         val idempotenceId = UUID.randomUUID().toString()

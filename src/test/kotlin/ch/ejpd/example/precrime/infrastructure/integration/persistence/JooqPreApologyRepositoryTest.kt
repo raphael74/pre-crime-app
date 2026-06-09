@@ -30,7 +30,7 @@ class JooqPreApologyRepositoryTest {
         val apologyId = PreApologyId()
         val preArrestId = PreArrestId()
         val perpetrator = Perpetrator(firstName = "Danny", lastName = "Witwer")
-        perpetratorRepository.save(perpetrator)
+        perpetratorRepository.create(perpetrator)
         val compensation = Compensation(10000.0, 450.0, 250.0, 9300.0)
         val apologyLetter = ApologyLetter("Dear Family, we are sorry.")
         val apology =
@@ -57,9 +57,9 @@ class JooqPreApologyRepositoryTest {
         val p1 = Perpetrator(firstName = "Unknown", lastName = "Oldest")
         val p2 = Perpetrator(firstName = "Unknown", lastName = "Newest")
         val p3 = Perpetrator(firstName = "Unknown", lastName = "Middle")
-        perpetratorRepository.save(p1)
-        perpetratorRepository.save(p2)
-        perpetratorRepository.save(p3)
+        perpetratorRepository.create(p1)
+        perpetratorRepository.create(p2)
+        perpetratorRepository.create(p3)
 
         val now = java.time.OffsetDateTime.now()
         val apology1 = PreApology(
@@ -104,8 +104,8 @@ class JooqPreApologyRepositoryTest {
         // GIVEN
         val p1 = Perpetrator(firstName = "Danny", lastName = "Witwer")
         val p2 = Perpetrator(firstName = "Arthur", lastName = "Pendelton")
-        perpetratorRepository.save(p1)
-        perpetratorRepository.save(p2)
+        perpetratorRepository.create(p1)
+        perpetratorRepository.create(p2)
 
         val apology1 = PreApology(
             id = PreApologyId(),

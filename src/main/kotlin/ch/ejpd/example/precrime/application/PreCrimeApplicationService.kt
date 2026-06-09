@@ -39,35 +39,33 @@ class PreCrimeApplicationService(
 
     @Transactional(readOnly = true)
     fun getAllApologies(): List<PreApologyWithPerpetrator> {
+        logger.info("Getting all Apologies")
         val apologies = preApologyRepository.findAll()
-        val perpetratorIds = apologies.map { it.perpetratorId }.toSet()
-        val perpetrators = perpetratorRepository.findByIds(perpetratorIds).associateBy { it.id }
         return apologies.map { apology ->
-            PreApologyWithPerpetrator(apology, perpetrators[apology.perpetratorId]!!)
+            PreApologyWithPerpetrator(apology, perpetratorRepository.findById(apology.perpetratorId)!!)
         }
     }
 
     @Transactional(readOnly = true)
     fun getAllPendingPreArrests(): List<PreArrestWithPerpetrator> {
+        logger.info("Getting all pending PreArrests")
         val arrests = preArrestRepository.findAllPending()
-        val perpetratorIds = arrests.map { it.perpetratorId }.toSet()
-        val perpetrators = perpetratorRepository.findByIds(perpetratorIds).associateBy { it.id }
         return arrests.map { arrest ->
-            PreArrestWithPerpetrator(arrest, perpetrators[arrest.perpetratorId]!!)
+            PreArrestWithPerpetrator(arrest, perpetratorRepository.findById(arrest.perpetratorId)!!)
         }
     }
 
     @Transactional(readOnly = true)
     fun getAllExecutedPreArrests(): List<PreArrestWithPerpetrator> {
+        logger.info("Getting executed PreArrests")
         val arrests = preArrestRepository.findAllArrested()
-        val perpetratorIds = arrests.map { it.perpetratorId }.toSet()
-        val perpetrators = perpetratorRepository.findByIds(perpetratorIds).associateBy { it.id }
         return arrests.map { arrest ->
-            PreArrestWithPerpetrator(arrest, perpetrators[arrest.perpetratorId]!!)
+            PreArrestWithPerpetrator(arrest, perpetratorRepository.findById(arrest.perpetratorId)!!)
         }
     }
 
     fun triggerVision(cmd: CreateVisionCommand): VisionId {
+        logger.info("Triggering vision. ${cmd.perpetratorFirstName} ${cmd.perpetratorFirstName} will commit ${cmd.crimeType.value}")
         var perpetrator = perpetratorRepository.findByFirstAndLastName(
             cmd.perpetratorFirstName,
             cmd.perpetratorLastName
@@ -77,17 +75,17 @@ class PreCrimeApplicationService(
                 firstName = cmd.perpetratorFirstName,
                 lastName = cmd.perpetratorLastName
             )
-            perpetratorRepository.save(perpetrator)
+            perpetratorRepository.create(perpetrator)
         }
         val vision = VisionFactory.createVision(perpetrator.id, cmd.crimeType)
         vision.injectPublisher(publisher)
         visionRepository.create(vision)
         vision.foreseeCrime()
-        logger.info("Foresee: $cmd.perpetratorFirstName $cmd.perpetratorLastName will commit ${cmd.crimeType.value}!")
         return vision.id
     }
 
     fun executePreArrest(preArrestId: PreArrestId) {
+        logger.info("Executing PreArrest")
         val preArrest = preArrestRepository.findById(preArrestId)
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.injectPublisher(publisher)
@@ -96,6 +94,7 @@ class PreCrimeApplicationService(
     }
 
     fun cancelPreArrest(preArrestId: PreArrestId) {
+        logger.info("Cancelling PreArrest")
         val preArrest = preArrestRepository.findById(preArrestId)
             ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.injectPublisher(publisher)

@@ -4,6 +4,6 @@ import org.jmolecules.ddd.annotation.Repository
 
 @Repository
 interface AuditEntryRepository {
-    fun save(auditEntry: AuditEntry)
+    fun create(auditEntry: AuditEntry)
     fun findAll(): List<AuditEntry>
 }

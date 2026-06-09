@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class JooqAuditEntryRepository(private val dsl: DSLContext) : AuditEntryRepository {
 
     @Transactional(propagation = Propagation.MANDATORY)
-    override fun save(auditEntry: AuditEntry) {
+    override fun create(auditEntry: AuditEntry) {
         dsl.insertInto(AUDIT_LOG)
             .set(AUDIT_LOG.ID, auditEntry.id)
             .set(AUDIT_LOG.EVENT_TYPE, auditEntry.eventType)

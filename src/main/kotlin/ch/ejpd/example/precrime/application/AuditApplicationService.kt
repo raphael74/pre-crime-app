@@ -19,7 +19,7 @@ class AuditApplicationService(
     fun logEvent(eventType: String, payload: String) {
         logger.info("[Audit] Logging $eventType")
         val entry = AuditEntry(eventType = eventType, payload = payload)
-        auditEntryRepository.save(entry)
+        auditEntryRepository.create(entry)
     }
 
     @Transactional(readOnly = true)

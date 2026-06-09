@@ -30,8 +30,8 @@ class JooqAuditEntryRepositoryTest(
         )
 
         // WHEN
-        repository.save(entry1)
-        repository.save(entry2)
+        repository.create(entry1)
+        repository.create(entry2)
 
         // THEN
         val allEntries = repository.findAll()

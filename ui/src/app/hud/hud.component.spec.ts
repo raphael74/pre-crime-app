@@ -74,11 +74,11 @@ describe('HudComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        tick(1000);
+        tick(component.pollingInterval);
         statsSubject.next(42);
         expect(component.crimesPrevented()).toBe(42);
 
-        tick(1000);
+        tick(component.pollingInterval);
         statsSubject.next(43);
         expect(component.crimesPrevented()).toBe(43);
         discardPeriodicTasks();
@@ -91,7 +91,7 @@ describe('HudComponent', () => {
         preCrimeServiceMock.getArrestsExecuted.and.returnValue(arrestsSubject.asObservable() as any);
         fixture.detectChanges();
 
-        tick(1000);
+        tick(component.pollingInterval);
         const mockArrests = [{
             id: '1',
             visionId: 'v1',
@@ -111,7 +111,7 @@ describe('HudComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        tick(1000);
+        tick(component.pollingInterval);
         const mockLogs: AuditEntry[] = [{
             id: {value: '1'},
             eventType: 'VISION_DETECTED',

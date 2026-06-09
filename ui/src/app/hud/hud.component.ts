@@ -22,7 +22,7 @@ export class HudComponent {
 
     crimeTypes = Object.keys(CreateVisionRequestCrimeTypeEnum).sort();
 
-    private readonly pollingInterval = 2000;
+    readonly pollingInterval = 2000;
 
     auditLogs = toSignal(
         interval(this.pollingInterval).pipe(

@@ -27,7 +27,7 @@ class ThymeleafPreApologyLetterService(
         val vision = visionRepository.findById(preArrest.visionId)
             ?: throw IllegalStateException("Vision ${preArrest.visionId} not found")
 
-        val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyyy HH:mm:ss")
+        val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
         val context = Context().apply {
             setVariable("perpetratorName", perpetrator.fullName)
             setVariable("foreseenAt", vision.foreseenAt.format(dateTimeFormatter))

@@ -22,8 +22,10 @@ export class HudComponent {
 
     crimeTypes = Object.keys(CreateVisionRequestCrimeTypeEnum).sort();
 
+    private readonly pollingInterval = 2000;
+
     auditLogs = toSignal(
-        interval(1000).pipe(
+        interval(this.pollingInterval).pipe(
             switchMap(() => this.auditService.getLogs().pipe(
                 catchError(() => {
                     this.backendError.set('AUDIT LOG FETCH FAILED');
@@ -35,7 +37,7 @@ export class HudComponent {
     );
 
     crimesPrevented = toSignal(
-        interval(1000).pipe(
+        interval(this.pollingInterval).pipe(
             switchMap(() => this.preCrimeService.getStats().pipe(
                 catchError(() => {
                     this.backendError.set('STATUS UPDATE FAILED');
@@ -47,7 +49,7 @@ export class HudComponent {
     );
 
     pendingPreArrests = toSignal(
-        interval(1000).pipe(
+        interval(this.pollingInterval).pipe(
             switchMap(() => this.preCrimeService.getArrestsPending().pipe(
                 catchError(() => {
                     this.backendError.set('PRE-ARREST LOG FETCH FAILED');
@@ -59,7 +61,7 @@ export class HudComponent {
     );
 
     executedPreArrests = toSignal(
-        interval(1000).pipe(
+        interval(this.pollingInterval).pipe(
             switchMap(() => this.preCrimeService.getArrestsExecuted().pipe(
                 catchError(() => {
                     this.backendError.set('PRE-ARREST LOG FETCH FAILED');
@@ -71,7 +73,7 @@ export class HudComponent {
     );
 
     apologies = toSignal(
-        interval(1000).pipe(
+        interval(this.pollingInterval).pipe(
             switchMap(() => this.preCrimeService.getApologies().pipe(
                 catchError(() => {
                     this.backendError.set('APOLOGY LOG FETCH FAILED');

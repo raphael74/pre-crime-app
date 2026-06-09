@@ -1,6 +1,19 @@
 spring:
   kafka:
     bootstrap-servers: localhost:9092
+    properties:
+      security.protocol: SASL_PLAINTEXT
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: >
+        org.apache.kafka.common.security.plain.PlainLoginModule required
+        username="precrime"
+        password="precrime-secret";
+    admin:
+      properties:
+        sasl.jaas.config: >
+          org.apache.kafka.common.security.plain.PlainLoginModule required
+          username="admin"
+          password="admin-secret";
   datasource:
     url: jdbc:postgresql://localhost:5432/precrime
     username: precrime_app

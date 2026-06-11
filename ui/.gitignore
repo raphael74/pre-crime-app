@@ -59,3 +59,8 @@ baseline.json
 .pnpm-store
 
 /src/app/api/
+
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/

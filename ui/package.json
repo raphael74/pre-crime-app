@@ -7,7 +7,9 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
-    "generate-api": "openapi-generator-cli generate -i ../openapi.yaml -g typescript-angular -o src/app/api --additional-properties=stringEnums=true"
+    "generate-api": "openapi-generator-cli generate -i ../openapi.yaml -g typescript-angular -o src/app/api --additional-properties=stringEnums=true",
+    "e2e": "playwright test --config=e2e/playwright.config.ts",
+    "e2e:install": "playwright install --with-deps chromium"
   },
   "private": true,
   "dependencies": {
@@ -35,6 +37,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.2.0",
+    "@playwright/test": "^1.52.0",
     "typescript": "^6.0.3"
   },
   "overrides": {

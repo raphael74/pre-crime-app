@@ -52,3 +52,7 @@ jobs:
           name: pre-crime-app
           path: target/pre-crime-app.jar
           if-no-files-found: error
+
+  e2e:
+    needs: build
+    uses: ./.github/workflows/playwright-e2e.yml

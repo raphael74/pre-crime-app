@@ -1,11 +1,8 @@
 name: Playwright E2E Tests
 
 on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   e2e:
@@ -29,22 +26,16 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ui/package-lock.json
 
-      - name: Build Frontend
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: pre-crime-app
+          path: target/
+
+      - name: Install E2E Dependencies
         run: |
           cd ui
-          npm install
-          npm run generate-api
-          npm run build
-
-      - name: Bundle Frontend into Backend
-        run: |
-          mkdir -p src/main/resources/static
-          cp -r ui/dist/precrime-ui/* src/main/resources/static/
-
-      - name: Build Backend
-        run: |
-          chmod +x mvnw
-          ./mvnw clean package -DskipTests
+          npm ci
 
       - name: Start Infrastructure (PostgreSQL + Kafka)
         run: docker compose up -d --wait

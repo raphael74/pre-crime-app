@@ -14,11 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Set up Java 25
+      - name: Set up GraalVM
         uses: actions/setup-java@v5
         with:
           java-version: '25'
-          distribution: 'temurin'
+          distribution: 'graalvm'
           cache: maven
 
       - name: Set up Node.js
@@ -41,16 +41,27 @@ jobs:
           mkdir -p src/main/resources/static
           cp -r ui/dist/precrime-ui/* src/main/resources/static/
 
-      - name: Build Backend and Run Tests
+      - name: Build Backend JAR and Run Tests
         run: |
           chmod +x mvnw
           ./mvnw clean package
 
-      - name: Upload Build Artifact
+      - name: Upload JAR Artifact
         uses: actions/upload-artifact@v7
         with:
           name: pre-crime-app
           path: target/pre-crime-app.jar
+          if-no-files-found: error
+
+      - name: Build Native Linux Executable
+        run: |
+          ./mvnw -Pnative package -DskipTests
+
+      - name: Upload Native Executable
+        uses: actions/upload-artifact@v7
+        with:
+          name: pre-crime-app-linux
+          path: target/pre-crime-app
           if-no-files-found: error
 
   e2e:

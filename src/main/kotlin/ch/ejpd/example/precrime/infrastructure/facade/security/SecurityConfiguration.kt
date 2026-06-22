@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 
 @Configuration
 @EnableWebSecurity
@@ -27,15 +26,21 @@ class SecurityConfiguration {
             }
             authorizeHttpRequests {
                 authorize("/api/**", authenticated)
-                authorize(anyRequest, permitAll)
+                authorize("/fragments/**", authenticated)
+                authorize("/", authenticated)
+                authorize("/login", permitAll)
+                authorize("/css/**", permitAll)
+                authorize("/assets/**", permitAll)
+                authorize(anyRequest, authenticated)
             }
             formLogin {
-                disable()
+                loginPage = "/login"
+                defaultSuccessUrl("/", true)
             }
             httpBasic { }
             logout {
-                logoutUrl = "/api/logout"
-                logoutSuccessHandler = HttpStatusReturningLogoutSuccessHandler()
+                logoutUrl = "/logout"
+                logoutSuccessUrl = "/login?logout"
             }
         }
 

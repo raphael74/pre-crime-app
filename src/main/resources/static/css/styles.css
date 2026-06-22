@@ -1,14 +1,15 @@
-:host {
-    display: block;
-}
-
-.hud-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    grid-template-rows: 80px 1fr 40px;
-    gap: 20px;
-    padding: 20px;
-    height: calc(100vh - 40px);
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #00050a;
+    color: #00f2ff;
+    font-family: 'Courier New', Courier, monospace;
+    background-image: radial-gradient(circle at 50% 50%, rgba(0, 50, 100, 0.3) 0%, transparent 80%),
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 100%, 100% 2px, 3px 100%;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .panel {
@@ -18,10 +19,6 @@
     padding: 15px;
     position: relative;
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
 }
 
 .panel::before {
@@ -91,6 +88,91 @@ button:hover {
     box-shadow: 0 0 20px #00f2ff;
 }
 
+.scanner {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 242, 255, 0.5);
+    box-shadow: 0 0 10px #00f2ff;
+    top: 0;
+    animation: scan 4s linear infinite;
+}
+
+.logo {
+    height: 60px;
+    filter: drop-shadow(0 0 5px #00f2ff);
+    margin-right: 20px;
+}
+
+@keyframes scan {
+    0% {
+        top: 0;
+    }
+    100% {
+        top: 100%;
+    }
+}
+
+/* Login Styles */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-panel {
+    width: 400px;
+    padding: 40px;
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-logo {
+    height: 100px;
+    margin-right: 0;
+}
+
+.login-title {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.error-message {
+    color: #ff4d4d;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.8em;
+}
+
+.warning-text {
+    margin-top: 30px;
+    font-size: 0.7em;
+    color: rgba(0, 242, 255, 0.5);
+    text-align: center;
+}
+
+/* HUD Styles */
+.hud-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 80px 1fr 40px;
+    gap: 20px;
+    padding: 20px;
+    height: calc(100vh - 40px);
+}
+
+.hud-container .panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
 .status-indicator {
     font-size: 0.8em;
     color: #00f2ff;
@@ -128,7 +210,6 @@ button:hover {
     padding-right: 10px;
 }
 
-/* Custom HUD Scrollbar */
 .log-feed::-webkit-scrollbar {
     width: 6px;
 }
@@ -152,64 +233,8 @@ button:hover {
     padding: 10px 0;
 }
 
-@keyframes flicker {
-    0% {
-        opacity: 0;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-.scanner {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(0, 242, 255, 0.5);
-    box-shadow: 0 0 10px #00f2ff;
-    top: 0;
-    animation: scan 4s linear infinite;
-}
-
-.logo {
-    height: 60px;
-    filter: drop-shadow(0 0 5px #00f2ff);
-    margin-right: 20px;
-}
-
-@keyframes scan {
-    0% {
-        top: 0;
-    }
-    100% {
-        top: 100%;
-    }
-}
-
-.apology-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.apology-list::-webkit-scrollbar-track {
-    background: rgba(0, 242, 255, 0.05);
-}
-
-.apology-list::-webkit-scrollbar-thumb {
-    background: rgba(0, 242, 255, 0.3);
-    border-radius: 3px;
-    box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
-}
-
-.apology-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 242, 255, 0.5);
-}
-
 .hud-header {
-    flex-direction: row;
+    flex-direction: row !important;
     grid-column: span 3;
     display: flex;
     justify-content: space-between;
@@ -286,6 +311,24 @@ button:hover {
     padding-right: 5px;
 }
 
+.apology-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.apology-list::-webkit-scrollbar-track {
+    background: rgba(0, 242, 255, 0.05);
+}
+
+.apology-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 255, 0.3);
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+.apology-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 255, 0.5);
+}
+
 .apology-card {
     border: 1px solid rgba(0, 242, 255, 0.2);
     background: rgba(0, 10, 20, 0.6);
@@ -332,12 +375,6 @@ button:hover {
     text-shadow: 0 0 5px #00f2ff;
 }
 
-.arrest-status.status-arrested {
-    background: rgba(0, 242, 255, 0.1);
-    border-color: #00f2ff;
-    box-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
-}
-
 .arrest-card {
     border-left: 3px solid #00f2ff;
 }
@@ -370,7 +407,7 @@ button:hover {
 }
 
 .hud-footer {
-    flex-direction: row;
+    flex-direction: row !important;
     grid-column: span 3;
     display: flex;
     justify-content: space-between;

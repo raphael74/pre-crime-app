@@ -1,0 +1,14 @@
+<div class="apology-card arrest-card" th:each="pair : ${executedPreArrests}">
+    <div class="apology-header">
+        <span class="apology-perpetrator"
+              th:text="${pair.perpetrator.firstName + ' ' + pair.perpetrator.lastName}"></span>
+        <span class="arrest-status" th:text="${pair.preArrest.status}"></span>
+    </div>
+    <div class="apology-breakdown">
+        <span>Date: <span
+                th:text="${#temporals.format(pair.preArrest.preArrestDate, 'dd-MMM-yyyy HH:mm')}"></span></span>
+        <span>ID: <span th:text="${pair.preArrest.id.toString().substring(0, 8) + '...'}"></span></span>
+        <span>Vision: <span th:text="${pair.preArrest.visionId.toString().substring(0, 8) + '...'}"></span></span>
+    </div>
+</div>
+<div class="apologies-empty" th:if="${#lists.isEmpty(executedPreArrests)}">No executed Pre-Arrests...</div>

@@ -1,0 +1,6 @@
+<div class="log-entry" th:each="log : ${logs}">
+    [<span th:text="${#temporals.format(log.recordedAt, 'HH:mm:ss')}"></span>] >> <span
+        th:text="${log.eventType}"></span>:
+    <pre class="log-payload" th:text="${log.payload}"></pre>
+</div>
+<div class="log-entry empty-state" th:if="${#lists.isEmpty(logs)}">NO SURVEILLANCE DATA AVAILABLE...</div>

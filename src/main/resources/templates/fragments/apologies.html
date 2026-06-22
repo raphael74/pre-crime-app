@@ -1,0 +1,18 @@
+<div class="apology-card" th:each="pair : ${apologies}">
+    <div class="apology-header">
+        <span class="apology-perpetrator"
+              th:text="${pair.perpetrator.firstName + ' ' + pair.perpetrator.lastName}"></span>
+        <span class="apology-payout"
+              th:classappend="${pair.apology.compensation.netPayout >= 0 ? 'positive' : 'negative'}">
+            <span th:text="${pair.apology.compensation.netPayout >= 0 ? '+' : ''}"></span>$<span
+                th:text="${pair.apology.compensation.netPayout}"></span>
+        </span>
+    </div>
+    <div class="apology-text" th:text="${pair.apology.apologyLetter.text}"></div>
+    <div class="apology-breakdown">
+        <span>Base: $<span th:text="${pair.apology.compensation.baseAmount}"></span></span>
+        <span>Fuel: -$<span th:text="${pair.apology.compensation.jetpackFuelDeduction}"></span></span>
+        <span>Halo: -$<span th:text="${pair.apology.compensation.haloRentalFee}"></span></span>
+    </div>
+</div>
+<div class="apologies-empty" th:if="${#lists.isEmpty(apologies)}">NO APOLOGIES GENERATED YET...</div>

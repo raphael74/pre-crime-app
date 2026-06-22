@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Department of Pre-Crime - HUD</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <script src="https://unpkg.com/htmx-ext-json-enc@2.0.1"></script>
+</head>
+<body hx-ext="json-enc">
+<div class="hud-container">
+    <header class="panel hud-header">
+        <div class="header-logo-container">
+            <img alt="fedpol logo" class="logo" th:src="@{/assets/images/fedpol-logo-de.png}">
+            <h1>Department of Pre-Crime</h1>
+        </div>
+        <div class="header-actions">
+            <div class="error-warning" id="backend-error" style="display: none;">CONNECTION FAILED</div>
+            <div class="status-indicator">
+                System Status: <span id="system-status">Optimal</span>
+            </div>
+            <form method="post" th:action="@{/logout}">
+                <button class="logout-btn" type="submit">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    <aside class="panel">
+        <div>
+            <div class="scanner"></div>
+            <h2>Precog Input</h2>
+            <br>
+            <form class="vision-form" hx-on::after-request="if(event.detail.successful) this.reset()" hx-post="/api/pre-crime/vision"
+                  hx-swap="none" id="vision-form">
+                <label>Perpetrator First Name</label>
+                <input maxlength="80" name="perpetratorFirstName" placeholder="First Name..." required>
+                <label>Perpetrator Last Name</label>
+                <input maxlength="80" name="perpetratorLastName" placeholder="Last Name..." required>
+                <label>Projected Crime</label>
+                <select name="crimeType" required>
+                    <option disabled selected value="">Select Crime...</option>
+                    <option th:each="type : ${crimeTypes}" th:text="${type}" th:value="${type}"></option>
+                </select>
+                <button type="submit">Submit to Precogs</button>
+                <br>
+            </form>
+        </div>
+
+        <div class="sub-section">
+            <h2>Pending Pre-Arrests</h2>
+            <div class="apology-list" hx-get="/fragments/pending-pre-arrests" hx-trigger="every 2s, load"
+                 id="pending-pre-arrests">
+                <div class="apologies-empty">Loading Pre-Arrests...</div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="panel">
+        <h2>Live Surveillance Feed (Audit Log)</h2>
+        <div class="log-feed" hx-get="/fragments/audit-logs" hx-trigger="every 2s, load" id="audit-logs">
+            <div class="log-entry empty-state">NO SURVEILLANCE DATA AVAILABLE...</div>
+        </div>
+    </main>
+
+    <aside class="panel stats-apologies-panel">
+        <div hx-get="/fragments/stats" hx-trigger="every 2s, load" id="stats">
+            <h2>Statistics</h2>
+            <div class="stats-number">0</div>
+            <div class="stats-label">Crimes Prevented</div>
+        </div>
+
+        <div class="sub-section">
+            <h2>Executed Pre-Arrests</h2>
+            <div class="apology-list" hx-get="/fragments/executed-pre-arrests" hx-trigger="every 2s, load"
+                 id="executed-pre-arrests">
+                <div class="apologies-empty">No executed Pre-Arrests...</div>
+            </div>
+        </div>
+
+        <div class="sub-section">
+            <h2>Pre-Emptive Apologies</h2>
+            <div class="apology-list" hx-get="/fragments/apologies" hx-trigger="every 2s, load" id="apologies">
+                <div class="apologies-empty">NO APOLOGIES GENERATED YET...</div>
+            </div>
+        </div>
+    </aside>
+
+    <footer class="panel hud-footer">
+        <div>
+            CONFIDENTIAL - PROPERTY OF PRE-CRIME DIVISION - FEDPOL
+        </div>
+        <div>
+            Apart from preventing crimes, this application shows the Onion/DDD Architecture Style principles of
+            the ISC-EJPD
+        </div>
+    </footer>
+</div>
+<script>
+    document.body.addEventListener('htmx:afterRequest', function (evt) {
+        const errorEl = document.getElementById('backend-error');
+        const statusEl = document.getElementById('system-status');
+        if (evt.detail.failed) {
+            errorEl.style.display = 'block';
+            statusEl.textContent = 'Critical';
+            statusEl.parentElement.classList.add('critical');
+        } else {
+            errorEl.style.display = 'none';
+            statusEl.textContent = 'Optimal';
+            statusEl.parentElement.classList.remove('critical');
+        }
+    });
+</script>
+</body>
+</html>

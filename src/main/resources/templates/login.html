@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Auth Access - Pre-Crime</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="login-wrapper">
+    <div class="panel login-panel">
+        <div class="scanner"></div>
+        <div class="logo-container">
+            <img alt="fedpol logo" class="logo login-logo" th:src="@{/assets/images/fedpol-logo-de.png}">
+        </div>
+        <h1 class="login-title">AUTH ACCESS</h1>
+        <form class="vision-form" method="post" th:action="@{/login}">
+            <label>Division ID</label>
+            <input autofocus name="username" placeholder="USERNAME..." required type="text">
+            <label>Access Key</label>
+            <input name="password" placeholder="PASSWORD..." required type="password">
+            <button type="submit">AUTHORIZE</button>
+            <div class="error-message" th:if="${param.error}">
+                ERROR: INVALID CREDENTIALS
+            </div>
+            <div class="error-message" style="color: #00f2ff;" th:if="${param.logout}">
+                LOGOUT SUCCESSFUL
+            </div>
+        </form>
+        <div class="warning-text">
+            WARNING: UNAUTHORIZED ACCESS IS A FUTURE FELONY
+        </div>
+    </div>
+</div>
+</body>
+</html>

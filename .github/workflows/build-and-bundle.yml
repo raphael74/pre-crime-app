@@ -39,7 +39,7 @@ jobs:
       - name: Bundle Frontend into Backend
         run: |
           mkdir -p src/main/resources/static
-          cp -r ui/dist/precrime-ui/* src/main/resources/static/
+          cp -r ui/dist/precrime-ui/browser/* src/main/resources/static/
 
       - name: Build Backend JAR and Run Tests
         run: |

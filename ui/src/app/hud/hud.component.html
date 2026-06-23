@@ -11,7 +11,7 @@
             <div [class.critical]="backendError()" class="status-indicator">
                 System Status: {{ backendError() ? 'Critical' : 'Optimal' }}
             </div>
-            <button (click)="logout()" class="logout-btn">Logout</button>
+            <button (click)="logout()" class="logout-btn" data-testid="logout-btn">Logout</button>
         </div>
     </header>
 
@@ -23,22 +23,25 @@
             <form #visionForm="ngForm" (ngSubmit)="triggerVision()" class="vision-form">
                 <label>Perpetrator First Name</label>
                 <input (ngModelChange)="perpetratorFirstName.set($event)" [ngModel]="perpetratorFirstName()"
+                       data-testid="first-name-input"
                        maxlength="80"
                        name="firstName"
                        placeholder="First Name..." required>
                 <label>Perpetrator Last Name</label>
                 <input (ngModelChange)="perpetratorLastName.set($event)" [ngModel]="perpetratorLastName()"
+                       data-testid="last-name-input"
                        maxlength="80"
                        name="perpetrator"
                        placeholder="Last Name..." required>
                 <label>Projected Crime</label>
-                <select (ngModelChange)="crimeType.set($event)" [ngModel]="crimeType()" name="crimeType" required>
+                <select (ngModelChange)="crimeType.set($event)" [ngModel]="crimeType()" data-testid="crime-type-select"
+                        name="crimeType" required>
                     <option disabled selected value="">Select Crime...</option>
                     @for (type of crimeTypes; track type) {
                     <option [value]="type">{{ type }}</option>
                     }
                 </select>
-                <button [disabled]="visionForm.invalid" type="submit">Submit to Precogs</button>
+                <button [disabled]="visionForm.invalid" type="submit" data-testid="submit-vision-btn">Submit to Precogs</button>
                 <br>
             </form>
         </div>
@@ -60,10 +63,10 @@
                     <div class="apology-breakdown">
                     <span>
                             <button (click)="executePreArrest(arrest.id!)" class="pre-arrest-btn"
-                                    type="button">Confirm Pre-Arrest executed</button>
+                                     data-testid="confirm-pre-arrest-btn" type="button">Confirm Pre-Arrest executed</button>
                     </span>
                         <span>
-                            <button (click)="cancelPreArrest(arrest.id!)" class="pre-arrest-btn" type="button">Cancel Pre-Arrest</button>
+                            <button (click)="cancelPreArrest(arrest.id!)" class="pre-arrest-btn" data-testid="cancel-pre-arrest-btn" type="button">Cancel Pre-Arrest</button>
                     </span>
                     </div>
                 </div>

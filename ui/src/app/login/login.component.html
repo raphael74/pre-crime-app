@@ -7,11 +7,13 @@
         <h1 class="login-title">AUTH ACCESS</h1>
         <div class="vision-form">
             <label>Division ID</label>
-            <input (ngModelChange)="username.set($event)" [ngModel]="username()" placeholder="USERNAME..." type="text">
+            <input (ngModelChange)="username.set($event)" [ngModel]="username()" data-testid="username-input"
+                   placeholder="USERNAME..." type="text">
             <label>Access Key</label>
-            <input (ngModelChange)="password.set($event)" [ngModel]="password()" placeholder="PASSWORD..."
+            <input (ngModelChange)="password.set($event)" [ngModel]="password()" data-testid="password-input"
+                   placeholder="PASSWORD..."
                    type="password">
-            <button (click)="onLogin()">AUTHORIZE</button>
+            <button (click)="onLogin()" data-testid="authorize-btn">AUTHORIZE</button>
             <div *ngIf="error()" class="error-message">
                 ERROR: {{ error() }}
             </div>

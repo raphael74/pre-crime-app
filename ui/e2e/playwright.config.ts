@@ -10,7 +10,7 @@ export default defineConfig({
         ? [['html'], ['github']]
         : 'list',
     use: {
-        baseURL: process.env.BASE_URL || 'http://localhost:8080',
+        baseURL: process.env.BASE_URL || 'http://localhost:4200',
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
     },

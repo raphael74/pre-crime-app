@@ -22,7 +22,7 @@ jobs:
           # List all artifacts, sorted by created_at descending
           # We skip the first 10 (the latest ones) and delete the rest
           gh api -X GET /repos/${{ github.repository }}/actions/artifacts -f per_page=100 \
-            --jq '.artifacts | sort_by(.created_at) | reverse | .[1:10] | .[].id' | \
+            --jq '.artifacts | sort_by(.created_at) | reverse | .[10:] | .[].id' | \
             while read -r artifact_id; do
               echo "Deleting artifact ID: $artifact_id"
               gh api -X DELETE /repos/${{ github.repository }}/actions/artifacts/$artifact_id

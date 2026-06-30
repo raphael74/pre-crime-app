@@ -1,0 +1,30 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    properties:
+      security.protocol: SASL_PLAINTEXT
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: >
+        org.apache.kafka.common.security.plain.PlainLoginModule required
+        username="precrime"
+        password="precrime-secret";
+    admin:
+      properties:
+        sasl.jaas.config: >
+          org.apache.kafka.common.security.plain.PlainLoginModule required
+          username="admin"
+          password="admin-secret";
+  datasource:
+    url: jdbc:postgresql://localhost:5432/precrime
+    username: precrime_app
+    password: precrime_app_secret
+  flyway:
+    user: precrime_migration
+    password: precrime_migration_secret
+    clean-disabled: false
+precrime:
+  flyway:
+    clean-on-validation-error: true
+logging:
+  level:
+    ch.ejpd.example.precrime: DEBUG

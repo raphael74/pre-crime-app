@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: "jdbc:h2:mem:precrime;MODE=PostgreSQL;DATABASE_TO_LOWER=true"
+    driver-class-name: org.h2.Driver
+  kafka:
+    consumer:
+      auto-offset-reset: earliest

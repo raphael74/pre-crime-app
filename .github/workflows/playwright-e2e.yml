@@ -38,7 +38,9 @@ jobs:
           npm ci
 
       - name: Start Infrastructure (PostgreSQL + Kafka)
-        run: docker compose up -d --wait
+        run: |
+          cd docker
+          docker compose up -d --wait
 
       - name: Start Backend
         run: |

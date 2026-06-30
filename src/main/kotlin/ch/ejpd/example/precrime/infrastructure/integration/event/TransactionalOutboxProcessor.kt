@@ -33,8 +33,13 @@ class TransactionalOutboxProcessor(
         }
 
         outboxRecords.forEach { outboxRecord ->
-            sendKafkaEvent(outboxRecord.id, outboxRecord.event)
-            outboxRepository.markAsProcessed(outboxRecord.id)
+            try {
+                sendKafkaEvent(outboxRecord.id, outboxRecord.event)
+                outboxRepository.markAsProcessed(outboxRecord.id)
+            } catch (e: UnsupportedEventTypeException) {
+                logger.error("Error while processing event with id ${outboxRecord.id}", e)
+                outboxRepository.markAsInvalid(outboxRecord.id)
+            }
         }
     }
 
@@ -63,7 +68,7 @@ class TransactionalOutboxProcessor(
                 eventKey = event.apologyId.value.toString()
             }
 
-            else -> throw IllegalArgumentException("Unsupported event type: ${event::class.simpleName}")
+            else -> throw UnsupportedEventTypeException(event::class.simpleName ?: "Unknown")
         }
 
         logger.info("Sending Kafka event ${event::class.simpleName} with ID ${outboxId.value} to topic $topic with key $eventKey")
@@ -74,3 +79,5 @@ class TransactionalOutboxProcessor(
         kafkaTemplate.send(record).get()
     }
 }
+
+private class UnsupportedEventTypeException(eventType: String) : RuntimeException("Unsupported event type: $eventType")

@@ -62,6 +62,15 @@ class JooqOutboxRepository(
             .execute()
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun markAsInvalid(id: OutboxId) {
+        dsl.update(OUTBOX)
+            .set(OUTBOX.STATUS, OutboxState.INVALID)
+            .set(OUTBOX.PROCESSED_AT, OffsetDateTime.now())
+            .where(OUTBOX.ID.eq(id))
+            .execute()
+    }
+
     private fun Record.toOutboxRecord() = Outbox(
         id = get(OUTBOX.ID)!!,
         event = convertToEvent(get(OUTBOX.EVENT)!!.data(), Class.forName(get(OUTBOX.EVENT_CLASS)!!)),

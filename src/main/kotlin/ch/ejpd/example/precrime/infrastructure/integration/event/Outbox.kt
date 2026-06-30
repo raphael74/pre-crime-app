@@ -11,4 +11,4 @@ data class Outbox(
 @JvmInline
 value class OutboxId(val value: UUID = UUID.randomUUID())
 
-enum class OutboxState { PENDING, PROCESSED }
+enum class OutboxState { PENDING, PROCESSED, INVALID }

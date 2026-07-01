@@ -33,10 +33,7 @@ class OutboxProcessor(
         if (outboxRecords.isNotEmpty()) {
             logger.info("Found ${outboxRecords.size} events to process")
         }
-
-        outboxRecords.forEach { outboxRecord ->
-            sendEvent(outboxRecord.id, outboxRecord.event)
-        }
+        outboxRecords.forEach { sendEvent(it.id, it.event) }
     }
 
     private fun sendEvent(outboxId: OutboxId, event: Any) {

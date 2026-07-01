@@ -153,6 +153,7 @@ class OutboxProcessorTest {
     @Test
     fun `should mark record as invalid when event type is unsupported`() {
         data class UnknownEvent(val id: String)
+
         val event = UnknownEvent("unknown")
         val outboxId = OutboxId()
         val outbox = Outbox(outboxId, event, OutboxState.PENDING)

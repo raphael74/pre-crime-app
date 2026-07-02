@@ -44,7 +44,9 @@
                     <option [value]="type">{{ type }}</option>
                     }
                 </select>
-                <button [disabled]="visionForm.invalid" type="submit" data-testid="submit-vision-btn">Submit to Precogs</button>
+                <button [disabled]="visionForm.invalid" data-testid="submit-vision-btn" type="submit">
+                    Submit to Precogs
+                </button>
                 <br>
             </form>
         </div>
@@ -66,10 +68,12 @@
                     <div class="apology-breakdown">
                     <span>
                             <button (click)="executePreArrest(arrest.id!)" class="pre-arrest-btn"
-                                     data-testid="confirm-pre-arrest-btn" type="button">Confirm Pre-Arrest executed</button>
+                                    data-testid="confirm-pre-arrest-btn"
+                                    type="button">Confirm Pre-Arrest executed</button>
                     </span>
                         <span>
-                            <button (click)="cancelPreArrest(arrest.id!)" class="pre-arrest-btn" data-testid="cancel-pre-arrest-btn" type="button">Cancel Pre-Arrest</button>
+                            <button (click)="cancelPreArrest(arrest.id!)" class="pre-arrest-btn"
+                                    data-testid="cancel-pre-arrest-btn" type="button">Cancel Pre-Arrest</button>
                     </span>
                     </div>
                 </div>

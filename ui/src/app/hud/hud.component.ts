@@ -14,20 +14,13 @@ import {AuditService, CreateVisionRequestCrimeTypeEnum, PreCrimeService} from '.
     imports: [CommonModule, FormsModule],
 })
 export class HudComponent {
-    private auditService = inject(AuditService);
-    private preCrimeService = inject(PreCrimeService);
-    private authService = inject(AuthService);
-    private router = inject(Router);
-
     perpetratorLastName = signal('');
     perpetratorFirstName = signal('');
     crimeType = signal('');
     backendError = signal<string | null>(null);
-
     crimeTypes = Object.keys(CreateVisionRequestCrimeTypeEnum).sort();
-
     readonly pollingInterval = 2000;
-
+    private auditService = inject(AuditService);
     auditLogs = toSignal(
         interval(this.pollingInterval).pipe(
             switchMap(() => this.auditService.getLogs().pipe(
@@ -39,7 +32,7 @@ export class HudComponent {
         ),
         {initialValue: []}
     );
-
+    private preCrimeService = inject(PreCrimeService);
     crimesPrevented = toSignal(
         interval(this.pollingInterval).pipe(
             switchMap(() => this.preCrimeService.getStats().pipe(
@@ -51,7 +44,6 @@ export class HudComponent {
         ),
         {initialValue: 0}
     );
-
     pendingPreArrests = toSignal(
         interval(this.pollingInterval).pipe(
             switchMap(() => this.preCrimeService.getArrestsPending().pipe(
@@ -63,7 +55,6 @@ export class HudComponent {
         ),
         {initialValue: []}
     );
-
     executedPreArrests = toSignal(
         interval(this.pollingInterval).pipe(
             switchMap(() => this.preCrimeService.getArrestsExecuted().pipe(
@@ -75,7 +66,6 @@ export class HudComponent {
         ),
         {initialValue: []}
     );
-
     apologies = toSignal(
         interval(this.pollingInterval).pipe(
             switchMap(() => this.preCrimeService.getApologies().pipe(
@@ -87,6 +77,8 @@ export class HudComponent {
         ),
         {initialValue: []}
     );
+    private authService = inject(AuthService);
+    private router = inject(Router);
 
     formatPayload(payload: string | undefined): string {
         if (!payload) return '';

@@ -17,9 +17,9 @@
                    type="password">
             <button (click)="onLogin()" data-testid="authorize-btn">AUTHORIZE</button>
             @if (error()) {
-                <div class="error-message">
-                    ERROR: {{ error() }}
-                </div>
+            <div class="error-message">
+                ERROR: {{ error() }}
+            </div>
             }
         </div>
         <div class="warning-text">

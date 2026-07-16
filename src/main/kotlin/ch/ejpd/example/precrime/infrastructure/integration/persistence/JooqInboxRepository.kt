@@ -22,9 +22,7 @@ class JooqInboxRepository(
                 .and(INBOX.CONSUMER_GROUP.eq(consumerGroup))
         )
 
-        if (exists) return false
-
-        return try {
+        return !exists && try {
             dsl.insertInto(INBOX)
                 .set(INBOX.ID, id)
                 .set(INBOX.CONSUMER_GROUP, consumerGroup)

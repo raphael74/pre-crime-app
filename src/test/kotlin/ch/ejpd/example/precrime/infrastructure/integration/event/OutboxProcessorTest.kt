@@ -14,19 +14,16 @@ import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_APOLOGY
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_CANCELLED_EVENT_TOPIC
 import ch.ejpd.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.OffsetDateTime
 
-@ExtendWith(MockKExtension::class)
 class OutboxProcessorTest {
 
     private val transactionManager = mockk<PlatformTransactionManager>(relaxed = true)

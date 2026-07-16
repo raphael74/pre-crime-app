@@ -3,14 +3,11 @@ package ch.ejpd.example.precrime.application
 import ch.ejpd.example.precrime.domain.audit.AuditEntry
 import ch.ejpd.example.precrime.domain.audit.AuditEntryRepository
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 class AuditApplicationServiceTest {
 
     private val auditEntryRepository = mockk<AuditEntryRepository>()

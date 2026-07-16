@@ -7,14 +7,11 @@ import ch.ejpd.example.precrime.domain.vision.CrimeForeseenEvent
 import ch.ejpd.example.precrime.domain.vision.CrimeType
 import ch.ejpd.example.precrime.domain.vision.VisionId
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.OffsetDateTime
 
-@ExtendWith(MockKExtension::class)
 class TransactionalDomainEventPublisherTest {
 
     private val outboxRepository = mockk<OutboxRepository>()

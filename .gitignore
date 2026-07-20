@@ -36,3 +36,4 @@ build/
 
 # Antora build output
 build/site/
+/etc/antora/extensions/node_modules/

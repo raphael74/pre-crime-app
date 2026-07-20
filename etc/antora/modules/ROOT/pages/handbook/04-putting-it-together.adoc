@@ -4,7 +4,7 @@ This page traces a single user action — **triggering a vision** — through ev
 
 == The Complete Flow
 
-[source,mermaid]
+[mermaid]
 ----
 flowchart TD
     User["User clicks 'Trigger Vision'"] -->|HTTP POST| Controller["PreCrimeController<br/>(Infrastructure)"]
@@ -174,7 +174,7 @@ fun onCrimeForeseen(event: CrimeForeseenEvent) {
 
 == The Big Picture
 
-[source,mermaid]
+[mermaid]
 ----
 graph LR
     subgraph Client

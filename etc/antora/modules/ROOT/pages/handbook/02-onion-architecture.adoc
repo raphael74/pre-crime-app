@@ -2,7 +2,7 @@
 
 Onion Architecture organizes code into concentric rings. The rule is simple: **inner rings define contracts, outer rings provide implementations**. Dependencies point **inward** — never outward.
 
-[source,mermaid]
+[mermaid]
 ----
 graph TB
     subgraph IO[" "]

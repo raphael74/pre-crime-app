@@ -20,7 +20,7 @@ What happens if step 2 fails after step 1 succeeded? You now have a `PreArrest` 
 
 The **Transactional Outbox Pattern** solves this by storing events in the **same database transaction** as the business data:
 
-[source,mermaid]
+[mermaid]
 ----
 sequenceDiagram
     participant App as Application Service
@@ -144,7 +144,7 @@ fun onMessage(event: Any) {
 
 Here is how a vision flows through the entire system:
 
-[source,mermaid]
+[mermaid]
 ----
 sequenceDiagram
     participant Vision

@@ -52,7 +52,7 @@ These annotations are not just documentation — they allow tools like **ArchUni
 
 This project follows **Onion Architecture**, which separates the code into three rings:
 
-[source,mermaid]
+[mermaid]
 ----
 graph TB
     subgraph Infrastructure["Infrastructure Ring"]
@@ -90,7 +90,7 @@ graph TB
 
 The aggregates communicate through **domain events** published reliably via the **Transactional Outbox Pattern**:
 
-[source,mermaid]
+[mermaid]
 ----
 sequenceDiagram
     participant Vision as Vision Aggregate

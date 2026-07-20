@@ -1,0 +1,6 @@
+name: developer-docs
+title: Developer Documentation
+version: ~
+start_page: index.adoc
+nav:
+  - modules/ROOT/nav.adoc

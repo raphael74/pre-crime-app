@@ -1,0 +1,18 @@
+site:
+  title: Pre-Crime Application Docs
+  url: https://raphael74.github.io/pre-crime-app
+  start_page: developer-docs::index.adoc
+
+content:
+  sources:
+    - url: ./
+      branches: HEAD
+      start_path: etc/developer-docs
+
+ui:
+  bundle:
+    url: https://gitlab.com/api/v4/projects/antora%2Fantora-ui-default/jobs/artifacts/master/raw/build/ui-bundle.zip?job=bundle-default
+    snapshot: true
+
+output:
+  dir: ./build/site

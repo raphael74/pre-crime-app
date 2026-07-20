@@ -1,0 +1,380 @@
+:host {
+    display: block;
+}
+
+.hud-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 80px 1fr 40px;
+    gap: 20px;
+    padding: 20px;
+    height: calc(100vh - 40px);
+}
+
+.panel {
+    border: 1px solid rgba(0, 242, 255, 0.3);
+    background: rgba(0, 20, 40, 0.4);
+    backdrop-filter: blur(5px);
+    padding: 15px;
+    position: relative;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.panel::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid #00f2ff;
+    border-left: 2px solid #00f2ff;
+}
+
+h1, h2 {
+    margin: 0;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px #00f2ff;
+}
+
+.vision-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input, select {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #00f2ff;
+    color: #00f2ff;
+    padding: 10px;
+    font-family: inherit;
+}
+
+select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f2ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+    padding-right: 40px;
+}
+
+select:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+}
+
+option {
+    background-color: #00050a;
+    color: #00f2ff;
+}
+
+button {
+    background: transparent;
+    border: 1px solid #00f2ff;
+    color: #00f2ff;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #00f2ff;
+    color: #000;
+    box-shadow: 0 0 20px #00f2ff;
+}
+
+.status-indicator {
+    font-size: 0.8em;
+    color: #00f2ff;
+    text-shadow: 0 0 5px #00f2ff;
+}
+
+.status-indicator.critical {
+    color: #ff4d4d;
+    text-shadow: 0 0 5px #ff4d4d;
+}
+
+.error-warning {
+    color: #ff4d4d;
+    font-weight: bold;
+    text-shadow: 0 0 10px #ff4d4d;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.log-feed {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 0.8em;
+    padding-right: 10px;
+}
+
+/* Custom HUD Scrollbar */
+.log-feed::-webkit-scrollbar {
+    width: 6px;
+}
+
+.log-feed::-webkit-scrollbar-track {
+    background: rgba(0, 242, 255, 0.05);
+}
+
+.log-feed::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 255, 0.3);
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+.log-feed::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 255, 0.5);
+}
+
+.log-entry {
+    border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+    padding: 10px 0;
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.scanner {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 242, 255, 0.5);
+    box-shadow: 0 0 10px #00f2ff;
+    top: 0;
+    animation: scan 4s linear infinite;
+}
+
+.logo {
+    height: 60px;
+    filter: drop-shadow(0 0 5px #00f2ff);
+    margin-right: 20px;
+}
+
+@keyframes scan {
+    0% {
+        top: 0;
+    }
+    100% {
+        top: 100%;
+    }
+}
+
+.apology-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.apology-list::-webkit-scrollbar-track {
+    background: rgba(0, 242, 255, 0.05);
+}
+
+.apology-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 255, 0.3);
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+.apology-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 255, 0.5);
+}
+
+.hud-header {
+    flex-direction: row;
+    grid-column: span 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logout-btn {
+    padding: 5px 15px;
+    font-size: 0.8em;
+}
+
+.pre-arrest-btn {
+    padding: 5px 15px;
+}
+
+.log-payload {
+    margin: 5px 0 15px 20px;
+    color: #00f2ff;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.empty-state {
+    opacity: 0.5;
+}
+
+.stats-apologies-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.stats-number {
+    font-size: 3em;
+    text-align: center;
+    margin-top: 10px;
+    text-shadow: 0 0 10px #00f2ff;
+}
+
+.stats-label {
+    text-align: center;
+    font-size: 0.9em;
+    color: #00f2ff;
+    opacity: 0.8;
+}
+
+.sub-section {
+    border-top: 1px solid rgba(0, 242, 255, 0.3);
+    padding-top: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.apology-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 5px;
+}
+
+.apology-card {
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    background: rgba(0, 10, 20, 0.6);
+    padding: 10px;
+    font-size: 0.85em;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.apology-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+    padding-bottom: 4px;
+    font-weight: bold;
+}
+
+.apology-perpetrator {
+    color: #00f2ff;
+}
+
+.apology-payout {
+    text-shadow: 0 0 5px currentColor;
+}
+
+.apology-payout.positive {
+    color: #00ff66;
+}
+
+.apology-payout.negative {
+    color: #ff4d4d;
+}
+
+.arrest-status {
+    font-size: 0.8em;
+    padding: 2px 6px;
+    border: 1px solid rgba(0, 242, 255, 0.3);
+    border-radius: 3px;
+    color: #00f2ff;
+    text-shadow: 0 0 5px #00f2ff;
+}
+
+.arrest-status.status-arrested {
+    background: rgba(0, 242, 255, 0.1);
+    border-color: #00f2ff;
+    box-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+}
+
+.arrest-card {
+    border-left: 3px solid #00f2ff;
+}
+
+.apology-text {
+    font-size: 0.8em;
+    line-height: 1.3;
+    opacity: 0.9;
+    color: #e0faff;
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
+.apology-breakdown {
+    font-size: 0.75em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    color: rgba(0, 242, 255, 0.6);
+    font-family: monospace;
+    border-top: 1px dashed rgba(0, 242, 255, 0.15);
+    padding-top: 4px;
+}
+
+.apologies-empty {
+    text-align: center;
+    opacity: 0.5;
+    font-size: 0.9em;
+    margin-top: 20px;
+}
+
+.hud-footer {
+    flex-direction: row;
+    grid-column: span 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7em;
+    color: rgba(0, 242, 255, 0.5);
+}

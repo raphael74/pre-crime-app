@@ -1,0 +1,45 @@
+{
+  "name": "precrime-ui",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --proxy-config proxy.conf.json",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test --watch=false",
+    "generate-api": "openapi-generator-cli generate -i ../openapi.yaml -g typescript-angular -o src/app/api --additional-properties=stringEnums=true",
+    "e2e": "playwright test --config=e2e/playwright.config.ts",
+    "e2e:install": "playwright install --with-deps chromium",
+    "lint": "ng lint"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "^22.0.7",
+    "@angular/core": "^22.0.7",
+    "@angular/forms": "^22.0.7",
+    "@angular/platform-browser": "^22.0.7",
+    "@angular/router": "^22.0.7",
+    "rxjs": "~7.8.2",
+    "tslib": "^2.8.1",
+    "zone.js": "~0.16.2"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.0.7",
+    "@angular/cli": "^22.0.7",
+    "@angular/compiler-cli": "^22.0.7",
+    "@eslint/js": "^10.0.1",
+    "@openapitools/openapi-generator-cli": "^2.39.1",
+    "@playwright/test": "^1.61.1",
+    "@types/jasmine": "~6.0.0",
+    "angular-eslint": "22.1.0",
+    "eslint": "^10.7.0",
+    "jasmine-core": "~6.3.0",
+    "karma": "~6.4.4",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.1",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.2.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "8.64.0"
+  }
+}

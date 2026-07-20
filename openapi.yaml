@@ -1,0 +1,304 @@
+openapi: 3.0.4
+info:
+  title: Pre-Crime API
+  description: API for the Pre-Crime department.
+  version: 1.0.0
+paths:
+  /audit/logs:
+    get:
+      summary: Get audit logs
+      operationId: getLogs
+      tags:
+        - Audit
+      responses:
+        '200':
+          description: List of audit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEntry'
+  /pre-crime/stats:
+    get:
+      summary: Get prevented crimes count
+      operationId: getStats
+      tags:
+        - PreCrime
+      responses:
+        '200':
+          description: Count of prevented crimes
+          content:
+            application/json:
+              schema:
+                type: integer
+  /pre-crime/apologies:
+    get:
+      summary: Get all pre-emptive apologies
+      operationId: getApologies
+      tags:
+        - PreCrime
+      responses:
+        '200':
+          description: List of pre-emptive apologies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreApologyResponse'
+  /pre-crime/arrests-pending:
+    get:
+      summary: Get all pending pre-arrests
+      operationId: getArrestsPending
+      tags:
+        - PreCrime
+      responses:
+        '200':
+          description: List of pre-arrests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreArrestResponse'
+  /pre-crime/arrests-executed:
+    get:
+      summary: Get all executed pre-arrests
+      operationId: getArrestsExecuted
+      tags:
+        - PreCrime
+      responses:
+        '200':
+          description: List of pre-arrests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreArrestResponse'
+  /pre-crime/arrest-executed:
+    post:
+      summary: triggers an execution of the arrest
+      operationId: arrestExecuted
+      tags:
+        - PreCrime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrestExecutedRequest'
+      responses:
+        '200':
+          description: Arrest executed
+  /pre-crime/arrest-cancelled:
+    post:
+      summary: cancels an arrest
+      operationId: arrestCancelled
+      tags:
+        - PreCrime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrestCancelRequest'
+      responses:
+        '200':
+          description: Arrest executed
+  /pre-crime/vision:
+    post:
+      summary: Trigger a vision
+      operationId: createVision
+      tags:
+        - PreCrime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVisionRequest'
+      responses:
+        '201':
+          description: Vision triggered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateVisionResponse'
+  /user:
+    get:
+      summary: Get current user
+      operationId: getCurrentUser
+      tags:
+        - User
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+components:
+  schemas:
+    AuditEntry:
+      type: object
+      required:
+        - id
+        - eventType
+        - payload
+        - recordedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/AuditEntryId'
+        eventType:
+          type: string
+        payload:
+          type: string
+        recordedAt:
+          type: string
+          format: date-time
+    AuditEntryId:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          format: uuid
+    ArrestExecutedRequest:
+      type: object
+      required:
+        - preArrestId
+      properties:
+        preArrestId:
+          type: string
+          format: uuid
+    ArrestCancelRequest:
+      type: object
+      required:
+        - preArrestId
+      properties:
+        preArrestId:
+          type: string
+          format: uuid
+    CreateVisionRequest:
+      type: object
+      required:
+        - perpetratorLastName
+        - perpetratorFirstName
+        - crimeType
+      properties:
+        perpetratorLastName:
+          type: string
+          maxLength: 80
+        perpetratorFirstName:
+          type: string
+          maxLength: 80
+        crimeType:
+          type: string
+          enum:
+            - MURDER
+            - THEFT
+            - ASSAULT
+            - ROBBERY
+            - BURGLARY
+            - FRAUD
+            - ARSON
+            - KIDNAPPING
+            - LARCENY
+            - JAYWALKING
+            - VANDALISM
+            - GRAND_THEFT_AUTO
+            - IDENTITY_THEFT
+            - TAX_EVASION
+    CreateVisionResponse:
+      type: object
+      required:
+        - visionId
+      properties:
+        visionId:
+          type: string
+          format: uuid
+    PreApologyResponse:
+      type: object
+      required:
+        - id
+        - preArrestId
+        - perpetratorId
+        - lastName
+        - firstName
+        - baseAmount
+        - jetpackFuelDeduction
+        - haloRentalFee
+        - netPayout
+        - apologyText
+      properties:
+        id:
+          type: string
+          format: uuid
+        preArrestId:
+          type: string
+          format: uuid
+        perpetratorId:
+          type: string
+          format: uuid
+        lastName:
+          type: string
+        firstName:
+          type: string
+        baseAmount:
+          type: number
+        jetpackFuelDeduction:
+          type: number
+        haloRentalFee:
+          type: number
+        netPayout:
+          type: number
+        apologyText:
+          type: string
+    PreArrestResponse:
+      type: object
+      required:
+        - id
+        - visionId
+        - perpetratorId
+        - firstName
+        - lastName
+        - preArrestIssuedDate
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        visionId:
+          type: string
+          format: uuid
+        perpetratorId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        preArrestIssuedDate:
+          type: string
+          format: date-time
+        preArrestDate:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ARRESTED_BEFORE_CRIME
+            - CANCELLED
+    UserResponse:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string

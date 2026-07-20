@@ -1,0 +1,168 @@
+<div class="hud-container">
+    <header class="panel hud-header">
+        <div class="header-logo-container">
+            <img alt="pre-crime logo" class="logo" src="assets/images/pre-crime-logo.png">
+            <h1>Department of Pre-Crime</h1>
+        </div>
+        <div class="header-actions">
+            @if (backendError()) {
+            <div class="error-warning">{{ backendError() }}</div>
+            }
+            <div [class.critical]="backendError()" class="status-indicator">
+                System Status: {{ backendError() ? 'Critical' : 'Optimal' }}
+            </div>
+            <button (click)="logout()" class="logout-btn" data-testid="logout-btn">Logout</button>
+        </div>
+    </header>
+
+    <aside class="panel">
+        <div>
+            <div class="scanner"></div>
+            <h2>Precog Input</h2>
+            <br>
+            <form #visionForm="ngForm" (ngSubmit)="triggerVision()" class="vision-form">
+                <label for="first-name-input">Perpetrator First Name</label>
+                <input (ngModelChange)="perpetratorFirstName.set($event)" [ngModel]="perpetratorFirstName()"
+                       data-testid="first-name-input"
+                       id="first-name-input"
+                       maxlength="80"
+                       name="firstName"
+                       placeholder="First Name..." required>
+                <label for="last-name-input">Perpetrator Last Name</label>
+                <input (ngModelChange)="perpetratorLastName.set($event)" [ngModel]="perpetratorLastName()"
+                       data-testid="last-name-input"
+                       id="last-name-input"
+                       maxlength="80"
+                       name="perpetrator"
+                       placeholder="Last Name..." required>
+                <label for="crime-type-select">Projected Crime</label>
+                <select (ngModelChange)="crimeType.set($event)" [ngModel]="crimeType()" data-testid="crime-type-select"
+                        id="crime-type-select"
+                        name="crimeType" required>
+                    <option disabled selected value="">Select Crime...</option>
+                    @for (type of crimeTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                    }
+                </select>
+                <button [disabled]="visionForm.invalid" data-testid="submit-vision-btn" type="submit">
+                    Submit to Precogs
+                </button>
+                <br>
+            </form>
+        </div>
+
+        <div class="sub-section">
+            <h2>Pending Pre-Arrests</h2>
+            <div class="apology-list">
+                @for (arrest of pendingPreArrests(); track arrest.id) {
+                <div class="apology-card arrest-card">
+                    <div class="apology-header">
+                        <span class="apology-perpetrator">{{ arrest.firstName }} {{ arrest.lastName }}</span>
+                        <span class="arrest-status">{{ arrest.status }}</span>
+                    </div>
+                    <div class="apology-breakdown">
+                        <span>Date: {{ arrest.preArrestIssuedDate | date:'medium' }}</span>
+                        <span>ID: {{ arrest.id.substring(0, 8) }}...</span>
+                        <span>Vision: {{ arrest.visionId.substring(0, 8) }}...</span>
+                    </div>
+                    <div class="apology-breakdown">
+                    <span>
+                            <button (click)="executePreArrest(arrest.id!)" class="pre-arrest-btn"
+                                    data-testid="confirm-pre-arrest-btn"
+                                    type="button">Confirm Pre-Arrest executed</button>
+                    </span>
+                        <span>
+                            <button (click)="cancelPreArrest(arrest.id!)" class="pre-arrest-btn"
+                                    data-testid="cancel-pre-arrest-btn" type="button">Cancel Pre-Arrest</button>
+                    </span>
+                    </div>
+                </div>
+                } @empty {
+                <div class="apologies-empty">No pending Pre-Arrests...</div>
+                }
+            </div>
+        </div>
+    </aside>
+
+    <main class="panel">
+        <h2>Live Surveillance Feed (Audit Log)</h2>
+        <div class="log-feed">
+            @for (log of auditLogs(); track log.id?.value) {
+            <div class="log-entry">
+                [{{ log.recordedAt | date:'HH:mm:ss' }}] >> {{ log.eventType }}:
+                <pre class="log-payload">{{ formatPayload(log.payload) }}</pre>
+            </div>
+            } @empty {
+            <div class="log-entry empty-state">No surveillance data available...</div>
+            }
+        </div>
+    </main>
+
+    <aside class="panel stats-apologies-panel">
+        <div>
+            <h2>Statistics</h2>
+            <div class="stats-number">
+                {{ crimesPrevented() }}
+            </div>
+            <div class="stats-label">Crimes Prevented</div>
+        </div>
+
+        <div class="sub-section">
+            <h2>Executed Pre-Arrests</h2>
+            <div class="apology-list">
+                @for (arrest of executedPreArrests(); track arrest.id) {
+                <div class="apology-card arrest-card">
+                    <div class="apology-header">
+                        <span class="apology-perpetrator">{{ arrest.firstName }} {{ arrest.lastName }}</span>
+                        <span class="arrest-status">{{ arrest.status }}</span>
+                    </div>
+                    <div class="apology-breakdown">
+                        <span>Date: {{ arrest.preArrestDate | date:'medium' }}</span>
+                        <span>ID: {{ arrest.id.substring(0, 8) }}...</span>
+                        <span>Vision: {{ arrest.visionId.substring(0, 8) }}...</span>
+                    </div>
+                </div>
+                } @empty {
+                <div class="apologies-empty">No executed Pre-Arrests...</div>
+                }
+            </div>
+        </div>
+
+        <div class="sub-section">
+            <h2>Pre-Emptive Apologies</h2>
+            <div class="apology-list">
+                @for (apology of apologies(); track apology.id) {
+                <div class="apology-card">
+                    <div class="apology-header">
+                        <span class="apology-perpetrator">{{ apology.firstName }} {{ apology.lastName }}</span>
+                        <span [class.negative]="apology.netPayout < 0"
+                              [class.positive]="apology.netPayout >= 0"
+                              class="apology-payout">
+                                {{ (apology.netPayout) >= 0 ? '+' : '' }}{{ apology.netPayout | currency:'USD' }}
+                            </span>
+                    </div>
+                    <div class="apology-text">{{ apology.apologyText }}</div>
+                    <div class="apology-breakdown">
+                        <span>Base: ${{ apology.baseAmount }}</span>
+                        <span>Fuel: -${{ apology.jetpackFuelDeduction }}</span>
+                        <span>Halo: -${{ apology.haloRentalFee }}</span>
+                    </div>
+                </div>
+                } @empty {
+                <div class="apologies-empty">
+                    No Apologies generated yet...
+                </div>
+                }
+            </div>
+        </div>
+    </aside>
+
+    <footer class="panel hud-footer">
+        <div>
+            Confidential - Property of Swiss Pre-Crime Division
+        </div>
+        <div>
+            Apart from preventing crimes, this application shows the Onion/DDD Architecture Style principles
+        </div>
+    </footer>
+</div>

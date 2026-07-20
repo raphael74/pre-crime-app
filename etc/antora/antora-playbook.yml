@@ -1,6 +1,6 @@
 antora:
   extensions:
-    - require: ./etc/antora/extensions/mermaid-extension.js
+    - require: ./extensions/mermaid-extension.js
       mermaid_library_url: https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs
 
 site:
@@ -10,7 +10,7 @@ site:
 
 content:
   sources:
-    - url: ./
+    - url: './../..'
       branches: HEAD
       start_path: etc/antora
 
@@ -20,4 +20,4 @@ ui:
     snapshot: true
 
 output:
-  dir: ./build/site
+  dir: ../../build/site

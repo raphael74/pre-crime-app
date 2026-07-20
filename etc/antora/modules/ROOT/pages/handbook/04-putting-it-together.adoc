@@ -24,7 +24,7 @@ flowchart TD
 
     AppSvc -->|call| Vision
     Vision -->|foreseeCrime| Pub
-    Pub -->|TransactionalOutbox<br/>(Infrastructure)| OutDB[(Outbox DB)]
+    Pub -->|Transactional Outbox| OutDB[(Outbox DB)]
 
     OutDB -->|OutboxProcessor polls| KProd["Kafka Producer<br/>(Infrastructure)"]
     KProd -->|CrimeForeseenEvent| Kafka["crime-foreseen-event topic"]

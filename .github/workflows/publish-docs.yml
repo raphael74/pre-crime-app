@@ -4,8 +4,7 @@ on:
   push:
     branches: [main, master]
     paths:
-      - etc/developer-docs/**
-      - antora-playbook.yml
+      - etc/antora/**
   workflow_dispatch:
 
 concurrency:
@@ -39,7 +38,7 @@ jobs:
         run: npm i antora
 
       - name: Generate Site
-        run: npx antora antora-playbook.yml
+        run: npx antora etc/antora/antora-playbook.yml
 
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v5

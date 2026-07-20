@@ -35,5 +35,5 @@ build/
 .antigravitycli/
 
 # Antora build output
-build/site/
+/etc/antora/build/site/
 /etc/antora/extensions/node_modules/

@@ -6,6 +6,7 @@ This documentation covers the architecture, development workflow, and operationa
 guidance for the Pre-Crime Application — a reference implementation of
 **Domain-Driven Design (DDD)** and **Onion Architecture** using a modern
 Kotlin/Spring Boot backend and an Angular frontend.
+The code is only for educational purposes and is not meant to be production ready.
 
 == Architecture
 

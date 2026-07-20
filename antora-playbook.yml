@@ -1,6 +1,6 @@
 antora:
   extensions:
-    - require: ./etc/antora/extensions/node_modules/@sntke/antora-mermaid-extension
+    - require: ./etc/antora/extensions/mermaid-extension.js
       mermaid_library_url: https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs
 
 site:

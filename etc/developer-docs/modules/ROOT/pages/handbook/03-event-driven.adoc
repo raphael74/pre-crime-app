@@ -1,0 +1,196 @@
+= Event-Driven Communication & the Transactional Outbox
+
+In this project, aggregates communicate through **domain events**. But there is a critical rule:
+
+[quote]
+An aggregate can never directly talk to another aggregate.
+
+Instead, when something important happens, the aggregate publishes a domain event. Other aggregates react to that event — possibly in a different transaction or even a different service entirely.
+
+== The Problem: Database + Message Broker
+
+Imagine a `PreArrest` is executed. The code needs to:
+
+1. Save the updated `PreArrest` to the database
+2. Publish a `PreArrestExecutedEvent` to Kafka
+
+What happens if step 2 fails after step 1 succeeded? You now have a `PreArrest` that was executed, but nobody knows about it. This is called a **distributed transaction** problem.
+
+== The Solution: Transactional Outbox
+
+The **Transactional Outbox Pattern** solves this by storing events in the **same database transaction** as the business data:
+
+[source,mermaid]
+----
+sequenceDiagram
+    participant App as Application Service
+    participant DB as Database
+    participant Outbox as Outbox Processor
+    participant Kafka as Kafka
+
+    App->>DB: START TRANSACTION
+    App->>DB: UPDATE pre_arrest SET status = 'ARRESTED'
+    App->>DB: INSERT INTO outbox (event = PreArrestExecutedEvent)
+    App->>DB: COMMIT
+
+    Outbox->>DB: SELECT ... FROM outbox WHERE status = 'PENDING' FOR UPDATE SKIP LOCKED
+    DB->>Outbox: [outbox record]
+    Outbox->>Kafka: kafkaTemplate.send(PreArrestExecutedEvent)
+    Outbox->>DB: UPDATE outbox SET status = 'PROCESSED'
+----
+
+=== Step 1: Domain publishes to the outbox (not directly to Kafka)
+
+[source,kotlin]
+----
+@Component
+class TransactionalDomainEventPublisher(
+    private val outboxRepository: OutboxRepository
+) : DomainEventPublisher {
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun publish(event: Any) {
+        // This runs INSIDE the same transaction as the business operation
+        outboxRepository.create(event)
+    }
+}
+----
+
+The `Propagation.MANDATORY` ensures this method is always called within an existing transaction — it will fail if there is no active transaction.
+
+=== Step 2: Scheduled processor polls the outbox
+
+[source,kotlin]
+----
+@Component
+class OutboxProcessor(
+    transactionManager: PlatformTransactionManager,
+    private val outboxRepository: OutboxRepository,
+    private val kafkaTemplate: KafkaTemplate<String, Any>
+) {
+    @Scheduled(fixedDelay = 1000)
+    fun processOutbox() {
+        val outboxRecords = outboxRepository.findPendingForUpdate()
+        outboxRecords.forEach { sendEvent(it.id, it.event) }
+    }
+}
+----
+
+=== Step 3: Events are routed to the correct Kafka topic
+
+[source,kotlin]
+----
+private fun prepareKafkaEvent(outboxId: OutboxId, event: Any): ProducerRecord<String, Any> {
+    val topic: String
+    val eventKey: String
+
+    when (event) {
+        is CrimeForeseenEvent -> {
+            topic = CRIME_FORESEEN_EVENT_TOPIC
+            eventKey = event.visionId.value.toString()
+        }
+        is PreArrestExecutedEvent -> {
+            topic = PRE_ARREST_EXECUTED_EVENT_TOPIC
+            eventKey = event.preArrestId.value.toString()
+        }
+        is PreArrestCancelledEvent -> {
+            topic = PRE_ARREST_CANCELLED_EVENT_TOPIC
+            eventKey = event.preArrestId.value.toString()
+        }
+        is PreApologyIssuedEvent -> {
+            topic = PRE_APOLOGY_ISSUED_EVENT_TOPIC
+            eventKey = event.apologyId.value.toString()
+        }
+        else -> throw IllegalArgumentException("Unsupported event type: ${event::class.simpleName}")
+    }
+
+    val record = ProducerRecord(topic, eventKey, event)
+    record.headers().add(IDEMPOTENCE_ID_HEADER, outboxId.value.toString().toByteArray())
+    return record
+}
+----
+
+=== Step 4: Consumer uses the Idempotent Inbox pattern
+
+When consuming events, the system must handle **duplicate messages** (Kafka can deliver the same message more than once). The **Inbox pattern** ensures each event is processed at most once:
+
+[source,sql]
+----
+CREATE TABLE inbox (
+    id             UUID NOT NULL,
+    consumer_group VARCHAR NOT NULL,
+    processed_at   TIMESTAMP WITH TIME ZONE NOT NULL,
+    PRIMARY KEY (id, consumer_group)
+);
+----
+
+Before processing an event, the consumer checks if it has already been processed:
+
+[source,kotlin]
+----
+// KafkaDomainEventConsumer checks before processing:
+fun onMessage(event: Any) {
+    val eventId = extractIdempotenceId(event)
+    if (inboxRepository.insertIfNotExists(eventId, consumerGroup)) {
+        // First time seeing this event — process it
+        processEvent(event)
+    } else {
+        // Already processed — skip
+    }
+}
+----
+
+== The Complete Event Chain
+
+Here is how a vision flows through the entire system:
+
+[source,mermaid]
+----
+sequenceDiagram
+    participant Vision
+    participant Outbox1 as Outbox
+    participant OP1 as OutboxProcessor
+    participant Kafka1 as Kafka
+    participant Consumer
+    participant PreArrest
+    participant Outbox2 as Outbox
+    participant OP2 as OutboxProcessor
+    participant Kafka2 as Kafka
+    participant Stats as Statistic
+    participant Apology as PreApology
+
+    Note over Vision,Apology: 1. Crime Foreseen
+    Vision->>Outbox1: CrimeForeseenEvent
+    OP1->>Outbox1: poll pending
+    OP1->>Kafka1: publish to crime-foreseen-event
+    Consumer->>Kafka1: consume
+    Consumer->>PreArrest: create PreArrest (PENDING)
+
+    Note over Vision,Apology: 2. Pre-Arrest Executed
+    PreArrest->>Outbox2: PreArrestExecutedEvent
+    OP2->>Outbox2: poll pending
+    OP2->>Kafka2: publish to pre-arrest-executed-event
+    Consumer->>Kafka2: consume
+    Consumer->>Stats: recordPrevention()
+    Consumer->>Apology: generatePreApology()
+----
+
+== Key Benefits
+
+|===
+| Benefit | Why It Matters
+
+| Reliability
+| Events are never lost — they are stored in the same database transaction as the business data.
+
+| At-Least-Once Delivery
+| The outbox processor retries on failure. Combined with the inbox pattern, you get exactly-once processing.
+
+| Loose Coupling
+| Aggregates do not know about each other. They only publish events and react to events.
+
+| Audit Trail
+| The outbox table provides a record of every event that was published.
+|===
+
+Now see the full flow end-to-end in xref:handbook/04-putting-it-together.adoc[Putting It All Together].

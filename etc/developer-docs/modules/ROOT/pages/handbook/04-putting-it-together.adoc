@@ -1,0 +1,261 @@
+= Putting It All Together
+
+This page traces a single user action — **triggering a vision** — through every layer of the application. Follow along to see how all the DDD patterns work together.
+
+== The Complete Flow
+
+[source,mermaid]
+----
+flowchart TD
+    User["User clicks 'Trigger Vision'"] -->|HTTP POST| Controller["PreCrimeController<br/>(Infrastructure)"]
+    Controller --> AppSvc["PreCrimeApplicationService<br/>triggerVision()<br/>(Application)"]
+
+    AppSvc -->|findOrCreate| PerpRepo["PerpetratorRepository<br/>(Domain Interface)"]
+    PerpRepo -->|jOOQ implements| PerpDB[(Perpetrator DB)]
+
+    AppSvc -->|create| VFact["VisionFactory.createVision()<br/>(Domain Factory)"]
+    VFact -->|creates| Vision["Vision Aggregate<br/>(Domain)"]
+
+    AppSvc -->|injectPublisher| Vision
+    Vision -->|inject| Pub["DomainEventPublisher<br/>(Domain Interface)"]
+
+    AppSvc -->|save| VRepo["VisionRepository<br/>(Domain Interface)"]
+    VRepo -->|jOOQ implements| VisDB[(Vision DB)]
+
+    AppSvc -->|call| Vision
+    Vision -->|foreseeCrime| Pub
+    Pub -->|TransactionalOutbox<br/>(Infrastructure)| OutDB[(Outbox DB)]
+
+    OutDB -->|OutboxProcessor polls| KProd["Kafka Producer<br/>(Infrastructure)"]
+    KProd -->|CrimeForeseenEvent| Kafka["crime-foreseen-event topic"]
+    Kafka -->|consumed by| KCons["KafkaDomainEventConsumer<br/>(Infrastructure)"]
+    KCons -->|inbox check| Inbox[(Inbox DB)]
+
+    KCons -->|calls| AppSvc2["PreCrimeApplicationService<br/>onCrimeForeseen()"]
+    AppSvc2 -->|creates| PreArrest["PreArrest Aggregate<br/>(Domain)"]
+    PreArrest -->|jOOQ| ArrestDB[(PreArrest DB)]
+----
+
+== Walkthrough
+
+=== Step 1: REST Controller (Infrastructure)
+
+The user clicks a button in the UI, which sends an HTTP POST to the REST controller:
+
+[source,kotlin]
+----
+@RestController
+@RequestMapping("/api")
+class PreCrimeController(
+    private val preCrimeApplicationService: PreCrimeApplicationService
+) {
+    @PostMapping("/visions")
+    fun triggerVision(@RequestBody request: CreateVisionRequest): VisionResponse {
+        val visionId = preCrimeApplicationService.triggerVision(
+            CreateVisionCommand(
+                perpetratorFirstName = request.perpetratorFirstName,
+                perpetratorLastName = request.perpetratorLastName,
+                crimeType = CrimeType.valueOf(request.crimeType.uppercase())
+            )
+        )
+        return VisionResponse(visionId.value.toString())
+    }
+}
+----
+
+The controller is in the **infrastructure** layer. It translates HTTP details into domain commands and delegates to the application service.
+
+=== Step 2: Application Service (Application)
+
+The application service orchestrates the use case:
+
+1. Find or create the perpetrator
+2. Use the factory to create a Vision
+3. Inject the event publisher
+4. Save the vision
+5. Call the business method
+
+[source,kotlin]
+----
+fun triggerVision(cmd: CreateVisionCommand): VisionId {
+    var perpetrator = perpetratorRepository.findByFirstAndLastName(
+        cmd.perpetratorFirstName, cmd.perpetratorLastName
+    )
+    if (perpetrator == null) {
+        perpetrator = Perpetrator(firstName = cmd.perpetratorFirstName, lastName = cmd.perpetratorLastName)
+        perpetratorRepository.create(perpetrator)
+    }
+    val vision = VisionFactory.createVision(perpetrator.id, cmd.crimeType)
+    vision.injectPublisher(publisher)
+    visionRepository.create(vision)
+    vision.foreseeCrime()
+    return vision.id
+}
+----
+
+Key points:
+* No business logic here — just orchestration
+* The factory is used for complex creation
+* The publisher is injected into the aggregate (so the domain stays pure)
+
+=== Step 3: Domain (Domain)
+
+Inside the aggregate, the business method runs and publishes a domain event:
+
+[source,kotlin]
+----
+@AggregateRoot
+class Vision(
+    @Identity val id: VisionId = VisionId(),
+    val perpetratorId: PerpetratorId,
+    val crimeType: CrimeType,
+    val foreseenAt: OffsetDateTime
+) {
+    fun foreseeCrime() {
+        publisher.publish(
+            CrimeForeseenEvent(
+                visionId = id,
+                perpetratorId = perpetratorId,
+                crimeType = crimeType,
+                foreseenAt = foreseenAt
+            )
+        )
+    }
+}
+----
+
+The aggregate does not know how the event is published — it just calls `publisher.publish()`. The actual implementation writes to the `outbox` table.
+
+=== Step 4: Transactional Outbox (Infrastructure)
+
+The publisher writes the event to the outbox table within the same database transaction:
+
+[source,kotlin]
+----
+@Component
+class TransactionalDomainEventPublisher(
+    private val outboxRepository: OutboxRepository
+) : DomainEventPublisher {
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun publish(event: Any) {
+        outboxRepository.create(event)
+    }
+}
+----
+
+If the database transaction fails, the outbox entry is rolled back too — data and event stay consistent.
+
+=== Step 5: Outbox Processor (Infrastructure)
+
+A scheduled task polls the outbox every second and publishes to Kafka:
+
+[source,kotlin]
+----
+@Scheduled(fixedDelay = 1000)
+fun processOutbox() {
+    val outboxRecords = outboxRepository.findPendingForUpdate()
+    outboxRecords.forEach { sendEvent(it.id, it.event) }
+}
+----
+
+=== Step 6: Event Consumer + Application Service (Infrastructure → Application)
+
+The consuming side receives the event, checks the inbox for idempotency, and triggers the next action — creating a `PreArrest`:
+
+[source,kotlin]
+----
+@DomainEventHandler
+fun onCrimeForeseen(event: CrimeForeseenEvent) {
+    val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId)
+    preArrestRepository.create(preArrest)
+}
+----
+
+== The Big Picture
+
+[source,mermaid]
+----
+graph LR
+    subgraph Client
+        UI[Angular UI]
+    end
+
+    subgraph Infrastructure
+        REST
+        Kafka_In["Kafka Consumer"]
+        Kafka_Out["Kafka Producer"]
+        Outbox["OutboxProcessor"]
+        JOOQ
+    end
+
+    subgraph Application
+        Svc["Application Services"]
+    end
+
+    subgraph Domain
+        Agg["Aggregates"]
+        Events["Domain Events"]
+        Repos["Repository Interfaces"]
+    end
+
+    subgraph Storage
+        DB[(PostgreSQL)]
+        Broker["Kafka"]
+    end
+
+    UI -->|HTTP| REST
+    REST --> Svc
+    Svc --> Agg
+    Agg --> Events
+    Svc --> Repos
+    Repos --> JOOQ
+    JOOQ --> DB
+    Events --> Outbox
+    Outbox --> Kafka_Out
+    Kafka_Out --> Broker
+    Broker --> Kafka_In
+    Kafka_In --> Svc
+
+    style Domain fill:#e1f5fe,stroke:#01579b
+    style Application fill:#fff3e0,stroke:#e65100
+    style Infrastructure fill:#f3e5f5,stroke:#4a148c
+----
+
+== Summary of DDD Benefits
+
+|===
+| DDD Pattern | Problem It Solves | Example
+
+| Value Object
+| Primitive obsession, inconsistent calculations
+| `Compensation`, `CrimeType`
+
+| Aggregate
+| Unclear boundaries, inconsistent state changes
+| `Vision.foreseeCrime()`
+
+| Domain Event
+| Hidden side effects, coupled aggregates
+| `CrimeForeseenEvent`
+
+| Repository
+| Domain depends on database technology
+| `VisionRepository` interface
+
+| Factory
+| Complex creation logic in constructors
+| `CompensationFactory`
+
+| Domain Service
+| Logic that spans multiple aggregates
+| `PreApologyDomainService`
+
+| Application Service
+| Orchestration mixed with business logic
+| `PreCrimeApplicationService`
+
+| Transactional Outbox
+| Events lost when database succeeds but Kafka fails
+| `TransactionalDomainEventPublisher` + `OutboxProcessor`
+|===

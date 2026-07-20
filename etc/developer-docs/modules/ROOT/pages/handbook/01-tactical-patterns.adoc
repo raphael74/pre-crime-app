@@ -1,0 +1,335 @@
+= Tactical DDD Building Blocks
+
+This page covers each DDD tactical pattern, explains when to use it, and shows a concrete example from this project.
+
+== Value Objects
+
+A **Value Object** is an immutable object that is defined by its attributes. Two value objects are equal if all their attributes are equal. They have **no identity** of their own.
+
+In this project, `Compensation` represents the payout calculation for a pre-arrested person:
+
+[source,kotlin]
+----
+@ValueObject
+data class Compensation(
+    val baseAmount: Double,
+    val jetpackFuelDeduction: Double,
+    val haloRentalFee: Double,
+    val netPayout: Double
+) {
+    fun isBillableToFamily(): Boolean = netPayout < 0
+}
+----
+
+Key characteristics:
+
+* **`data class`** — structural equality (two `Compensation` with same values are equal)
+* **`val`** properties — immutable
+* **No identity** — no `id` field
+* **Behavior** — methods like `isBillableToFamily()` that use the object's data
+
+Another example is `AggregateVersion`, which tracks optimistic locking versions:
+
+[source,kotlin]
+----
+@ValueObject
+@JvmInline
+value class AggregateVersion(val value: Long = 0) {
+    fun increment(): AggregateVersion = AggregateVersion(value + 1)
+}
+----
+
+|===
+| Do use Value Objects for | Don't use for
+
+| Money, dates, measurements, coordinates, ranges
+| Things that need a persistent identity
+|===
+
+== Aggregates
+
+An **Aggregate** is a cluster of domain objects that are treated as a single unit. Each aggregate has one **Aggregate Root** that is the only entry point for modifying anything inside the aggregate.
+
+This is the core of the `Vision` aggregate:
+
+[source,kotlin]
+----
+@AggregateRoot
+class Vision(
+    @Identity val id: VisionId = VisionId(),
+    var version: AggregateVersion = AggregateVersion(),
+    val perpetratorId: PerpetratorId,
+    val crimeType: CrimeType,
+    val foreseenAt: OffsetDateTime
+) {
+    fun foreseeCrime() {
+        publisher.publish(
+            CrimeForeseenEvent(
+                visionId = id,
+                perpetratorId = perpetratorId,
+                crimeType = crimeType,
+                foreseenAt = foreseenAt
+            )
+        )
+    }
+}
+----
+
+Note how:
+
+* The `@AggregateRoot` annotation marks the class
+* The `@Identity` annotation marks the identifier field
+* Business behavior (`foreseeCrime()`) lives **inside** the aggregate
+* The aggregate publishes a domain event when something important happens
+
+The identifier uses a Kotlin `value class`:
+
+[source,kotlin]
+----
+@JvmInline
+value class VisionId(val value: UUID = UUID.randomUUID()) : Identifier
+----
+
+=== Aggregate Rules
+
+1. Only the aggregate root can be referenced from outside
+2. All changes to the aggregate go through the root
+3. Each transaction typically modifies one aggregate
+
+Here is the `PreArrest` aggregate with a state change:
+
+[source,kotlin]
+----
+@AggregateRoot
+class PreArrest(
+    @Identity val id: PreArrestId = PreArrestId(),
+    var version: AggregateVersion = AggregateVersion(),
+    val visionId: VisionId,
+    val perpetratorId: PerpetratorId,
+    var status: PreArrestStatus = PreArrestStatus.PENDING
+) {
+    fun executePreArrest() {
+        status = PreArrestStatus.ARRESTED_BEFORE_CRIME
+        preArrestDate = OffsetDateTime.now()
+        publisher.publish(PreArrestExecutedEvent(id, visionId, perpetratorId))
+    }
+
+    fun cancelPreArrest() {
+        status = PreArrestStatus.CANCELLED
+        publisher.publish(PreArrestCancelledEvent(id, visionId, perpetratorId))
+    }
+}
+----
+
+== Domain Events
+
+A **Domain Event** captures something that happened in the domain that other parts of the system should know about. They are immutable and named in the past tense.
+
+This project uses jMolecules' `@DomainEvent` annotation:
+
+[source,kotlin]
+----
+@DomainEvent
+data class CrimeForeseenEvent(
+    val visionId: VisionId,
+    val perpetratorId: PerpetratorId,
+    val crimeType: CrimeType,
+    val foreseenAt: OffsetDateTime
+)
+----
+
+The events are consumed by application services. The handler is marked with `@DomainEventHandler`:
+
+[source,kotlin]
+----
+@DomainEventHandler
+fun onCrimeForeseen(event: CrimeForeseenEvent) {
+    val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId)
+    preArrestRepository.create(preArrest)
+}
+----
+
+Events are **never published directly to Kafka** from the domain. They are persisted to an outbox table first (explained in xref:handbook/03-event-driven.adoc[Event-Driven Communication]).
+
+== Repositories
+
+A **Repository** provides a way to retrieve and persist aggregates while hiding the underlying storage technology.
+
+In this project, repositories are **interfaces in the domain layer**:
+
+[source,kotlin]
+----
+@Repository
+interface VisionRepository {
+    fun findById(id: VisionId): Vision?
+    fun create(vision: Vision)
+    fun update(vision: Vision)
+}
+----
+
+The implementation lives in the infrastructure layer (using jOOQ):
+
+[source,kotlin]
+----
+@Repository
+class JooqVisionRepository(private val dsl: DSLContext) : VisionRepository {
+    override fun findById(id: VisionId): Vision? {
+        return dsl.selectFrom(VISION)
+            .where(VISION.ID.eq(id.value))
+            .fetchOneInto(Vision::class.java)
+    }
+    // ...
+}
+----
+
+The domain layer only sees the interface — it has no idea about jOOQ, SQL, or the database.
+
+== Services
+
+=== Domain Services
+
+A **Domain Service** contains business logic that does not naturally fit inside a single aggregate. It operates on multiple aggregates or uses external calculations.
+
+[source,kotlin]
+----
+@Service
+class PreApologyDomainService(
+    private val preApologyLetterService: PreApologyLetterService,
+) {
+    fun generatePreApology(preArrestId: PreArrestId, perpetratorId: PerpetratorId, crimeType: CrimeType): PreApology {
+        val compensation = CompensationFactory.createCompensation(crimeType)
+        val letterText = preApologyLetterService.generateLetterText(preArrestId, compensation)
+        return PreApology(
+            preArrestId = preArrestId,
+            perpetratorId = perpetratorId,
+            compensation = compensation,
+            apologyLetter = ApologyLetter(letterText)
+        )
+    }
+}
+----
+
+=== Application Services
+
+An **Application Service** orchestrates a use case. It coordinates aggregates, repositories, and domain services. It is the entry point from the infrastructure layer.
+
+[source,kotlin]
+----
+@org.jmolecules.ddd.annotation.Service
+@Service
+@Transactional
+class PreCrimeApplicationService(
+    private val visionRepository: VisionRepository,
+    private val statisticRepository: StatisticRepository,
+    private val preArrestRepository: PreArrestRepository,
+    private val preApologyRepository: PreApologyRepository,
+    private val perpetratorRepository: PerpetratorRepository,
+    private val preApologyDomainService: PreApologyDomainService,
+    private val publisher: DomainEventPublisher
+) {
+    fun triggerVision(cmd: CreateVisionCommand): VisionId {
+        var perpetrator = perpetratorRepository.findByFirstAndLastName(
+            cmd.perpetratorFirstName, cmd.perpetratorLastName
+        )
+        if (perpetrator == null) {
+            perpetrator = Perpetrator(firstName = cmd.perpetratorFirstName, lastName = cmd.perpetratorLastName)
+            perpetratorRepository.create(perpetrator)
+        }
+        val vision = VisionFactory.createVision(perpetrator.id, cmd.crimeType)
+        vision.injectPublisher(publisher)
+        visionRepository.create(vision)
+        vision.foreseeCrime()
+        return vision.id
+    }
+
+    @DomainEventHandler
+    fun onCrimeForeseen(event: CrimeForeseenEvent) {
+        val preArrest = PreArrest(visionId = event.visionId, perpetratorId = event.perpetratorId)
+        preArrestRepository.create(preArrest)
+    }
+}
+----
+
+== Factories
+
+A **Factory** encapsulates complex creation logic. In this project, `CompensationFactory` calculates the payout based on the type of crime:
+
+[source,kotlin]
+----
+@Factory
+class CompensationFactory {
+    companion object {
+        fun createCompensation(crimeType: CrimeType): Compensation {
+            val baseAmount = when (crimeType) {
+                CrimeType.MURDER -> 10000.0
+                CrimeType.GRAND_THEFT_AUTO -> 5000.0
+                CrimeType.JAYWALKING -> 50.0
+                else -> 1000.0
+            }
+            val jetpackFuelDeduction = 450.0
+            val haloRentalFee = 250.0
+            val netPayout = baseAmount - jetpackFuelDeduction - haloRentalFee
+            return Compensation(baseAmount, jetpackFuelDeduction, haloRentalFee, netPayout)
+        }
+    }
+}
+----
+
+== How These Patterns Work Together
+
+[source,mermaid]
+----
+graph LR
+    subgraph Aggregate["An Aggregate"]
+        Identity["@Identity: VisionId"]
+        VO1["@ValueObject: CrimeType"]
+        VO2["@ValueObject: AggregateVersion"]
+        Behavior["foreseeCrime()"]
+        Event["publishes @DomainEvent"]
+    end
+
+    Aggregate -->|persisted by| Repo["@Repository: VisionRepository"]
+    Aggregate -->|created by| Factory["@Factory: VisionFactory"]
+    Aggregate -->|uses| Publisher["DomainEventPublisher"]
+    Event -->|consumed by| AppSvc["@Service: ApplicationService"]
+    AppSvc -->|uses other| Aggregate2["Other @AggregateRoot"]
+
+    Factory -.->|creates| Aggregate
+    Repo -.->|interface only| Aggregate
+----
+
+== Quick Reference
+
+|===
+| Pattern | jMolecules Annotation | Example in This Project
+
+| Value Object
+| `@ValueObject`
+| `Compensation`, `CrimeType`, `AggregateVersion`
+
+| Aggregate Root
+| `@AggregateRoot`
+| `Vision`, `PreArrest`, `PreApology`
+
+| Domain Event
+| `@DomainEvent`
+| `CrimeForeseenEvent`, `PreArrestExecutedEvent`
+
+| Repository
+| `@Repository`
+| `VisionRepository`, `PreArrestRepository`
+
+| Domain Service
+| `@Service`
+| `PreApologyDomainService`
+
+| Application Service
+| `@Service` + `@org.springframework.stereotype.Service`
+| `PreCrimeApplicationService`
+
+| Factory
+| `@Factory`
+| `VisionFactory`, `CompensationFactory`
+|===
+
+Now that you know the building blocks, read about xref:handbook/02-onion-architecture.adoc[how they are organized into layers].

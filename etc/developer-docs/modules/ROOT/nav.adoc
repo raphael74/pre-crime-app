@@ -1,1 +1,7 @@
 * xref:index.adoc[Overview]
+* DDD Developer Handbook
+** xref:handbook/index.adoc[Introduction]
+** xref:handbook/01-tactical-patterns.adoc[Tactical DDD Building Blocks]
+** xref:handbook/02-onion-architecture.adoc[Onion Architecture]
+** xref:handbook/03-event-driven.adoc[Event-Driven Communication & Outbox]
+** xref:handbook/04-putting-it-together.adoc[Putting It All Together]

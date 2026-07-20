@@ -1,0 +1,112 @@
+= DDD Developer Handbook
+
+This handbook explains the **tactical patterns of Domain-Driven Design (DDD)** and how they are implemented in this project using **Spring Boot**, **jMolecules**, and **Kotlin**.
+
+The goal is to give every developer — from junior to senior — a shared vocabulary and a clear mental model of the code they are writing.
+
+== What is Domain-Driven Design?
+
+Domain-Driven Design is a software development approach that puts the **business domain** — the problem your software solves — at the center. Instead of starting with databases or APIs, you start by understanding the business and modeling it in code.
+
+The core idea:
+
+[quote]
+The heart of software is its ability to solve domain problems. Everything else is a detail.
+
+== The Two Levels of DDD
+
+|===
+| Strategic Design | Tactical Design
+
+| Finding the boundaries between different parts of the business (Bounded Contexts).
+|
+The building blocks for modeling inside a single context:
+
+* Value Objects
+* Aggregates
+* Domain Events
+* Repositories
+* Services
+* Factories
+|===
+
+This handbook focuses on **tactical patterns** — the concrete code structures you will use every day.
+
+== Why jMolecules?
+
+jMolecules provides **annotations** that make your DDD intent explicit in code:
+
+[source,kotlin]
+----
+@AggregateRoot
+@ValueObject
+@DomainEvent
+@Repository
+@Service
+@Factory
+----
+
+These annotations are not just documentation — they allow tools like **ArchUnit** to automatically verify that your code follows DDD rules. The architecture tests in this project will fail if, for example, an Aggregate Root references infrastructure code.
+
+== The Three Layers (Onion Architecture)
+
+This project follows **Onion Architecture**, which separates the code into three rings:
+
+[source,mermaid]
+----
+graph TB
+    subgraph Infrastructure["Infrastructure Ring"]
+        REST["REST Controllers"]
+        Kafka["Kafka Consumers"]
+        JOOQ["jOOQ Persistence"]
+    end
+
+    subgraph Application["Application Ring"]
+        AppSvc["Application Services"]
+    end
+
+    subgraph Domain["Domain Ring (center)"]
+        Agg["Aggregates"]
+        VO["Value Objects"]
+        Events["Domain Events"]
+        Repos["Repository Interfaces"]
+        DomSvc["Domain Services"]
+    end
+
+    REST --> AppSvc
+    Kafka --> AppSvc
+    AppSvc --> Agg
+    AppSvc --> Repos
+    Agg --> Events
+    DomSvc --> Agg
+    JOOQ -.->|implements| Repos
+----
+
+* **Domain Ring** (inner-most): Business logic only. No frameworks, no databases, no HTTP.
+* **Application Ring** (middle): Orchestrates domain objects for use cases.
+* **Infrastructure Ring** (outer-most): Databases, message brokers, HTTP, security.
+
+== The Event Flow in This Project
+
+The aggregates communicate through **domain events** published reliably via the **Transactional Outbox Pattern**:
+
+[source,mermaid]
+----
+sequenceDiagram
+    participant Vision as Vision Aggregate
+    participant Outbox as Outbox Table
+    participant Kafka as Kafka Broker
+    participant PreArrest as PreArrest Aggregate
+    participant Statistic as Statistic Aggregate
+    participant PreApology as PreApology Aggregate
+
+    Vision->>Outbox: CrimeForeseenEvent
+    Outbox->>Kafka: OutboxProcessor polls & publishes
+    Kafka->>PreArrest: ApplicationService creates PreArrest
+    PreArrest->>Outbox: PreArrestExecutedEvent
+    Outbox->>Kafka: OutboxProcessor polls & publishes
+    Kafka->>Statistic: recordPrevention()
+    Kafka->>PreApology: PreApologyDomainService generates apology
+----
+
+Ready to dive in? Start with xref:handbook/01-tactical-patterns.adoc[the tactical patterns].

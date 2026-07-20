@@ -1,0 +1,180 @@
+= Onion Architecture
+
+Onion Architecture organizes code into concentric rings. The rule is simple: **inner rings define contracts, outer rings provide implementations**. Dependencies point **inward** — never outward.
+
+[source,mermaid]
+----
+graph TB
+    subgraph IO[" "]
+        direction TB
+        subgraph Domain["Domain Ring (no frameworks)"]
+            Agg["@AggregateRoot<br/>Vision, PreArrest, PreApology"]
+            VO["@ValueObject<br/>Compensation, CrimeType"]
+            Events["@DomainEvent<br/>CrimeForeseenEvent"]
+            Repos["@Repository<br/>VisionRepository"]
+            DomSvc["@Service<br/>PreApologyDomainService"]
+            Factories["@Factory<br/>VisionFactory"]
+            Pub["DomainEventPublisher"]
+        end
+
+        subgraph Application["Application Ring (orchestration)"]
+            AppSvc["@Service<br/>PreCrimeApplicationService"]
+            AuditSvc["AuditApplicationService"]
+        end
+
+        subgraph Infrastructure["Infrastructure Ring (technology)"]
+            REST["REST Controller<br/>PreCrimeController"]
+            KafkaC["Kafka Consumer<br/>KafkaDomainEventConsumer"]
+            JOOQ["jOOQ Repositories<br/>JooqVisionRepository"]
+            Outbox["OutboxProcessor"]
+            TPub["TransactionalDomainEventPublisher"]
+            Security["SecurityConfiguration"]
+        end
+    end
+
+    Application -->|depends on| Domain
+    Infrastructure -->|depends on| Application
+    Infrastructure -->|implements interfaces from| Domain
+    JOOQ -.->|implements| Repos
+    TPub -.->|implements| Pub
+----
+
+== The Three Rings
+
+=== Domain Ring (innermost)
+
+This is where the **business logic** lives. It has **no dependencies** on any framework — no Spring, no database, no HTTP.
+
+Allowed dependencies:
+* Kotlin standard library
+* jMolecules annotations (they are just markers)
+* Other domain classes
+
+Contains:
+* Aggregates (`Vision`, `PreArrest`, `PreApology`)
+* Value Objects (`Compensation`, `CrimeType`)
+* Domain Events (`CrimeForeseenEvent`)
+* Repository interfaces (`VisionRepository`)
+* Domain Services (`PreApologyDomainService`)
+* Factories (`VisionFactory`, `CompensationFactory`)
+
+This rule is enforced by an ArchUnit test:
+
+[source,kotlin]
+----
+@Test
+fun domainMustNotDependOnInfrastructure() {
+    checkRule(classes()
+        .that().resideInAPackage("..domain..")
+        .should().onlyDependOnClassesThat()
+        .resideInAnyPackage("..domain..", "java..", "kotlin..",
+            "org.jmolecules..", "org.jetbrains.."))
+}
+----
+
+=== Application Ring (middle)
+
+This layer **orchestrates** the domain objects to fulfill use cases. It depends on the domain ring.
+
+Contains:
+* Application Services (`PreCrimeApplicationService`)
+* Event handlers (`onCrimeForeseen`, `onPreArrestExecuted`)
+
+An application service does not contain business logic — it delegates to aggregates and domain services:
+
+[source,kotlin]
+----
+@DomainEventHandler
+fun onPreArrestExecuted(event: PreArrestExecutedEvent) {
+    updateStatistics()
+    createPreApology(event.perpetratorId, event.preArrestId, event.visionId)
+}
+
+private fun createPreApology(perpetratorId: PerpetratorId, preArrestId: PreArrestId, visionId: VisionId) {
+    val vision = visionRepository.findById(visionId)
+    val preApology = preApologyDomainService.generatePreApology(preArrestId, perpetratorId, vision.crimeType)
+    preApology.injectPublisher(publisher)
+    preApology.issue()
+    preApologyRepository.create(preApology)
+}
+----
+
+=== Infrastructure Ring (outermost)
+
+This ring contains **all the technical details** — databases, message queues, HTTP, security.
+
+Contains:
+* REST controllers (`PreCrimeController`)
+* Kafka consumers (`KafkaDomainEventConsumer`)
+* jOOQ repository implementations (`JooqVisionRepository`)
+* Outbox processor (`OutboxProcessor`)
+* Security configuration (`SecurityConfiguration`)
+
+This ring **implements** the interfaces defined in the domain ring:
+
+[source,kotlin]
+----
+@Component
+class TransactionalDomainEventPublisher(
+    private val outboxRepository: OutboxRepository
+) : DomainEventPublisher {
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun publish(event: Any) {
+        if (event is Iterable<*>) {
+            event.filterNotNull().forEach { publishSingle(it) }
+        } else {
+            publishSingle(event)
+        }
+    }
+}
+----
+
+== Why Onion Architecture?
+
+|===
+| Benefit | Explanation
+
+| Testability
+| Business logic is pure Kotlin — test it without Spring, without a database.
+
+| Flexibility
+| Swap databases, message brokers, or UI frameworks without touching the domain.
+
+| Clarity
+| When you look at the `domain` package, you see the business — not SQL or HTTP.
+
+| Enforceability
+| ArchUnit + jMolecules can automatically verify the layer rules.
+|===
+
+== Visual Layer Convention
+
+You can see the layers in the package structure:
+
+[source]
+----
+src/main/kotlin/org/example/precrime/
+├── domain/              # Innermost ring
+│   ├── vision/
+│   │   ├── Vision.kt           # @AggregateRoot
+│   │   └── VisionRepository.kt # @Repository interface
+│   ├── prearrest/
+│   │   ├── PreArrest.kt        # @AggregateRoot
+│   │   └── PreArrestRepository.kt
+│   ├── preapology/
+│   │   ├── PreApology.kt       # @AggregateRoot
+│   │   ├── PreApologyRepository.kt
+│   │   └── PreApologyDomainService.kt
+│   └── DomainEventPublisher.kt # Interface
+├── application/         # Middle ring
+│   ├── PreCrimeApplicationService.kt
+│   └── AuditApplicationService.kt
+└── infrastructure/      # Outermost ring
+    ├── facade/rest/     # REST controllers
+    ├── facade/event/    # Kafka consumers
+    └── integration/event/  # Outbox implementation
+        └── persistence/    # jOOQ implementations
+----
+
+Next: learn how aggregates communicate through xref:handbook/03-event-driven.adoc[Event-Driven Communication].

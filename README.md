@@ -262,6 +262,14 @@ npm start
 
 The UI will be available at `http://localhost:4200` (proxied to `/api` on `localhost:8080`).
 
+## Documentation generated with AsciiDoc and Antora
+The ect/antora folder contains the developer documentation concerning Onion and DDD principles.
+
+To generate the Antora html documentation just run:
+```bash
+npx antora etc/antora/antora-playbook.yml
+```
+
 ## Development Conventions
 
 - **Onion Constraints**: Architectural boundaries are enforced by **ArchUnit** and **jMolecules** in

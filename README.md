@@ -267,7 +267,7 @@ The ect/antora folder contains the developer documentation concerning Onion and 
 
 To generate the Antora html documentation just run:
 ```bash
-npx antora etc/antora/antora-playbook.yml
+npx antora etc/antora/playbooks/antora-playbook.yml
 ```
 
 ## Development Conventions

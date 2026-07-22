@@ -36,4 +36,4 @@ build/
 
 # Antora build output
 /etc/antora/build/site/
-/etc/antora/extensions/node_modules/
+/etc/antora/playbooks/node_modules/

@@ -1,7 +1,6 @@
 antora:
   extensions:
-    - require: ./extensions/mermaid-extension.js
-      mermaid_library_url: https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs
+    - require: '@sntke/antora-mermaid-extension'
 
 site:
   title: Pre-Crime Application Docs
@@ -10,7 +9,7 @@ site:
 
 content:
   sources:
-    - url: './../..'
+    - url: './../../..'
       branches: HEAD
       start_path: etc/antora
 
@@ -18,6 +17,7 @@ ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
     snapshot: true
+  supplemental_files: ./supplemental-ui
 
 output:
   dir: etc/antora/build/site

@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "dependencies": {
+    "antora": "latest",
+    "@antora/cli": "latest",
+    "@antora/site-generator": "latest",
+    "@sntke/antora-mermaid-extension": "latest"
+  }
+}

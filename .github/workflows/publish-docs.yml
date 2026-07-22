@@ -2,7 +2,7 @@ name: Publish to GitHub Pages
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main, master ]
     paths:
       - etc/antora/**
   workflow_dispatch:
@@ -35,10 +35,11 @@ jobs:
           node-version: '22'
 
       - name: Install Antora
-        run: npm i antora
+        working-directory: ./etc/antora/playbooks
+        run: npm install
 
       - name: Generate Site
-        run: npx antora etc/antora/antora-playbook.yml
+        run: npx antora etc/antora/playbooks/antora-playbook.yml
 
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v5

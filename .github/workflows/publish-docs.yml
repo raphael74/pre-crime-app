@@ -35,6 +35,9 @@ jobs:
           node-version: '22'
 
       - name: Install Antora
+        run: npm i antora
+
+      - name: Install packages
         working-directory: ./etc/antora/playbooks
         run: npm install
 

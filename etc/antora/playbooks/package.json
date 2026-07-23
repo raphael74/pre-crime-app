@@ -3,6 +3,7 @@
   "devDependencies": {
     "@antora/cli": "3.1.15",
     "@antora/site-generator": "3.1.15",
-    "@sntke/antora-mermaid-extension": "0.0.13"
+    "@sntke/antora-mermaid-extension": "latest",
+    "@antora/lunr-extension": "latest"
   }
 }

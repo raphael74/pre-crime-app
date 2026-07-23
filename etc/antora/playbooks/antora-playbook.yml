@@ -1,6 +1,8 @@
 antora:
   extensions:
     - require: '@sntke/antora-mermaid-extension'
+    - require: '@antora/lunr-extension'
+      languages: [ en, de ]
 
 site:
   title: Pre-Crime Application Docs

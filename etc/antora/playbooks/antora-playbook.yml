@@ -22,4 +22,4 @@ ui:
   supplemental_files: ./supplemental-ui
 
 output:
-  dir: etc/antora/build/site
+  dir: ../build/site

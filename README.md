@@ -45,7 +45,7 @@ classDiagram
         PreArrestId id
         VisionId visionId
         PerpetratorId perpetratorId
-      OffsetDateTime preArrestIssueDate
+        OffsetDateTime preArrestIssueDate
         OffsetDateTime preArrestDate
         PreArrestStatus status
     }
@@ -70,11 +70,11 @@ classDiagram
         String eventType
     }
 
-  Vision ..> Perpetrator: references
-  PreArrest ..> Vision: references
-  PreArrest ..> Perpetrator: references
-  PreApology ..> Vision: references
-  PreApology ..> Perpetrator: references
+    Vision ..> Perpetrator: references
+    PreArrest ..> Vision: references
+    PreArrest ..> Perpetrator: references
+    PreApology ..> Vision: references
+    PreApology ..> Perpetrator: references
 ```
 
 ## Database Schema
@@ -139,11 +139,11 @@ erDiagram
         timestamptz processed_at
     }
 
-    perpetrator ||--o{ vision : ""
-    perpetrator ||--o{ pre_arrest : ""
-    perpetrator ||--o{ pre_apology : ""
-    vision ||--o{ pre_arrest : ""
-    pre_arrest ||--o{ pre_apology : ""
+    perpetrator ||--o{ vision: ""
+    perpetrator ||--o{ pre_arrest: ""
+    perpetrator ||--o{ pre_apology: ""
+    vision ||--o{ pre_arrest: ""
+    pre_arrest ||--o{ pre_apology: ""
 ```
 
 ## Architecture & Flow
@@ -155,32 +155,32 @@ concerns. This is enforced using **jMolecules** annotations and **ArchUnit**.
 
 ```mermaid
 flowchart TD
-  subgraph Infrastructure["Infrastructure Ring"]
-    direction TB
-    Rest["@RestController (Facade)"]
-    RepoImpl["jOOQ / SQL (Persistence)"]
-    Kafka["Kafka / Messaging (Integration)"]
-    Security["Spring Security (Security)"]
-  end
+    subgraph Infrastructure["Infrastructure Ring"]
+        direction TB
+        Rest["@RestController (Facade)"]
+        RepoImpl["jOOQ / SQL (Persistence)"]
+        Kafka["Kafka / Messaging (Integration)"]
+        Security["Spring Security (Security)"]
+    end
 
-  subgraph Application["Application Ring"]
-    direction TB
-    AppService["@Service (Orchestration)"]
-    EventHandler["@DomainEventHandler (Side Effects)"]
-  end
+    subgraph Application["Application Ring"]
+        direction TB
+        AppService["@Service (Orchestration)"]
+        EventHandler["@DomainEventHandler (Side Effects)"]
+    end
 
-  subgraph Domain["Domain Ring"]
-    direction TB
-    AR["@AggregateRoot"]
-    VO["@ValueObject"]
-    DE["@DomainEvent"]
-    Rep["@Repository (Interface)"]
-    Fact["@Factory"]
-  end
+    subgraph Domain["Domain Ring"]
+        direction TB
+        AR["@AggregateRoot"]
+        VO["@ValueObject"]
+        DE["@DomainEvent"]
+        Rep["@Repository (Interface)"]
+        Fact["@Factory"]
+    end
 
-  Infrastructure --> Application
-  Application --> Domain
-  Infrastructure -.->|Implements Interfaces| Domain
+    Infrastructure --> Application
+    Application --> Domain
+    Infrastructure -.->|Implements Interfaces| Domain
 ```
 
 ### Event Flow
@@ -195,20 +195,20 @@ sequenceDiagram
     participant S as Statistic
     participant K as Kafka (Event Bus)
     Note over P: Crime Foreseen
-  P ->> K: CrimeForeseen Event
-  K -->> L: Consume CrimeForeseen
-  Note over L: Initiate Pre-Arrest (Pending)
+    P ->> K: CrimeForeseen Event
+    K -->> L: Consume CrimeForeseen
+    Note over L: Initiate Pre-Arrest (Pending)
 
-  alt Confirmed
-    L ->> K: PreArrestExecuted Event
-    K -->> S: Consume PreArrestExecuted
-    Note over S: Record Prevention (Stats)
-    K -->> A: Consume PreArrestExecuted
-    Note over A: Generate Apology & Billing
-    A ->> K: PreApologyIssued Event
-  else Cancelled
-    L ->> K: PreArrestCancelled Event
-  end
+    alt Confirmed
+        L ->> K: PreArrestExecuted Event
+        K -->> S: Consume PreArrestExecuted
+        Note over S: Record Prevention (Stats)
+        K -->> A: Consume PreArrestExecuted
+        Note over A: Generate Apology & Billing
+        A ->> K: PreApologyIssued Event
+    else Cancelled
+        L ->> K: PreArrestCancelled Event
+    end
 ```
 
 ## Technical Stack
@@ -263,11 +263,14 @@ npm start
 The UI will be available at `http://localhost:4200` (proxied to `/api` on `localhost:8080`).
 
 ## Documentation generated with AsciiDoc and Antora
+
 The ect/antora folder contains the developer documentation concerning Onion and DDD principles.
 
 To generate the Antora html documentation just run:
+
 ```bash
-npx antora etc/antora/playbooks/antora-playbook.yml
+cd etc/antora/playbooks
+npx antora antora-playbook.yml
 ```
 
 ## Development Conventions

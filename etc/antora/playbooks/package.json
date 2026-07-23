@@ -1,8 +1,9 @@
 {
   "private": true,
   "devDependencies": {
-    "@antora/cli": "3.1.15",
-    "@antora/site-generator": "3.1.15",
+    "antora": "latest",
+    "@antora/cli": "latest",
+    "@antora/site-generator": "latest",
     "@sntke/antora-mermaid-extension": "latest",
     "@antora/lunr-extension": "latest"
   }

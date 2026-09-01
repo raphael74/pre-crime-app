@@ -1,0 +1,721 @@
+= Onion Architecture & Domain-Driven Design (DDD)
+
+A self-contained developer reference explaining the core concepts of **Onion Architecture** and **Domain-Driven Design (DDD)**, with code examples illustrating how these patterns work in practice.
+
+== Why These Concepts Matter
+
+Most software projects fail not because of bad code, but because of a growing gap between what the business needs and what the code actually does. As a codebase grows, business logic gets scattered across controllers, database queries, and utility classes. Nobody can answer the question: _"Where does the rule about X live?"_
+
+[quote]
+The heart of software is its ability to solve domain problems for its user. — Eric Evans, _Domain-Driven Design_
+
+Onion Architecture and DDD address this by putting the **domain** — the problem your software solves — at the center of the design. Everything else (databases, frameworks, APIs) exists only to support it.
+
+== Onion Architecture
+
+Onion Architecture organizes code into **concentric rings**. The rule is simple: **inner rings define contracts, outer rings provide implementations**. Dependencies always point **inward** — never outward.
+
+[mermaid]
+----
+graph TB
+    subgraph Infrastructure["Infrastructure Ring"]
+        direction TB
+        REST["REST / gRPC Controllers"]
+        MQ["Message Queue Consumers"]
+        DB["Database Implementations"]
+        External["External API Clients"]
+    end
+
+    subgraph Application["Application Ring"]
+        AppSvc["Application Services"]
+        EventHandlers["Event Handlers"]
+    end
+
+    subgraph Domain["Domain Ring (center)"]
+        Agg["Aggregate Roots"]
+        VO["Value Objects"]
+        Events["Domain Events"]
+        Repos["Repository Interfaces"]
+        DomSvc["Domain Services"]
+        Factories["Factories"]
+    end
+
+    REST --> AppSvc
+    MQ --> AppSvc
+    AppSvc --> Agg
+    AppSvc --> Repos
+    AppSvc --> DomSvc
+    Agg --> Events
+    DomSvc --> Agg
+    DB -.->|implements| Repos
+    External -.->|implements| Repos
+----
+
+=== The Dependency Rule
+
+The most important rule in Onion Architecture:
+
+[quote]
+Source code dependencies can only point inward. Nothing in an inner ring can know anything about something in an outer ring.
+
+This means:
+
+* The **Domain Ring** depends on nothing — no frameworks, no databases, no HTTP
+* The **Application Ring** depends on the Domain
+* The **Infrastructure Ring** depends on both Application and Domain
+
+If you see a domain class importing from a framework package, the architecture has been violated.
+
+=== The Three Rings
+
+==== Domain Ring (innermost)
+
+This is where the **business logic** lives. It has **no dependencies** on any external framework.
+
+Allowed dependencies:
+
+* Language standard library
+* DDD annotation libraries (e.g., jMolecules — these are compile-only markers)
+* Other domain classes
+
+Contains:
+
+* Aggregates and Aggregate Roots
+* Value Objects
+* Domain Events
+* Repository interfaces
+* Domain Services
+* Factories
+
+==== Application Ring (middle)
+
+This layer **orchestrates** the domain objects to fulfill use cases. It does not contain business logic itself.
+
+Allowed dependencies:
+
+* Domain ring
+* Logging (e.g., SLF4J)
+* Transaction management annotations
+
+Contains:
+
+* Application Services
+* Event Handlers
+
+==== Infrastructure Ring (outermost)
+
+This ring contains **all technical details** — databases, message brokers, HTTP, security, external APIs.
+
+Contains:
+
+* REST / gRPC controllers
+* Message queue consumers and producers
+* Database repository implementations
+* Outbox processors
+* Security configuration
+* External API adapters
+
+This ring **implements** the interfaces defined in the domain ring. The domain never knows about these implementations.
+
+=== Why Onion Architecture?
+
+|===
+| Benefit | Explanation
+
+| Testability
+| Business logic is pure — test it without frameworks, databases, or network calls.
+
+| Flexibility
+| Swap databases, message brokers, or API protocols without touching the domain.
+
+| Clarity
+| When you look at the domain package, you see the business — not SQL or HTTP.
+
+| Maintainability
+| Changes to infrastructure (e.g., switching from REST to gRPC) don't ripple into business logic.
+|===
+
+=== Package Structure
+
+A typical Onion Architecture project mirrors the rings in its package layout:
+
+[source]
+----
+com.example.myapp/
+├── domain/                  # Innermost ring
+│   ├── order/
+│   │   ├── Order.kt             # @AggregateRoot
+│   │   ├── OrderRepository.kt   # @Repository interface
+│   │   ├── OrderId.kt           # Identity value object
+│   │   ├── OrderPlacedEvent.kt  # @DomainEvent
+│   │   └── Money.kt             # @ValueObject
+│   ├── payment/
+│   │   ├── Payment.kt
+│   │   └── PaymentRepository.kt
+│   └── shared/
+│       └── DomainEventPublisher.kt  # Interface
+├── application/             # Middle ring
+│   ├── OrderService.kt
+│   └── PaymentService.kt
+└── infrastructure/          # Outermost ring
+    ├── rest/
+    │   └── OrderController.kt
+    ├── persistence/
+    │   └── JooqOrderRepository.kt
+    └── messaging/
+        └── KafkaEventPublisher.kt
+----
+
+== Domain-Driven Design: Strategic Patterns
+
+Before diving into code-level patterns, DDD starts with **strategic design** — how you decompose a large system into manageable parts.
+
+=== Bounded Contexts
+
+A **Bounded Context** is a boundary within which a particular domain model applies. The same word can mean different things in different contexts.
+
+For example, a `Customer` in the _Sales_ context has a name and credit limit. A `Customer` in the _Support_ context has a ticket history and satisfaction score. These are different models that happen to share a name — they belong to different Bounded Contexts.
+
+Each Bounded Context has its own:
+
+* Domain model (aggregates, value objects)
+* Ubiquitous Language (the vocabulary used by developers and domain experts)
+* Database schema (potentially)
+* Team (ideally)
+
+=== Ubiquitous Language
+
+The **Ubiquitous Language** is a shared vocabulary between developers and domain experts. Every term used in code, conversations, and documentation should have a single, unambiguous meaning within a Bounded Context.
+
+For example, in a _Pre-Crime_ domain:
+
+|===
+| Term | Ubiquitous Language Definition
+
+| Vision
+| A precognitive glimpse of a future crime, including the perpetrator and crime type.
+
+| Pre-Arrest
+| The act of detaining a person before they commit a foreseen crime.
+
+| Compensation
+| A financial calculation determining the payout owed to the family of a pre-arrested person.
+|===
+
+When the business says "vision" and the code says `CrimeForecast`, the language has diverged. Use the same word everywhere.
+
+=== Context Maps
+
+A **Context Map** shows how Bounded Contexts relate to each other. Common relationships include:
+
+* **Upstream/Downstream**: One context provides data that another consumes
+* **Shared Kernel**: Two contexts share a small, common domain model
+* **Anti-Corruption Layer**: A context translates an external model into its own
+
+== Domain-Driven Design: Tactical Patterns
+
+Tactical patterns are the building blocks you use inside a single Bounded Context to model your domain in code.
+
+=== Value Objects
+
+A **Value Object** is an immutable object defined entirely by its attributes. Two value objects are equal if all their attributes are equal. They have **no identity**.
+
+[source,kotlin]
+----
+@ValueObject
+data class Money(
+    val amount: Double,
+    val currency: String
+) {
+    fun add(other: Money): Money {
+        require(currency == other.currency) { "Cannot add different currencies" }
+        return Money(amount + other.amount, currency)
+    }
+
+    fun isNegative(): Boolean = amount < 0
+}
+----
+
+Key characteristics:
+
+* **Immutable** — all properties are `val`
+* **No identity** — no `id` field; equality is based on attribute values
+* **Behavior** — methods that operate on the object's own data
+* **Self-validating** — invariant checks in `init` blocks or companion factories
+
+Another example using a Kotlin inline class for lightweight wrappers:
+
+[source,kotlin]
+----
+@ValueObject
+@JvmInline
+value class AggregateVersion(val value: Long = 0) {
+    fun increment(): AggregateVersion = AggregateVersion(value + 1)
+}
+----
+
+|===
+| Do use Value Objects for | Don't use for
+
+| Money, dates, measurements, coordinates, ranges, addresses
+| Things that need a persistent identity (e.g., a specific order)
+|===
+
+=== Aggregates and Aggregate Roots
+
+An **Aggregate** is a cluster of domain objects treated as a single unit for data changes. Each aggregate has one **Aggregate Root** — the only entry point for modifying anything inside the aggregate.
+
+[source,kotlin]
+----
+@AggregateRoot
+class Order(
+    @Identity val id: OrderId = OrderId(),
+    var version: AggregateVersion = AggregateVersion(),
+    val customerId: CustomerId,
+    val items: MutableList<OrderItem> = mutableListOf(),
+    var status: OrderStatus = OrderStatus.DRAFT
+) {
+    private var _publisher: DomainEventPublisher? = null
+
+    fun injectPublisher(publisher: DomainEventPublisher) {
+        this._publisher = publisher
+    }
+
+    private val publisher: DomainEventPublisher
+        get() = requireNotNull(_publisher) {
+            "DomainEventPublisher has not been injected into Order $id"
+        }
+
+    fun addItem(productId: ProductId, quantity: Int, price: Money) {
+        require(status == OrderStatus.DRAFT) { "Cannot modify a confirmed order" }
+        items.add(OrderItem(productId, quantity, price))
+    }
+
+    fun confirm() {
+        require(items.isNotEmpty()) { "Cannot confirm an empty order" }
+        status = OrderStatus.CONFIRMED
+        publisher.publish(OrderConfirmedEvent(id, customerId, totalAmount()))
+    }
+
+    fun totalAmount(): Money {
+        return items.fold(Money(0.0, "USD")) { acc, item -> acc.add(item.subtotal()) }
+    }
+}
+----
+
+The identifier uses a dedicated value class:
+
+[source,kotlin]
+----
+@JvmInline
+value class OrderId(val value: UUID = UUID.randomUUID()) : Identifier
+----
+
+==== Aggregate Rules
+
+1. Only the aggregate root can be referenced from outside
+2. All changes to the aggregate go through the root
+3. Each transaction typically modifies **one aggregate**
+4. The aggregate ensures **consistency boundaries** — invariants are checked before any state change
+
+=== Domain Events
+
+A **Domain Event** captures something that happened in the domain that other parts of the system should know about. They are immutable and named in the **past tense**.
+
+[source,kotlin]
+----
+@DomainEvent
+data class OrderConfirmedEvent(
+    val orderId: OrderId,
+    val customerId: CustomerId,
+    val totalAmount: Money
+)
+----
+
+Why events matter:
+
+* They make **side effects explicit** — instead of hidden `if` statements, you see a published event
+* They enable **loose coupling** — aggregates communicate through events, not direct references
+* They support **audit trails** — events can be stored and replayed
+
+Events are consumed by application services or other aggregates:
+
+[source,kotlin]
+----
+@DomainEventHandler
+fun onOrderConfirmed(event: OrderConfirmedEvent) {
+    inventoryService.reserveStock(event.orderId)
+    notificationService.notifyCustomer(event.customerId, event.orderId)
+}
+----
+
+=== Repositories
+
+A **Repository** provides a way to retrieve and persist aggregates while hiding the storage technology. In Onion Architecture, repository **interfaces live in the domain layer**.
+
+[source,kotlin]
+----
+@Repository
+interface OrderRepository {
+    fun findById(id: OrderId): Order?
+    fun create(order: Order)
+    fun update(order: Order)
+    fun findAllByCustomerId(customerId: CustomerId): List<Order>
+}
+----
+
+The implementation lives in the infrastructure layer:
+
+[source,kotlin]
+----
+@Component
+class JooqOrderRepository(
+    private val dsl: DSLContext
+) : OrderRepository {
+
+    override fun findById(id: OrderId): Order? {
+        return dsl.selectFrom(ORDER)
+            .where(ORDER.ID.eq(id.value))
+            .fetchOne()
+            ?.toOrder()
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun create(order: Order) {
+        dsl.insertInto(ORDER)
+            .set(ORDER.ID, order.id.value)
+            .set(ORDER.CUSTOMER_ID, order.customerId.value)
+            .set(ORDER.STATUS, order.status.name)
+            .set(ORDER.VERSION, order.version.value)
+            .execute()
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun update(order: Order) {
+        val updatedRows = dsl.update(ORDER)
+            .set(ORDER.STATUS, order.status.name)
+            .set(ORDER.VERSION, order.version.increment().value)
+            .where(ORDER.ID.eq(order.id.value))
+            .and(ORDER.VERSION.eq(order.version.value))
+            .execute()
+
+        if (updatedRows == 0) {
+            throw OptimisticLockingException("Order ${order.id} was modified by another transaction")
+        }
+        order.version = order.version.increment()
+    }
+
+    private fun Record.toOrder() = Order(
+        id = OrderId(get(ORDER.ID)!!),
+        version = AggregateVersion(get(ORDER.VERSION)!!),
+        customerId = CustomerId(get(ORDER.CUSTOMER_ID)!!),
+        status = OrderStatus.valueOf(get(ORDER.STATUS)!!)
+    )
+}
+----
+
+The domain layer only sees the interface — it has no knowledge of jOOQ, SQL, or the database.
+
+=== Domain Services
+
+A **Domain Service** contains business logic that does not naturally fit inside a single aggregate. It operates on multiple aggregates or involves external calculations that are part of the domain.
+
+[source,kotlin]
+----
+@Service
+class ShippingCostCalculator(
+    private val shippingRateRepository: ShippingRateRepository
+) {
+    fun calculate(order: Order, address: Address): Money {
+        val rate = shippingRateRepository.findRate(address.zone, order.totalWeight())
+        return rate.applyTo(order.totalAmount())
+    }
+}
+----
+
+When to use a Domain Service:
+
+* The logic involves **multiple aggregates** (e.g., transferring money between accounts)
+* The logic requires **external domain data** (e.g., looking up a shipping rate)
+* The logic is a **domain concept** that doesn't belong to any single entity
+
+=== Application Services
+
+An **Application Service** orchestrates a use case. It coordinates aggregates, repositories, and domain services. It is the entry point from the infrastructure layer into the domain.
+
+[source,kotlin]
+----
+@org.jmolecules.ddd.annotation.Service
+@Service
+@Transactional
+class OrderApplicationService(
+    private val orderRepository: OrderRepository,
+    private val customerRepository: CustomerRepository,
+    private val inventoryService: InventoryService,
+    private val publisher: DomainEventPublisher
+) {
+    fun placeOrder(cmd: PlaceOrderCommand): OrderId {
+        val customer = customerRepository.findById(cmd.customerId)
+            ?: throw IllegalStateException("Customer not found")
+
+        val order = Order(customerId = customer.id)
+        order.injectPublisher(publisher)
+
+        cmd.items.forEach { item ->
+            order.addItem(item.productId, item.quantity, item.price)
+        }
+
+        orderRepository.create(order)
+        order.confirm()
+        return order.id
+    }
+
+    @DomainEventHandler
+    fun onOrderConfirmed(event: OrderConfirmedEvent) {
+        inventoryService.reserveStock(event.orderId)
+    }
+}
+----
+
+Key points:
+
+* Application services contain **no business logic** — they delegate to aggregates
+* They handle **transaction management** (`@Transactional`)
+* They translate **commands** (external input) into domain operations
+* They are the **only layer** that coordinates multiple aggregates
+
+=== Factories
+
+A **Factory** encapsulates complex creation logic. When constructing an aggregate requires rules, calculations, or coordination that don't belong in a constructor, use a factory.
+
+[source,kotlin]
+----
+@Factory
+class OrderFactory {
+    companion object {
+        fun createOrder(customerId: CustomerId, items: List<OrderItemRequest>): Order {
+            val order = Order(customerId = customerId)
+            items.forEach { request ->
+                order.addItem(request.productId, request.quantity, request.price)
+            }
+            return order
+        }
+
+        fun createFromImport(importData: ExternalOrderData): Order {
+            val customer = CustomerId(importData.externalCustomerId)
+            val order = Order(customerId = customer)
+            importData.lineItems.forEach { line ->
+                order.addItem(
+                    ProductId(line.sku),
+                    line.quantity,
+                    Money(line.price, importData.currency)
+                )
+            }
+            return order
+        }
+    }
+}
+----
+
+When to use a Factory:
+
+* Construction involves **business rules** (e.g., "orders over $100 get free shipping")
+* There are **multiple ways** to create the same aggregate
+* Creation requires **coordinating** multiple objects
+
+=== Putting the Patterns Together
+
+[mermaid]
+----
+graph LR
+    subgraph Aggregate["An Aggregate"]
+        Identity["@Identity: OrderId"]
+        VO1["@ValueObject: Money"]
+        VO2["@ValueObject: AggregateVersion"]
+        Behavior["confirm()"]
+        Event["publishes @DomainEvent"]
+    end
+
+    Aggregate -->|persisted by| Repo["@Repository: OrderRepository"]
+    Aggregate -->|created by| Factory["@Factory: OrderFactory"]
+    Aggregate -->|uses| Publisher["DomainEventPublisher"]
+    Event -->|consumed by| AppSvc["@Service: ApplicationService"]
+    AppSvc -->|orchestrates| Aggregate
+
+    Factory -.->|creates| Aggregate
+    Repo -.->|interface only| Aggregate
+----
+
+== Dependency Inversion in Practice
+
+Onion Architecture relies on the **Dependency Inversion Principle**: high-level modules (domain) define interfaces, and low-level modules (infrastructure) implement them.
+
+=== Pattern 1: Repository Interface + Infrastructure Implementation
+
+The domain defines what it needs:
+
+[source,kotlin]
+----
+// Domain layer — the contract
+@Repository
+interface OrderRepository {
+    fun findById(id: OrderId): Order?
+    fun create(order: Order)
+    fun update(order: Order)
+}
+----
+
+The infrastructure layer provides the implementation:
+
+[source,kotlin]
+----
+// Infrastructure layer — the implementation
+@Component
+class JooqOrderRepository(private val dsl: DSLContext) : OrderRepository {
+    override fun findById(id: OrderId): Order? {
+        return dsl.selectFrom(ORDER)
+            .where(ORDER.ID.eq(id.value))
+            .fetchOne()
+            ?.toOrder()
+    }
+    // ...
+}
+----
+
+The domain never imports jOOQ. If you switch to another ORM, only the infrastructure changes.
+
+=== Pattern 2: Domain Event Publisher Interface + Outbox Implementation
+
+The domain defines how to publish events:
+
+[source,kotlin]
+----
+// Domain layer
+interface DomainEventPublisher {
+    @org.jmolecules.event.annotation.DomainEventPublisher
+    fun publish(event: Any)
+}
+----
+
+The infrastructure provides a transactional outbox implementation:
+
+[source,kotlin]
+----
+// Infrastructure layer
+@Component
+class TransactionalDomainEventPublisher(
+    private val outboxRepository: OutboxRepository
+) : DomainEventPublisher {
+
+    @org.jmolecules.event.annotation.DomainEventPublisher
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun publish(event: Any) {
+        outboxRepository.create(event)
+    }
+}
+----
+
+The domain calls `publisher.publish(event)` without knowing whether the implementation writes to Kafka, a database outbox, or a log file.
+
+== Enforcing Architectural Boundaries
+
+Architecture rules are only useful if they are **automatically enforced**. Tools like **ArchUnit** (with jMolecules integration) can verify that your code follows the dependency rules at build time.
+
+[source,kotlin]
+----
+@AnalyzeClasses(
+    packages = ["com.example.myapp"],
+    importOptions = [ImportOption.DoNotIncludeTests::class]
+)
+internal class ArchitectureTest {
+
+    companion object {
+        private const val DOMAIN_PACKAGE = "..domain.."
+        private const val APPLICATION_PACKAGE = "..application.."
+
+        private val DOMAIN_ALLOWED = arrayOf(
+            DOMAIN_PACKAGE, "java..", "kotlin..",
+            "org.jmolecules..", "org.jetbrains.."
+        )
+
+        private val APPLICATION_ALLOWED = arrayOf(
+            APPLICATION_PACKAGE, DOMAIN_PACKAGE,
+            "java..", "kotlin..", "org.jmolecules..", "org.jetbrains..",
+            "org.slf4j..", "org.springframework.stereotype..",
+            "org.springframework.transaction.."
+        )
+    }
+
+    @ArchTest
+    val ddd: ArchRule = JMoleculesDddRules.all()
+
+    @ArchTest
+    val onion: ArchRule = JMoleculesArchitectureRules.ensureOnionSimple()
+
+    @ArchTest
+    val domainMustBeFrameworkFree: ArchRule = noClasses()
+        .that().resideInAPackage(DOMAIN_PACKAGE)
+        .should().dependOnClassesThat().resideOutsideOfPackages(*DOMAIN_ALLOWED)
+
+    @ArchTest
+    val applicationMustOnlyDependOnDomain: ArchRule = noClasses()
+        .that().resideInAPackage(APPLICATION_PACKAGE)
+        .should().dependOnClassesThat().resideOutsideOfPackages(*APPLICATION_ALLOWED)
+}
+----
+
+This test runs on every build. If someone adds a Spring import to a domain class, the build fails. The rules are:
+
+* `JMoleculesDddRules.all()` — verifies aggregates, entities, value objects, events, and repositories are used correctly
+* `JMoleculesArchitectureRules.ensureOnionSimple()` — enforces the three-ring dependency structure
+* Custom rules — define which packages each ring is allowed to depend on
+
+== Quick Reference
+
+|===
+| Pattern | Purpose | jMolecules Annotation
+
+| Value Object
+| Immutable, identity-less object defined by its attributes
+| `@ValueObject`
+
+| Aggregate Root
+| Consistency boundary; the only entry point for state changes
+| `@AggregateRoot`
+
+| Identity
+| Unique identifier for an aggregate
+| `@Identity`
+
+| Domain Event
+| Something that happened in the domain; used for decoupled communication
+| `@DomainEvent`
+
+| Repository Interface
+| Abstracts persistence; defined in the domain, implemented in infrastructure
+| `@Repository`
+
+| Domain Service
+| Business logic that spans multiple aggregates or involves external domain data
+| `@Service`
+
+| Application Service
+| Use case orchestration; coordinates aggregates, repositories, and services
+| `@Service` + `@Transactional`
+
+| Factory
+| Encapsulates complex aggregate creation logic
+| `@Factory`
+
+| Domain Event Publisher
+| Publishes domain events; interface in domain, implementation in infrastructure
+| `@DomainEventPublisher`
+|===
+
+== Further Reading
+
+* Eric Evans, _Domain-Driven Design: Tackling Complexity in the Heart of Software_ (2003)
+* Vaughn Vernon, _Implementing Domain-Driven Design_ (2013)
+* Jeffrey Palermo, https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/[The Onion Architecture] (2008)
+* https://www.jmolecules.org/[jMolecules] — DDD and architecture annotations for the JVM
+* https://www.archunit.org/[ArchUnit] — Architecture testing for Java and Kotlin

@@ -5,3 +5,4 @@
 ** xref:handbook/02-onion-architecture.adoc[Onion Architecture]
 ** xref:handbook/03-event-driven.adoc[Event-Driven Communication & Outbox]
 ** xref:handbook/04-putting-it-together.adoc[Putting It All Together]
+* xref:ddd-onion-concepts.adoc[Onion Architecture & DDD Concepts]

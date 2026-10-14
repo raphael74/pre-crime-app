@@ -30,14 +30,14 @@ describe('AuthService', () => {
     });
 
     it('should be unauthenticated by default', () => {
-        expect(service.isAuthenticated()).toBeFalse();
+        expect(service.isAuthenticated()).toBe(false);
         expect(service.authHeader()).toBeNull();
     });
 
     it('should authenticate on login', () => {
         service.login('admin', 'secret').subscribe(success => {
-            expect(success).toBeTrue();
-            expect(service.isAuthenticated()).toBeTrue();
+            expect(success).toBe(true);
+            expect(service.isAuthenticated()).toBe(true);
             expect(service.authHeader()).toBe('Basic YWRtaW46c2VjcmV0');
         });
 
@@ -49,8 +49,8 @@ describe('AuthService', () => {
 
     it('should fail on login error', () => {
         service.login('admin', 'wrong').subscribe(success => {
-            expect(success).toBeFalse();
-            expect(service.isAuthenticated()).toBeFalse();
+            expect(success).toBe(false);
+            expect(service.isAuthenticated()).toBe(false);
             expect(service.authHeader()).toBeNull();
         });
 
@@ -68,7 +68,7 @@ describe('AuthService', () => {
         expect(req.request.method).toBe('POST');
         req.flush({});
 
-        expect(service.isAuthenticated()).toBeFalse();
+        expect(service.isAuthenticated()).toBe(false);
         expect(service.authHeader()).toBeNull();
     });
 });

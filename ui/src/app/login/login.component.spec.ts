@@ -4,16 +4,17 @@ import {AuthService} from '../auth.service';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {of} from 'rxjs';
+import type {Mock} from 'vitest';
 
 describe('LoginComponent', () => {
     let component: LoginComponent;
     let fixture: ComponentFixture<LoginComponent>;
-    let authServiceSpy: jasmine.SpyObj<AuthService>;
-    let routerSpy: jasmine.SpyObj<Router>;
+    let authServiceSpy: {login: Mock};
+    let routerSpy: {navigate: Mock};
 
     beforeEach(async () => {
-        authServiceSpy = jasmine.createSpyObj('AuthService', ['login']);
-        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+        authServiceSpy = {login: vi.fn()};
+        routerSpy = {navigate: vi.fn()};
 
         await TestBed.configureTestingModule({
             imports: [LoginComponent, FormsModule],
@@ -33,7 +34,7 @@ describe('LoginComponent', () => {
     });
 
     it('should call authService.login and navigate on success', () => {
-        authServiceSpy.login.and.returnValue(of(true));
+        authServiceSpy.login.mockReturnValue(of(true));
         component.username.set('admin');
         component.password.set('password');
 
@@ -44,7 +45,7 @@ describe('LoginComponent', () => {
     });
 
     it('should set error message on login failure', () => {
-        authServiceSpy.login.and.returnValue(of(false));
+        authServiceSpy.login.mockReturnValue(of(false));
         component.username.set('wrong');
         component.password.set('wrong');
 

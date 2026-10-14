@@ -1,15 +1,16 @@
 import {TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
+import type {Mock} from 'vitest';
 import {authGuard} from './auth.guard';
 import {AuthService} from './auth.service';
 
 describe('authGuard', () => {
-    let authService: jasmine.SpyObj<AuthService>;
-    let router: jasmine.SpyObj<Router>;
+    let authService: {isAuthenticated: Mock};
+    let router: {parseUrl: Mock};
 
     beforeEach(() => {
-        authService = jasmine.createSpyObj('AuthService', ['isAuthenticated']);
-        router = jasmine.createSpyObj('Router', ['parseUrl']);
+        authService = {isAuthenticated: vi.fn()};
+        router = {parseUrl: vi.fn()};
 
         TestBed.configureTestingModule({
             providers: [
@@ -20,17 +21,17 @@ describe('authGuard', () => {
     });
 
     it('should allow navigation if user is authenticated', () => {
-        authService.isAuthenticated.and.returnValue(true);
+        authService.isAuthenticated.mockReturnValue(true);
 
         const result = TestBed.runInInjectionContext(() => authGuard());
 
-        expect(result).toBeTrue();
+        expect(result).toBe(true);
     });
 
     it('should redirect to login if user is not authenticated', () => {
-        authService.isAuthenticated.and.returnValue(false);
+        authService.isAuthenticated.mockReturnValue(false);
         const loginUrl = {} as any;
-        router.parseUrl.and.returnValue(loginUrl);
+        router.parseUrl.mockReturnValue(loginUrl);
 
         const result = TestBed.runInInjectionContext(() => authGuard());
 

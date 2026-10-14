@@ -1,4 +1,4 @@
-import {ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {HudComponent} from './hud.component';
 import {FormsModule} from '@angular/forms';
 import {of, Subject, throwError} from 'rxjs';
@@ -11,14 +11,21 @@ import {
 } from '../api';
 import {AuthService} from '../auth.service';
 import {Router} from '@angular/router';
+import type {Mock} from 'vitest';
 
 describe('HudComponent', () => {
     let component: HudComponent;
     let fixture: ComponentFixture<HudComponent>;
-    let auditServiceMock: jasmine.SpyObj<AuditService>;
-    let preCrimeServiceMock: jasmine.SpyObj<PreCrimeService>;
-    let authServiceMock: jasmine.SpyObj<AuthService>;
-    let routerMock: jasmine.SpyObj<Router>;
+    let auditServiceMock: {getLogs: Mock};
+    let preCrimeServiceMock: {
+        getStats: Mock;
+        createVision: Mock;
+        getApologies: Mock;
+        getArrestsExecuted: Mock;
+        getArrestsPending: Mock;
+    };
+    let authServiceMock: {logout: Mock};
+    let routerMock: {navigate: Mock};
     let statsSubject: Subject<number>;
     let auditLogsSubject: Subject<AuditEntry[]>;
 
@@ -26,17 +33,23 @@ describe('HudComponent', () => {
         statsSubject = new Subject<number>();
         auditLogsSubject = new Subject<AuditEntry[]>();
 
-        auditServiceMock = jasmine.createSpyObj('AuditService', ['getLogs']);
-        auditServiceMock.getLogs.and.returnValue(auditLogsSubject.asObservable() as any);
+        auditServiceMock = {getLogs: vi.fn()};
+        auditServiceMock.getLogs.mockReturnValue(auditLogsSubject.asObservable() as any);
 
-        preCrimeServiceMock = jasmine.createSpyObj('PreCrimeService', ['getStats', 'createVision', 'getApologies', 'getArrestsExecuted', 'getArrestsPending']);
-        preCrimeServiceMock.getStats.and.returnValue(statsSubject.asObservable() as any);
-        preCrimeServiceMock.getApologies.and.returnValue(of([]) as any);
-        preCrimeServiceMock.getArrestsExecuted.and.returnValue(of([]) as any);
-        preCrimeServiceMock.getArrestsPending.and.returnValue(of([]) as any);
+        preCrimeServiceMock = {
+            getStats: vi.fn(),
+            createVision: vi.fn(),
+            getApologies: vi.fn(),
+            getArrestsExecuted: vi.fn(),
+            getArrestsPending: vi.fn()
+        };
+        preCrimeServiceMock.getStats.mockReturnValue(statsSubject.asObservable() as any);
+        preCrimeServiceMock.getApologies.mockReturnValue(of([]) as any);
+        preCrimeServiceMock.getArrestsExecuted.mockReturnValue(of([]) as any);
+        preCrimeServiceMock.getArrestsPending.mockReturnValue(of([]) as any);
 
-        authServiceMock = jasmine.createSpyObj('AuthService', ['logout']);
-        routerMock = jasmine.createSpyObj('Router', ['navigate']);
+        authServiceMock = {logout: vi.fn()};
+        routerMock = {navigate: vi.fn()};
 
         await TestBed.configureTestingModule({
             imports: [HudComponent, FormsModule],
@@ -47,17 +60,25 @@ describe('HudComponent', () => {
                 {provide: Router, useValue: routerMock}
             ]
         }).compileComponents();
+
+        // The component polls the backend on an interval; use Vitest's fake timers
+        // so tests can advance the clock deterministically (fakeAsync is unsupported
+        // by the Vitest test runner).
+        vi.useFakeTimers();
     });
 
-    it('should create', fakeAsync(() => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('should create', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
-        discardPeriodicTasks();
-    }));
+    });
 
-    it('should initialize with default values', fakeAsync(() => {
+    it('should initialize with default values', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -66,32 +87,30 @@ describe('HudComponent', () => {
         expect(component.crimeType()).toBe('');
         expect(component.auditLogs()).toEqual([]);
         expect(component.crimesPrevented()).toBe(0);
-        discardPeriodicTasks();
-    }));
+    });
 
-    it('should update stats periodically', fakeAsync(() => {
+    it('should update stats periodically', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        tick(component.pollingInterval);
+        vi.advanceTimersByTime(component.pollingInterval);
         statsSubject.next(42);
         expect(component.crimesPrevented()).toBe(42);
 
-        tick(component.pollingInterval);
+        vi.advanceTimersByTime(component.pollingInterval);
         statsSubject.next(43);
         expect(component.crimesPrevented()).toBe(43);
-        discardPeriodicTasks();
-    }));
+    });
 
-    it('should update pre-arrests periodically', fakeAsync(() => {
+    it('should update pre-arrests periodically', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         const arrestsSubject = new Subject<any[]>();
-        preCrimeServiceMock.getArrestsExecuted.and.returnValue(arrestsSubject.asObservable() as any);
+        preCrimeServiceMock.getArrestsExecuted.mockReturnValue(arrestsSubject.asObservable() as any);
         fixture.detectChanges();
 
-        tick(component.pollingInterval);
+        vi.advanceTimersByTime(component.pollingInterval);
         const mockArrests = [{
             id: '1',
             visionId: 'v1',
@@ -103,15 +122,14 @@ describe('HudComponent', () => {
         }];
         arrestsSubject.next(mockArrests);
         expect(component.executedPreArrests()).toEqual(mockArrests as any);
-        discardPeriodicTasks();
-    }));
+    });
 
-    it('should update audit logs periodically', fakeAsync(() => {
+    it('should update audit logs periodically', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        tick(component.pollingInterval);
+        vi.advanceTimersByTime(component.pollingInterval);
         const mockLogs: AuditEntry[] = [{
             id: {value: '1'},
             eventType: 'VISION_DETECTED',
@@ -120,11 +138,9 @@ describe('HudComponent', () => {
         }];
         auditLogsSubject.next(mockLogs);
         expect(component.auditLogs()).toEqual(mockLogs);
+    });
 
-        discardPeriodicTasks();
-    }));
-
-    it('should trigger vision and handle success', fakeAsync(() => {
+    it('should trigger vision and handle success', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -133,7 +149,7 @@ describe('HudComponent', () => {
         component.perpetratorLastName.set('Doe');
         component.crimeType.set('Murder');
 
-        preCrimeServiceMock.createVision.and.returnValue(of({visionId: 'uuid', message: 'Success'}) as any);
+        preCrimeServiceMock.createVision.mockReturnValue(of({visionId: 'uuid', message: 'Success'}) as any);
 
         component.triggerVision();
 
@@ -146,11 +162,9 @@ describe('HudComponent', () => {
         expect(component.perpetratorLastName()).toBe('');
         expect(component.crimeType()).toBe('');
         expect(component.backendError()).toBeNull();
+    });
 
-        discardPeriodicTasks();
-    }));
-
-    it('should handle error when trigger vision fails', fakeAsync(() => {
+    it('should handle error when trigger vision fails', () => {
         fixture = TestBed.createComponent(HudComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -159,13 +173,12 @@ describe('HudComponent', () => {
         component.perpetratorLastName.set('Doe');
         component.crimeType.set('Murder');
 
-        preCrimeServiceMock.createVision.and.returnValue(throwError(() => new Error('Error')));
+        preCrimeServiceMock.createVision.mockReturnValue(throwError(() => new Error('Error')));
 
         component.triggerVision();
 
         expect(component.backendError()).toBe('VISION TRANSMISSION FAILED');
-        discardPeriodicTasks();
-    }));
+    });
 
     it('should handle logout', () => {
         fixture = TestBed.createComponent(HudComponent);

@@ -10,10 +10,9 @@ import org.jmolecules.archunit.JMoleculesDddRules
 
 @AnalyzeClasses(
     packages = ["org.example.precrime"],
-    importOptions = [ImportOption.DoNotIncludeTests::class]
+    importOptions = [ImportOption.DoNotIncludeTests::class],
 )
 internal class ArchitectureTest {
-
     companion object {
         private const val DOMAIN_PACKAGE = "..domain.."
         private const val APPLICATION_PACKAGE = "..application.."
@@ -25,26 +24,29 @@ internal class ArchitectureTest {
         private const val SPRING_STEREOTYPE_PACKAGES = "org.springframework.stereotype.."
         private const val SPRING_TRANSACTION_PACKAGES = "org.springframework.transaction.."
 
-        private val COMMON_ALLOWED_PACKAGES = arrayOf(
-            JAVA_PACKAGES,
-            KOTLIN_PACKAGES,
-            JMOLECULES_PACKAGES,
-            JETBRAINS_PACKAGES
-        )
+        private val COMMON_ALLOWED_PACKAGES =
+            arrayOf(
+                JAVA_PACKAGES,
+                KOTLIN_PACKAGES,
+                JMOLECULES_PACKAGES,
+                JETBRAINS_PACKAGES,
+            )
 
-        private val DOMAIN_ALLOWED_PACKAGES = arrayOf(
-            DOMAIN_PACKAGE,
-            *COMMON_ALLOWED_PACKAGES
-        )
+        private val DOMAIN_ALLOWED_PACKAGES =
+            arrayOf(
+                DOMAIN_PACKAGE,
+                *COMMON_ALLOWED_PACKAGES,
+            )
 
-        private val APPLICATION_ALLOWED_PACKAGES = arrayOf(
-            APPLICATION_PACKAGE,
-            DOMAIN_PACKAGE,
-            SLF4J_PACKAGES,
-            SPRING_STEREOTYPE_PACKAGES,
-            SPRING_TRANSACTION_PACKAGES,
-            *COMMON_ALLOWED_PACKAGES
-        )
+        private val APPLICATION_ALLOWED_PACKAGES =
+            arrayOf(
+                APPLICATION_PACKAGE,
+                DOMAIN_PACKAGE,
+                SLF4J_PACKAGES,
+                SPRING_STEREOTYPE_PACKAGES,
+                SPRING_TRANSACTION_PACKAGES,
+                *COMMON_ALLOWED_PACKAGES,
+            )
     }
 
     @ArchTest
@@ -54,12 +56,20 @@ internal class ArchitectureTest {
     val onion: ArchRule = JMoleculesArchitectureRules.ensureOnionSimple()
 
     @ArchTest
-    val domainShouldNotDependOnFrameworks: ArchRule = noClasses()
-        .that().resideInAPackage(DOMAIN_PACKAGE)
-        .should().dependOnClassesThat().resideOutsideOfPackages(*DOMAIN_ALLOWED_PACKAGES)
+    val domainShouldNotDependOnFrameworks: ArchRule =
+        noClasses()
+            .that()
+            .resideInAPackage(DOMAIN_PACKAGE)
+            .should()
+            .dependOnClassesThat()
+            .resideOutsideOfPackages(*DOMAIN_ALLOWED_PACKAGES)
 
     @ArchTest
-    val applicationShouldOnlyDependOnDomainAndLimitedSpring: ArchRule = noClasses()
-        .that().resideInAPackage(APPLICATION_PACKAGE)
-        .should().dependOnClassesThat().resideOutsideOfPackages(*APPLICATION_ALLOWED_PACKAGES)
+    val applicationShouldOnlyDependOnDomainAndLimitedSpring: ArchRule =
+        noClasses()
+            .that()
+            .resideInAPackage(APPLICATION_PACKAGE)
+            .should()
+            .dependOnClassesThat()
+            .resideOutsideOfPackages(*APPLICATION_ALLOWED_PACKAGES)
 }

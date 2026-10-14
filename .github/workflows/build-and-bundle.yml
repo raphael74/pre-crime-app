@@ -21,6 +21,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Lint Kotlin (ktlint)
+        run: |
+          chmod +x mvnw
+          ./mvnw -B ktlint:check
+
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:

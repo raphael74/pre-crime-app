@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class AuditEntryTest {
-
     @Test
     fun `should create audit entry with given event type and payload`() {
         val entry = AuditEntry(eventType = "VISION_DETECTED", payload = "{\"crime\":\"Murder\"}")

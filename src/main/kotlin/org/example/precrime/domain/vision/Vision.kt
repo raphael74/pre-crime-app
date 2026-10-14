@@ -10,7 +10,7 @@ import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 @AggregateRoot
 class Vision(
@@ -18,18 +18,19 @@ class Vision(
     var version: AggregateVersion = AggregateVersion(),
     val perpetratorId: PerpetratorId,
     val crimeType: CrimeType,
-    val foreseenAt: OffsetDateTime
+    val foreseenAt: OffsetDateTime,
 ) {
-    private var _publisher: DomainEventPublisher? = null
+    private var eventPublisher: DomainEventPublisher? = null
 
     fun injectPublisher(publisher: DomainEventPublisher) {
-        this._publisher = publisher
+        this.eventPublisher = publisher
     }
 
     private val publisher: DomainEventPublisher
-        get() = requireNotNull(_publisher) {
-            "DomainEventPublisher has not been injected into Vision $id"
-        }
+        get() =
+            requireNotNull(eventPublisher) {
+                "DomainEventPublisher has not been injected into Vision $id"
+            }
 
     fun foreseeCrime() {
         publisher.publish(
@@ -37,14 +38,16 @@ class Vision(
                 visionId = id,
                 perpetratorId = perpetratorId,
                 crimeType = crimeType,
-                foreseenAt = foreseenAt
-            )
+                foreseenAt = foreseenAt,
+            ),
         )
     }
 }
 
 @ValueObject
-enum class CrimeType(val value: String) {
+enum class CrimeType(
+    val value: String,
+) {
     MURDER("Murder"),
     THEFT("Theft"),
     ASSAULT("Assault"),
@@ -58,32 +61,37 @@ enum class CrimeType(val value: String) {
     VANDALISM("Vandalism"),
     GRAND_THEFT_AUTO("Grand Theft Auto"),
     IDENTITY_THEFT("Identity Theft"),
-    TAX_EVASION("Tax Evasion");
+    TAX_EVASION("Tax Evasion"),
 }
 
 @Factory
 class VisionFactory {
     companion object {
-        fun createVision(perpetratorId: PerpetratorId, crimeType: CrimeType): Vision {
+        fun createVision(
+            perpetratorId: PerpetratorId,
+            crimeType: CrimeType,
+        ): Vision {
             val visionId = VisionId()
             val foreseenAt = OffsetDateTime.now().plusHours(2)
             return Vision(
                 id = visionId,
                 perpetratorId = perpetratorId,
                 crimeType = crimeType,
-                foreseenAt = foreseenAt
+                foreseenAt = foreseenAt,
             )
         }
     }
 }
 
 @JvmInline
-value class VisionId(val value: UUID = UUID.randomUUID()) : Identifier
+value class VisionId(
+    val value: UUID = UUID.randomUUID(),
+) : Identifier
 
 @DomainEvent
 data class CrimeForeseenEvent(
     val visionId: VisionId,
     val perpetratorId: PerpetratorId,
     val crimeType: CrimeType,
-    val foreseenAt: OffsetDateTime
+    val foreseenAt: OffsetDateTime,
 )

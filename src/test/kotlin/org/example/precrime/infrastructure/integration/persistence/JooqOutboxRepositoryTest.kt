@@ -1,5 +1,6 @@
 package org.example.precrime.infrastructure.integration.persistence
 
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.IntegrationTest
 import org.example.precrime.domain.perpetrator.PerpetratorId
 import org.example.precrime.domain.prearrest.PreArrestExecutedEvent
@@ -7,7 +8,6 @@ import org.example.precrime.domain.prearrest.PreArrestId
 import org.example.precrime.domain.vision.CrimeForeseenEvent
 import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.domain.vision.VisionId
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -16,7 +16,6 @@ import java.time.OffsetDateTime
 @IntegrationTest
 @Transactional
 class JooqOutboxRepositoryTest {
-
     @Autowired
     private lateinit var outboxRepository: JooqOutboxRepository
 
@@ -38,14 +37,15 @@ class JooqOutboxRepositoryTest {
     @Test
     fun `should find pending records for update`() {
         // GIVEN
-        val id1 = outboxRepository.create(
-            CrimeForeseenEvent(
-                VisionId(),
-                PerpetratorId(),
-                CrimeType.MURDER,
-                OffsetDateTime.now()
+        val id1 =
+            outboxRepository.create(
+                CrimeForeseenEvent(
+                    VisionId(),
+                    PerpetratorId(),
+                    CrimeType.MURDER,
+                    OffsetDateTime.now(),
+                ),
             )
-        )
         val id2 = outboxRepository.create(PreArrestExecutedEvent(PreArrestId(), VisionId(), PerpetratorId()))
 
         // WHEN

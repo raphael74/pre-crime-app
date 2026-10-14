@@ -31,6 +31,7 @@
         <kotlin.version>2.4.21</kotlin.version>
         <jmolecules.version>2.0.1</jmolecules.version>
         <jmolecules.integrations.version>0.33.0</jmolecules.integrations.version>
+        <ktlint-maven-plugin.version>3.7.1</ktlint-maven-plugin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -234,6 +235,20 @@
                                 <enumPropertyNaming>UPPERCASE</enumPropertyNaming>
                             </configOptions>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.gantsign.maven</groupId>
+                <artifactId>ktlint-maven-plugin</artifactId>
+                <version>${ktlint-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>check</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

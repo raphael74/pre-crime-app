@@ -1,19 +1,18 @@
 package org.example.precrime.infrastructure.integration.event
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.example.precrime.domain.perpetrator.PerpetratorId
 import org.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import org.example.precrime.domain.prearrest.PreArrestId
 import org.example.precrime.domain.vision.CrimeForeseenEvent
 import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.domain.vision.VisionId
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 
 class TransactionalDomainEventPublisherTest {
-
     private val outboxRepository = mockk<OutboxRepository>()
     private val publisher = TransactionalDomainEventPublisher(outboxRepository)
 

@@ -1,18 +1,23 @@
 package org.example.precrime
 
+import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Awaitility.await
 import org.example.precrime.domain.perpetrator.PerpetratorRepository
 import org.example.precrime.domain.prearrest.PreArrestRepository
 import org.example.precrime.domain.vision.VisionId
 import org.example.precrime.domain.vision.VisionRepository
-import org.example.precrime.infrastructure.facade.rest.model.*
-import org.assertj.core.api.Assertions.assertThat
-import org.awaitility.Awaitility.await
+import org.example.precrime.infrastructure.facade.rest.model.ArrestExecutedRequest
+import org.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
+import org.example.precrime.infrastructure.facade.rest.model.CreateVisionResponse
+import org.example.precrime.infrastructure.facade.rest.model.PreApologyResponse
+import org.example.precrime.infrastructure.facade.rest.model.PreArrestResponse
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
 import org.springframework.test.web.servlet.client.RestTestClient
 import org.springframework.test.web.servlet.client.expectBody
-import java.util.*
+import java.util.Base64
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 @IntegrationTest
@@ -21,9 +26,8 @@ class PreCrimeScenarioTest(
     @Autowired private val restTestClient: RestTestClient,
     @Autowired private val visionRepository: VisionRepository,
     @Autowired private val preArrestRepository: PreArrestRepository,
-    @Autowired private val perpetratorRepository: PerpetratorRepository
+    @Autowired private val perpetratorRepository: PerpetratorRepository,
 ) {
-
     @Test
     fun `a future crime foreseen results in a pre-arrest and updated stats`() {
         // GIVEN: The department is operational
@@ -76,52 +80,78 @@ class PreCrimeScenarioTest(
         assertThat(apology.apologyText).contains("Dear Family of John Doe")
     }
 
-    private fun getStats(): Int {
-        return restTestClient.get().uri("/api/pre-crime/stats")
+    private fun getStats(): Int =
+        restTestClient
+            .get()
+            .uri("/api/pre-crime/stats")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .exchange()
-            .expectStatus().isOk
-            .expectBody<Int>().returnResult().responseBody ?: 0
-    }
+            .expectStatus()
+            .isOk
+            .expectBody<Int>()
+            .returnResult()
+            .responseBody ?: 0
 
-    private fun getApologies(): List<PreApologyResponse> {
-        return restTestClient.get().uri("/api/pre-crime/apologies")
+    private fun getApologies(): List<PreApologyResponse> =
+        restTestClient
+            .get()
+            .uri("/api/pre-crime/apologies")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .exchange()
-            .expectStatus().isOk
-            .expectBody<Array<PreApologyResponse>>().returnResult().responseBody?.toList() ?: emptyList()
-    }
+            .expectStatus()
+            .isOk
+            .expectBody<Array<PreApologyResponse>>()
+            .returnResult()
+            .responseBody
+            ?.toList() ?: emptyList()
 
-    private fun triggerVision(firstName: String, lastName: String, crimeType: CreateVisionRequest.CrimeType): VisionId {
-        val result = restTestClient.post()
-            .uri("/api/pre-crime/vision")
-            .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
-            .body(CreateVisionRequest(lastName, firstName, crimeType))
-            .exchange()
-            .expectStatus().isCreated
-            .expectBody<CreateVisionResponse>().returnResult().responseBody
+    private fun triggerVision(
+        firstName: String,
+        lastName: String,
+        crimeType: CreateVisionRequest.CrimeType,
+    ): VisionId {
+        val result =
+            restTestClient
+                .post()
+                .uri("/api/pre-crime/vision")
+                .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
+                .body(CreateVisionRequest(lastName, firstName, crimeType))
+                .exchange()
+                .expectStatus()
+                .isCreated
+                .expectBody<CreateVisionResponse>()
+                .returnResult()
+                .responseBody
 
         return VisionId(result?.visionId!!)
     }
 
     private fun triggerArrest(preArrestId: UUID) {
-        restTestClient.post()
+        restTestClient
+            .post()
             .uri("/api/pre-crime/arrest-executed")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .body(ArrestExecutedRequest(preArrestId))
             .exchange()
-            .expectStatus().isOk
+            .expectStatus()
+            .isOk
     }
 
-    private fun getPendingPreArrests(): List<PreArrestResponse> {
-        return restTestClient.get().uri("/api/pre-crime/arrests-pending")
+    private fun getPendingPreArrests(): List<PreArrestResponse> =
+        restTestClient
+            .get()
+            .uri("/api/pre-crime/arrests-pending")
             .header("Authorization", generateAuthorizationHeader("precog", "agatha"))
             .exchange()
-            .expectStatus().isOk
-            .expectBody<Array<PreArrestResponse>>().returnResult().responseBody?.toList() ?: emptyList()
-    }
+            .expectStatus()
+            .isOk
+            .expectBody<Array<PreArrestResponse>>()
+            .returnResult()
+            .responseBody
+            ?.toList() ?: emptyList()
 
-    private fun generateAuthorizationHeader(username: String, password: String): String {
-        return "Basic " + Base64.getEncoder().encodeToString("${username}:${password}".toByteArray())
-    }
+    private fun generateAuthorizationHeader(
+        username: String,
+        password: String,
+    ): String = "Basic " + Base64.getEncoder().encodeToString("$username:$password".toByteArray())
 }

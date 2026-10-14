@@ -7,13 +7,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
-
 @RestControllerAdvice
 class RestExceptionHandler {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @ExceptionHandler
-    fun handleAll(ex: Exception, request: HttpServletRequest?): ResponseEntity<Any> {
+    fun handleAll(
+        ex: Exception,
+        request: HttpServletRequest?,
+    ): ResponseEntity<Any> {
         logger.warn("Exception in call ${request?.requestURI}:", ex)
 
         var message = ex.message

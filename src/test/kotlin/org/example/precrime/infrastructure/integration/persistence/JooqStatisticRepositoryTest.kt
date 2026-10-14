@@ -1,20 +1,19 @@
 package org.example.precrime.infrastructure.integration.persistence
 
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.IntegrationTest
 import org.example.precrime.domain.statistic.StatisticId
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 @Transactional
 class JooqStatisticRepositoryTest(
-    @Autowired private var repository: JooqStatisticRepository
+    @Autowired private var repository: JooqStatisticRepository,
 ) {
-
-    private val SINGLETON_ID = StatisticId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+    private val singletonId = StatisticId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
     @Test
     fun `should find singleton statistic`() {
@@ -23,7 +22,7 @@ class JooqStatisticRepositoryTest(
 
         // THEN
         assertThat(statistic).isNotNull
-        assertThat(statistic.id).isEqualTo(SINGLETON_ID)
+        assertThat(statistic.id).isEqualTo(singletonId)
     }
 
     @Test

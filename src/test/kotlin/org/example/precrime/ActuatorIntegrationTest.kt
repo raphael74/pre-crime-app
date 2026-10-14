@@ -7,23 +7,29 @@ import org.springframework.test.web.servlet.client.RestTestClient
 
 @IntegrationTest
 @AutoConfigureRestTestClient
-class ActuatorIntegrationTest(@Autowired private val restTestClient: RestTestClient) {
-
+class ActuatorIntegrationTest(
+    @Autowired private val restTestClient: RestTestClient,
+) {
     @Test
     fun `health endpoint should be accessible`() {
-        restTestClient.get()
+        restTestClient
+            .get()
             .uri("/actuator/health")
             .exchange()
-            .expectStatus().isOk
+            .expectStatus()
+            .isOk
             .expectBody()
-            .jsonPath("$.status").isEqualTo("UP")
+            .jsonPath("$.status")
+            .isEqualTo("UP")
     }
 
     @Test
     fun `info endpoint should be accessible`() {
-        restTestClient.get()
+        restTestClient
+            .get()
             .uri("/actuator/info")
             .exchange()
-            .expectStatus().isOk
+            .expectStatus()
+            .isOk
     }
 }

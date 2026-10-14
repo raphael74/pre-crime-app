@@ -12,7 +12,11 @@ import org.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import org.example.precrime.domain.prearrest.PreArrestId
 import org.example.precrime.domain.prearrest.PreArrestRepository
 import org.example.precrime.domain.statistic.StatisticRepository
-import org.example.precrime.domain.vision.*
+import org.example.precrime.domain.vision.CrimeForeseenEvent
+import org.example.precrime.domain.vision.CrimeType
+import org.example.precrime.domain.vision.VisionFactory
+import org.example.precrime.domain.vision.VisionId
+import org.example.precrime.domain.vision.VisionRepository
 import org.jmolecules.event.annotation.DomainEventHandler
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -28,14 +32,12 @@ class PreCrimeApplicationService(
     private val preApologyRepository: PreApologyRepository,
     private val perpetratorRepository: PerpetratorRepository,
     private val preApologyDomainService: PreApologyDomainService,
-    private val publisher: DomainEventPublisher
+    private val publisher: DomainEventPublisher,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(readOnly = true)
-    fun getPreventedCrimesCount(): Int {
-        return statisticRepository.findSingleton().totalCrimesPrevented
-    }
+    fun getPreventedCrimesCount(): Int = statisticRepository.findSingleton().totalCrimesPrevented
 
     @Transactional(readOnly = true)
     fun getAllApologies(): List<PreApologyWithPerpetrator> {
@@ -66,15 +68,17 @@ class PreCrimeApplicationService(
 
     fun triggerVision(cmd: CreateVisionCommand): VisionId {
         logger.info("Triggering vision. ${cmd.perpetratorFirstName} ${cmd.perpetratorFirstName} will commit ${cmd.crimeType.value}")
-        var perpetrator = perpetratorRepository.findByFirstAndLastName(
-            cmd.perpetratorFirstName,
-            cmd.perpetratorLastName
-        )
-        if (perpetrator == null) {
-            perpetrator = Perpetrator(
-                firstName = cmd.perpetratorFirstName,
-                lastName = cmd.perpetratorLastName
+        var perpetrator =
+            perpetratorRepository.findByFirstAndLastName(
+                cmd.perpetratorFirstName,
+                cmd.perpetratorLastName,
             )
+        if (perpetrator == null) {
+            perpetrator =
+                Perpetrator(
+                    firstName = cmd.perpetratorFirstName,
+                    lastName = cmd.perpetratorLastName,
+                )
             perpetratorRepository.create(perpetrator)
         }
         val vision = VisionFactory.createVision(perpetrator.id, cmd.crimeType)
@@ -86,8 +90,9 @@ class PreCrimeApplicationService(
 
     fun executePreArrest(preArrestId: PreArrestId) {
         logger.info("Executing PreArrest")
-        val preArrest = preArrestRepository.findById(preArrestId)
-            ?: throw IllegalStateException("PreArrest $preArrestId not found")
+        val preArrest =
+            preArrestRepository.findById(preArrestId)
+                ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.injectPublisher(publisher)
         preArrest.executePreArrest()
         preArrestRepository.update(preArrest)
@@ -95,8 +100,9 @@ class PreCrimeApplicationService(
 
     fun cancelPreArrest(preArrestId: PreArrestId) {
         logger.info("Cancelling PreArrest")
-        val preArrest = preArrestRepository.findById(preArrestId)
-            ?: throw IllegalStateException("PreArrest $preArrestId not found")
+        val preArrest =
+            preArrestRepository.findById(preArrestId)
+                ?: throw IllegalStateException("PreArrest $preArrestId not found")
         preArrest.injectPublisher(publisher)
         preArrest.cancelPreArrest()
         preArrestRepository.update(preArrest)
@@ -119,13 +125,17 @@ class PreCrimeApplicationService(
         statistic.recordPrevention()
         statisticRepository.update(statistic)
         logger.info("Stats: Total crimes 'prevented' via Minority Report logic: ${statistic.totalCrimesPrevented}")
-
     }
 
-    private fun createPreApology(perpetratorId: PerpetratorId, preArrestId: PreArrestId, visionId: VisionId) {
+    private fun createPreApology(
+        perpetratorId: PerpetratorId,
+        preArrestId: PreArrestId,
+        visionId: VisionId,
+    ) {
         // Generate and save pre-emptive apology & compensation statement
-        val vision = visionRepository.findById(visionId)
-            ?: throw IllegalStateException("Vision $visionId not found")
+        val vision =
+            visionRepository.findById(visionId)
+                ?: throw IllegalStateException("Vision $visionId not found")
 
         val preApology = preApologyDomainService.generatePreApology(preArrestId, perpetratorId, vision.crimeType)
         preApology.injectPublisher(publisher)
@@ -136,11 +146,18 @@ class PreCrimeApplicationService(
     }
 }
 
-data class PreArrestWithPerpetrator(val preArrest: PreArrest, val perpetrator: Perpetrator)
-data class PreApologyWithPerpetrator(val apology: PreApology, val perpetrator: Perpetrator)
+data class PreArrestWithPerpetrator(
+    val preArrest: PreArrest,
+    val perpetrator: Perpetrator,
+)
+
+data class PreApologyWithPerpetrator(
+    val apology: PreApology,
+    val perpetrator: Perpetrator,
+)
 
 data class CreateVisionCommand(
     val perpetratorFirstName: String,
     val perpetratorLastName: String,
-    val crimeType: CrimeType
+    val crimeType: CrimeType,
 )

@@ -9,13 +9,14 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 
-
 @SpringBootTest
 @EmbeddedKafka(
-    topics = [CRIME_FORESEEN_EVENT_TOPIC, PRE_ARREST_EXECUTED_EVENT_TOPIC,
-        PRE_ARREST_CANCELLED_EVENT_TOPIC, PRE_APOLOGY_ISSUED_EVENT_TOPIC],
+    topics = [
+        CRIME_FORESEEN_EVENT_TOPIC, PRE_ARREST_EXECUTED_EVENT_TOPIC,
+        PRE_ARREST_CANCELLED_EVENT_TOPIC, PRE_APOLOGY_ISSUED_EVENT_TOPIC,
+    ],
     partitions = 1,
-    controlledShutdown = true
+    controlledShutdown = true,
 )
 @ActiveProfiles("integration-test")
 @DirtiesContext

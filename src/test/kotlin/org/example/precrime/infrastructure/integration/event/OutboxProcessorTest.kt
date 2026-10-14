@@ -1,5 +1,11 @@
 package org.example.precrime.infrastructure.integration.event
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.domain.perpetrator.PerpetratorId
 import org.example.precrime.domain.preapology.PreApologyId
 import org.example.precrime.domain.preapology.PreApologyIssuedEvent
@@ -13,28 +19,22 @@ import org.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORESEEN_
 import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_APOLOGY_ISSUED_EVENT_TOPIC
 import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_CANCELLED_EVENT_TOPIC
 import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.OffsetDateTime
 
 class OutboxProcessorTest {
-
     private val transactionManager = mockk<PlatformTransactionManager>(relaxed = true)
     private val outboxRepository = mockk<OutboxRepository>()
     private val kafkaTemplate = mockk<KafkaTemplate<String, Any>>()
 
-    private val processor = OutboxProcessor(
-        transactionManager = transactionManager,
-        outboxRepository = outboxRepository,
-        kafkaTemplate = kafkaTemplate
-    )
+    private val processor =
+        OutboxProcessor(
+            transactionManager = transactionManager,
+            outboxRepository = outboxRepository,
+            kafkaTemplate = kafkaTemplate,
+        )
 
     @Test
     fun `should do nothing when there are no pending records`() {
@@ -56,9 +56,10 @@ class OutboxProcessorTest {
         every { outboxRepository.markAsProcessed(outboxId) } returns Unit
 
         val recordSlot = slot<ProducerRecord<String, Any>>()
-        every { kafkaTemplate.send(capture(recordSlot)) } returns mockk {
-            every { get() } returns mockk()
-        }
+        every { kafkaTemplate.send(capture(recordSlot)) } returns
+            mockk {
+                every { get() } returns mockk()
+            }
 
         processor.processOutbox()
 
@@ -81,9 +82,10 @@ class OutboxProcessorTest {
         every { outboxRepository.markAsProcessed(outboxId) } returns Unit
 
         val recordSlot = slot<ProducerRecord<String, Any>>()
-        every { kafkaTemplate.send(capture(recordSlot)) } returns mockk {
-            every { get() } returns mockk()
-        }
+        every { kafkaTemplate.send(capture(recordSlot)) } returns
+            mockk {
+                every { get() } returns mockk()
+            }
 
         processor.processOutbox()
 
@@ -106,9 +108,10 @@ class OutboxProcessorTest {
         every { outboxRepository.markAsProcessed(outboxId) } returns Unit
 
         val recordSlot = slot<ProducerRecord<String, Any>>()
-        every { kafkaTemplate.send(capture(recordSlot)) } returns mockk {
-            every { get() } returns mockk()
-        }
+        every { kafkaTemplate.send(capture(recordSlot)) } returns
+            mockk {
+                every { get() } returns mockk()
+            }
 
         processor.processOutbox()
 
@@ -131,9 +134,10 @@ class OutboxProcessorTest {
         every { outboxRepository.markAsProcessed(outboxId) } returns Unit
 
         val recordSlot = slot<ProducerRecord<String, Any>>()
-        every { kafkaTemplate.send(capture(recordSlot)) } returns mockk {
-            every { get() } returns mockk()
-        }
+        every { kafkaTemplate.send(capture(recordSlot)) } returns
+            mockk {
+                every { get() } returns mockk()
+            }
 
         processor.processOutbox()
 
@@ -149,7 +153,9 @@ class OutboxProcessorTest {
 
     @Test
     fun `should mark record as invalid when event type is unsupported`() {
-        data class UnknownEvent(val id: String)
+        data class UnknownEvent(
+            val id: String,
+        )
 
         val event = UnknownEvent("unknown")
         val outboxId = OutboxId()
@@ -170,9 +176,10 @@ class OutboxProcessorTest {
         val outboxId = OutboxId()
         val outbox = Outbox(outboxId, event, OutboxState.PENDING)
         every { outboxRepository.findPendingForUpdate() } returns listOf(outbox)
-        every { kafkaTemplate.send(any<ProducerRecord<String, Any>>()) } returns mockk {
-            every { get() } throws RuntimeException("Kafka unavailable")
-        }
+        every { kafkaTemplate.send(any<ProducerRecord<String, Any>>()) } returns
+            mockk {
+                every { get() } throws RuntimeException("Kafka unavailable")
+            }
 
         processor.processOutbox()
 
@@ -192,9 +199,10 @@ class OutboxProcessorTest {
         every { outboxRepository.findPendingForUpdate() } returns listOf(outbox1, outbox2)
         every { outboxRepository.markAsProcessed(outboxId1) } returns Unit
         every { outboxRepository.markAsProcessed(outboxId2) } returns Unit
-        every { kafkaTemplate.send(any<ProducerRecord<String, Any>>()) } returns mockk {
-            every { get() } returns mockk()
-        }
+        every { kafkaTemplate.send(any<ProducerRecord<String, Any>>()) } returns
+            mockk {
+                every { get() } returns mockk()
+            }
 
         processor.processOutbox()
 

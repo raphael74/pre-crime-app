@@ -1,5 +1,6 @@
 package org.example.precrime.infrastructure.integration.persistence
 
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.IntegrationTest
 import org.example.precrime.domain.AggregateVersion
 import org.example.precrime.domain.perpetrator.Perpetrator
@@ -7,31 +8,30 @@ import org.example.precrime.domain.perpetrator.PerpetratorRepository
 import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.domain.vision.Vision
 import org.example.precrime.domain.vision.VisionId
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 @Transactional
 class JooqVisionRepositoryTest(
     @Autowired private var repository: JooqVisionRepository,
-    @Autowired private var perpetratorRepository: PerpetratorRepository
+    @Autowired private var perpetratorRepository: PerpetratorRepository,
 ) {
-
     @Test
     fun `should save and find vision`() {
         // GIVEN
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         perpetratorRepository.create(perpetrator)
 
-        val vision = Vision(
-            perpetratorId = perpetrator.id,
-            crimeType = CrimeType.MURDER,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                perpetratorId = perpetrator.id,
+                crimeType = CrimeType.MURDER,
+                foreseenAt = OffsetDateTime.now(),
+            )
 
         // WHEN
         repository.create(vision)
@@ -63,11 +63,12 @@ class JooqVisionRepositoryTest(
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         perpetratorRepository.create(perpetrator)
 
-        val vision = Vision(
-            perpetratorId = perpetrator.id,
-            crimeType = CrimeType.MURDER,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                perpetratorId = perpetrator.id,
+                crimeType = CrimeType.MURDER,
+                foreseenAt = OffsetDateTime.now(),
+            )
         repository.create(vision)
 
         val initialVersion = vision.version
@@ -87,22 +88,24 @@ class JooqVisionRepositoryTest(
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         perpetratorRepository.create(perpetrator)
 
-        val vision = Vision(
-            perpetratorId = perpetrator.id,
-            crimeType = CrimeType.MURDER,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                perpetratorId = perpetrator.id,
+                crimeType = CrimeType.MURDER,
+                foreseenAt = OffsetDateTime.now(),
+            )
         repository.create(vision)
         repository.update(vision)
 
         // WHEN - try to update with stale version
-        val stale = Vision(
-            id = vision.id,
-            version = AggregateVersion(0),
-            perpetratorId = perpetrator.id,
-            crimeType = CrimeType.MURDER,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val stale =
+            Vision(
+                id = vision.id,
+                version = AggregateVersion(0),
+                perpetratorId = perpetrator.id,
+                crimeType = CrimeType.MURDER,
+                foreseenAt = OffsetDateTime.now(),
+            )
 
         // THEN
         org.junit.jupiter.api.Assertions.assertThrows(OptimisticLockingException::class.java) {

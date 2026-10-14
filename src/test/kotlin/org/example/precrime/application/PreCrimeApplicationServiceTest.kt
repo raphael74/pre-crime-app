@@ -1,23 +1,36 @@
 package org.example.precrime.application
 
-import org.example.precrime.domain.DomainEventPublisher
-import org.example.precrime.domain.perpetrator.Perpetrator
-import org.example.precrime.domain.perpetrator.PerpetratorRepository
-import org.example.precrime.domain.preapology.*
-import org.example.precrime.domain.prearrest.*
-import org.example.precrime.domain.statistic.Statistic
-import org.example.precrime.domain.statistic.StatisticRepository
-import org.example.precrime.domain.vision.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.example.precrime.domain.DomainEventPublisher
+import org.example.precrime.domain.perpetrator.Perpetrator
+import org.example.precrime.domain.perpetrator.PerpetratorRepository
+import org.example.precrime.domain.preapology.ApologyLetter
+import org.example.precrime.domain.preapology.Compensation
+import org.example.precrime.domain.preapology.PreApology
+import org.example.precrime.domain.preapology.PreApologyDomainService
+import org.example.precrime.domain.preapology.PreApologyIssuedEvent
+import org.example.precrime.domain.preapology.PreApologyRepository
+import org.example.precrime.domain.prearrest.PreArrest
+import org.example.precrime.domain.prearrest.PreArrestCancelledEvent
+import org.example.precrime.domain.prearrest.PreArrestExecutedEvent
+import org.example.precrime.domain.prearrest.PreArrestId
+import org.example.precrime.domain.prearrest.PreArrestRepository
+import org.example.precrime.domain.prearrest.PreArrestStatus
+import org.example.precrime.domain.statistic.Statistic
+import org.example.precrime.domain.statistic.StatisticRepository
+import org.example.precrime.domain.vision.CrimeForeseenEvent
+import org.example.precrime.domain.vision.CrimeType
+import org.example.precrime.domain.vision.Vision
+import org.example.precrime.domain.vision.VisionId
+import org.example.precrime.domain.vision.VisionRepository
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 
 class PreCrimeApplicationServiceTest {
-
     private val visionRepository = mockk<VisionRepository>()
     private val statisticRepository = mockk<StatisticRepository>()
     private val preArrestRepository = mockk<PreArrestRepository>()
@@ -25,15 +38,16 @@ class PreCrimeApplicationServiceTest {
     private val perpetratorRepository = mockk<PerpetratorRepository>()
     private val preApologyDomainService = mockk<PreApologyDomainService>()
     private val publisher = mockk<DomainEventPublisher>(relaxed = true)
-    private val service = PreCrimeApplicationService(
-        visionRepository,
-        statisticRepository,
-        preArrestRepository,
-        preApologyRepository,
-        perpetratorRepository,
-        preApologyDomainService,
-        publisher
-    )
+    private val service =
+        PreCrimeApplicationService(
+            visionRepository,
+            statisticRepository,
+            preArrestRepository,
+            preApologyRepository,
+            perpetratorRepository,
+            preApologyDomainService,
+            publisher,
+        )
 
     @Test
     fun `getPreventedCrimesCount should return count from singleton statistic`() {
@@ -49,7 +63,6 @@ class PreCrimeApplicationServiceTest {
         assertThat(count).isEqualTo(42)
         verify { statisticRepository.findSingleton() }
     }
-
 
     @Test
     fun `triggerVision should find singleton, foresee crime and save`() {
@@ -84,9 +97,11 @@ class PreCrimeApplicationServiceTest {
 
         // THEN
         verify {
-            preArrestRepository.create(match {
-                it.visionId == visionId && it.perpetratorId == perpetrator.id
-            })
+            preArrestRepository.create(
+                match {
+                    it.visionId == visionId && it.perpetratorId == perpetrator.id
+                },
+            )
         }
     }
 
@@ -98,29 +113,31 @@ class PreCrimeApplicationServiceTest {
         val preArrestId = PreArrestId()
         val event = PreArrestExecutedEvent(preArrestId, visionId, perpetrator.id)
 
-        val vision = Vision(
-            id = visionId,
-            perpetratorId = perpetrator.id,
-            crimeType = CrimeType.MURDER,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                id = visionId,
+                perpetratorId = perpetrator.id,
+                crimeType = CrimeType.MURDER,
+                foreseenAt = OffsetDateTime.now(),
+            )
         every { visionRepository.findById(any()) } returns vision
 
         val statistic = mockk<Statistic>(relaxed = true)
         every { statisticRepository.findSingleton() } returns statistic
         every { statisticRepository.update(any()) } returns Unit
 
-        val apology = PreApology(
-            preArrestId = preArrestId,
-            perpetratorId = perpetrator.id,
-            compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
-            apologyLetter = ApologyLetter("Dear family...")
-        )
+        val apology =
+            PreApology(
+                preArrestId = preArrestId,
+                perpetratorId = perpetrator.id,
+                compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
+                apologyLetter = ApologyLetter("Dear family..."),
+            )
         every {
             preApologyDomainService.generatePreApology(
                 preArrestId,
                 perpetrator.id,
-                vision.crimeType
+                vision.crimeType,
             )
         } returns apology
         every { preApologyRepository.create(any()) } returns Unit
@@ -212,12 +229,13 @@ class PreCrimeApplicationServiceTest {
         // GIVEN
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         val preArrestId = PreArrestId()
-        val apology = PreApology(
-            preArrestId = preArrestId,
-            perpetratorId = perpetrator.id,
-            compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
-            apologyLetter = ApologyLetter("Dear family...")
-        )
+        val apology =
+            PreApology(
+                preArrestId = preArrestId,
+                perpetratorId = perpetrator.id,
+                compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
+                apologyLetter = ApologyLetter("Dear family..."),
+            )
         every { preApologyRepository.findAll() } returns listOf(apology)
         every { perpetratorRepository.findById(perpetrator.id) } returns perpetrator
 

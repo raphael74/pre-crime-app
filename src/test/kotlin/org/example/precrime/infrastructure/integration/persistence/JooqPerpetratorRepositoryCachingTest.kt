@@ -15,9 +15,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class JooqPerpetratorRepositoryCachingTest(
     @Autowired private var perpetratorRepository: PerpetratorRepository,
-    @Autowired private var cacheManager: CacheManager
+    @Autowired private var cacheManager: CacheManager,
 ) {
-
     @Test
     fun `should cache perpetrator findById`() {
         val id = PerpetratorId()

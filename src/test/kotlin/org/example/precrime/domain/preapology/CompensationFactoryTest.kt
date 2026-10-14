@@ -1,21 +1,20 @@
 package org.example.precrime.domain.preapology
 
-import org.example.precrime.domain.vision.CrimeType
 import org.assertj.core.api.Assertions.assertThat
+import org.example.precrime.domain.vision.CrimeType
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 
 class CompensationFactoryTest {
-
     @ParameterizedTest
     @MethodSource("compensationExpectations")
     fun `should compute correct compensation for each crime type`(
         crimeType: CrimeType,
         expectedBaseAmount: Double,
         expectedNetPayout: Double,
-        expectedBillable: Boolean
+        expectedBillable: Boolean,
     ) {
         val compensation = CompensationFactory.createCompensation(crimeType)
 
@@ -35,21 +34,22 @@ class CompensationFactoryTest {
 
     companion object {
         @JvmStatic
-        fun compensationExpectations(): List<Arguments> = listOf(
-            Arguments.of(CrimeType.MURDER, 10000.0, 9300.0, false),
-            Arguments.of(CrimeType.GRAND_THEFT_AUTO, 5000.0, 4300.0, false),
-            Arguments.of(CrimeType.JAYWALKING, 50.0, -650.0, true),
-            Arguments.of(CrimeType.THEFT, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.ASSAULT, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.ROBBERY, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.BURGLARY, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.FRAUD, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.ARSON, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.KIDNAPPING, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.LARCENY, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.VANDALISM, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.IDENTITY_THEFT, 1000.0, 300.0, false),
-            Arguments.of(CrimeType.TAX_EVASION, 1000.0, 300.0, false),
-        )
+        fun compensationExpectations(): List<Arguments> =
+            listOf(
+                Arguments.of(CrimeType.MURDER, 10000.0, 9300.0, false),
+                Arguments.of(CrimeType.GRAND_THEFT_AUTO, 5000.0, 4300.0, false),
+                Arguments.of(CrimeType.JAYWALKING, 50.0, -650.0, true),
+                Arguments.of(CrimeType.THEFT, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.ASSAULT, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.ROBBERY, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.BURGLARY, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.FRAUD, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.ARSON, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.KIDNAPPING, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.LARCENY, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.VANDALISM, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.IDENTITY_THEFT, 1000.0, 300.0, false),
+                Arguments.of(CrimeType.TAX_EVASION, 1000.0, 300.0, false),
+            )
     }
 }

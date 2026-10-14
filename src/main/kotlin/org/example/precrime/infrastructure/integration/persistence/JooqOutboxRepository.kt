@@ -17,14 +17,13 @@ import java.time.OffsetDateTime
 @Component
 class JooqOutboxRepository(
     private val dsl: DSLContext,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) : OutboxRepository {
-
     @Transactional(propagation = Propagation.MANDATORY)
     override fun create(event: Any): OutboxId {
-
         val id = OutboxId()
-        dsl.insertInto(OUTBOX)
+        dsl
+            .insertInto(OUTBOX)
             .set(OUTBOX.ID, id)
             .set(OUTBOX.CREATED_AT, OffsetDateTime.now())
             .set(OUTBOX.EVENT_CLASS, event::class.java.name)
@@ -34,17 +33,18 @@ class JooqOutboxRepository(
         return id
     }
 
-    override fun findById(id: OutboxId): Outbox? {
-        return dsl.select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
+    override fun findById(id: OutboxId): Outbox? =
+        dsl
+            .select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
             .from(OUTBOX)
             .where(OUTBOX.ID.eq(id))
             .fetchOne()
             ?.toOutboxRecord()
-    }
 
     override fun findPendingForUpdate(): List<Outbox> {
         // Use pessimistic locking
-        return dsl.select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
+        return dsl
+            .select(OUTBOX.ID, OUTBOX.EVENT_CLASS, OUTBOX.EVENT, OUTBOX.STATUS)
             .from(OUTBOX)
             .where(OUTBOX.STATUS.eq(OutboxState.PENDING))
             .forUpdate()
@@ -55,7 +55,8 @@ class JooqOutboxRepository(
 
     @Transactional(propagation = Propagation.MANDATORY)
     override fun markAsProcessed(id: OutboxId) {
-        dsl.update(OUTBOX)
+        dsl
+            .update(OUTBOX)
             .set(OUTBOX.STATUS, OutboxState.PROCESSED)
             .set(OUTBOX.PROCESSED_AT, OffsetDateTime.now())
             .where(OUTBOX.ID.eq(id))
@@ -64,21 +65,23 @@ class JooqOutboxRepository(
 
     @Transactional(propagation = Propagation.MANDATORY)
     override fun markAsInvalid(id: OutboxId) {
-        dsl.update(OUTBOX)
+        dsl
+            .update(OUTBOX)
             .set(OUTBOX.STATUS, OutboxState.INVALID)
             .set(OUTBOX.PROCESSED_AT, OffsetDateTime.now())
             .where(OUTBOX.ID.eq(id))
             .execute()
     }
 
-    private fun Record.toOutboxRecord() = Outbox(
-        id = get(OUTBOX.ID)!!,
-        event = convertToEvent(get(OUTBOX.EVENT)!!.data(), Class.forName(get(OUTBOX.EVENT_CLASS)!!)),
-        status = get(OUTBOX.STATUS)!!
-    )
+    private fun Record.toOutboxRecord() =
+        Outbox(
+            id = get(OUTBOX.ID)!!,
+            event = convertToEvent(get(OUTBOX.EVENT)!!.data(), Class.forName(get(OUTBOX.EVENT_CLASS)!!)),
+            status = get(OUTBOX.STATUS)!!,
+        )
 
-    private fun convertToEvent(json: String, clazz: Class<*>): Any {
-        return objectMapper.readValue(json, clazz)
-    }
+    private fun convertToEvent(
+        json: String,
+        clazz: Class<*>,
+    ): Any = objectMapper.readValue(json, clazz)
 }
-

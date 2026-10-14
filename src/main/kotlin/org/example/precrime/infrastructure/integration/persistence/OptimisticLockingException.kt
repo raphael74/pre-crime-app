@@ -1,3 +1,5 @@
 package org.example.precrime.infrastructure.integration.persistence
 
-class OptimisticLockingException(message: String) : RuntimeException(message)
+class OptimisticLockingException(
+    message: String,
+) : RuntimeException(message)

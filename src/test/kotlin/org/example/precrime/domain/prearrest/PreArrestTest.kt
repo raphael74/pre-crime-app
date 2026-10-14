@@ -1,16 +1,15 @@
 package org.example.precrime.domain.prearrest
 
-import org.example.precrime.domain.DomainEventPublisher
-import org.example.precrime.domain.perpetrator.PerpetratorId
-import org.example.precrime.domain.vision.VisionId
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.example.precrime.domain.DomainEventPublisher
+import org.example.precrime.domain.perpetrator.PerpetratorId
+import org.example.precrime.domain.vision.VisionId
 import org.junit.jupiter.api.Test
 
 class PreArrestTest {
-
     @Test
     fun `creating PreArrest should initialize with correct status`() {
         // GIVEN
@@ -59,7 +58,7 @@ class PreArrestTest {
             publisher.publish(
                 match<PreArrestExecutedEvent> {
                     it.visionId == visionId && it.perpetratorId == perpetratorId && it.preArrestId == preArrest.id
-                }
+                },
             )
         }
     }

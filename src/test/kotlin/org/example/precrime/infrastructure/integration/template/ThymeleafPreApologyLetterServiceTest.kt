@@ -1,5 +1,11 @@
 package org.example.precrime.infrastructure.integration.template
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.example.precrime.domain.perpetrator.Perpetrator
 import org.example.precrime.domain.perpetrator.PerpetratorId
 import org.example.precrime.domain.perpetrator.PerpetratorRepository
@@ -11,58 +17,56 @@ import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.domain.vision.Vision
 import org.example.precrime.domain.vision.VisionId
 import org.example.precrime.domain.vision.VisionRepository
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.SpringTemplateEngine
 import java.time.OffsetDateTime
 
 class ThymeleafPreApologyLetterServiceTest {
-
     private val springTemplateEngine = mockk<SpringTemplateEngine>()
     private val preArrestRepository = mockk<PreArrestRepository>()
     private val visionRepository = mockk<VisionRepository>()
     private val perpetratorRepository = mockk<PerpetratorRepository>()
 
-    private val service = ThymeleafPreApologyLetterService(
-        springTemplateEngine = springTemplateEngine,
-        preArrestRepository = preArrestRepository,
-        visionRepository = visionRepository,
-        perpetratorRepository = perpetratorRepository
-    )
+    private val service =
+        ThymeleafPreApologyLetterService(
+            springTemplateEngine = springTemplateEngine,
+            preArrestRepository = preArrestRepository,
+            visionRepository = visionRepository,
+            perpetratorRepository = perpetratorRepository,
+        )
 
     @Test
     fun `should generate letter text with correct context variables`() {
         val preArrestId = PreArrestId()
         val perpetratorId = PerpetratorId()
         val visionId = VisionId()
-        val perpetrator = Perpetrator(
-            id = perpetratorId,
-            firstName = "John",
-            lastName = "Doe"
-        )
-        val vision = Vision(
-            id = visionId,
-            perpetratorId = perpetratorId,
-            crimeType = CrimeType.MURDER,
-            foreseenAt = OffsetDateTime.parse("2026-06-15T14:30:00+00:00")
-        )
-        val preArrest = PreArrest(
-            id = preArrestId,
-            visionId = visionId,
-            perpetratorId = perpetratorId
-        )
-        val compensation = Compensation(
-            baseAmount = 10000.0,
-            jetpackFuelDeduction = 450.0,
-            haloRentalFee = 250.0,
-            netPayout = 9300.0
-        )
+        val perpetrator =
+            Perpetrator(
+                id = perpetratorId,
+                firstName = "John",
+                lastName = "Doe",
+            )
+        val vision =
+            Vision(
+                id = visionId,
+                perpetratorId = perpetratorId,
+                crimeType = CrimeType.MURDER,
+                foreseenAt = OffsetDateTime.parse("2026-06-15T14:30:00+00:00"),
+            )
+        val preArrest =
+            PreArrest(
+                id = preArrestId,
+                visionId = visionId,
+                perpetratorId = perpetratorId,
+            )
+        val compensation =
+            Compensation(
+                baseAmount = 10000.0,
+                jetpackFuelDeduction = 450.0,
+                haloRentalFee = 250.0,
+                netPayout = 9300.0,
+            )
 
         every { preArrestRepository.findById(preArrestId) } returns preArrest
         every { perpetratorRepository.findById(perpetratorId) } returns perpetrator
@@ -104,11 +108,12 @@ class ThymeleafPreApologyLetterServiceTest {
         val preArrestId = PreArrestId()
         val perpetratorId = PerpetratorId()
         val visionId = VisionId()
-        val preArrest = PreArrest(
-            id = preArrestId,
-            visionId = visionId,
-            perpetratorId = perpetratorId
-        )
+        val preArrest =
+            PreArrest(
+                id = preArrestId,
+                visionId = visionId,
+                perpetratorId = perpetratorId,
+            )
         val compensation = Compensation(1000.0, 450.0, 250.0, 300.0)
 
         every { preArrestRepository.findById(preArrestId) } returns preArrest
@@ -125,11 +130,12 @@ class ThymeleafPreApologyLetterServiceTest {
         val perpetratorId = PerpetratorId()
         val visionId = VisionId()
         val perpetrator = Perpetrator(id = perpetratorId, firstName = "Jane", lastName = "Smith")
-        val preArrest = PreArrest(
-            id = preArrestId,
-            visionId = visionId,
-            perpetratorId = perpetratorId
-        )
+        val preArrest =
+            PreArrest(
+                id = preArrestId,
+                visionId = visionId,
+                perpetratorId = perpetratorId,
+            )
         val compensation = Compensation(1000.0, 450.0, 250.0, 300.0)
 
         every { preArrestRepository.findById(preArrestId) } returns preArrest
@@ -147,17 +153,19 @@ class ThymeleafPreApologyLetterServiceTest {
         val perpetratorId = PerpetratorId()
         val visionId = VisionId()
         val perpetrator = Perpetrator(id = perpetratorId, firstName = "Alice", lastName = "Wonder")
-        val vision = Vision(
-            id = visionId,
-            perpetratorId = perpetratorId,
-            crimeType = CrimeType.JAYWALKING,
-            foreseenAt = OffsetDateTime.parse("2026-01-01T09:05:03+00:00")
-        )
-        val preArrest = PreArrest(
-            id = preArrestId,
-            visionId = visionId,
-            perpetratorId = perpetratorId
-        )
+        val vision =
+            Vision(
+                id = visionId,
+                perpetratorId = perpetratorId,
+                crimeType = CrimeType.JAYWALKING,
+                foreseenAt = OffsetDateTime.parse("2026-01-01T09:05:03+00:00"),
+            )
+        val preArrest =
+            PreArrest(
+                id = preArrestId,
+                visionId = visionId,
+                perpetratorId = perpetratorId,
+            )
         val compensation = Compensation(50.0, 450.0, 250.0, -650.0)
 
         every { preArrestRepository.findById(preArrestId) } returns preArrest

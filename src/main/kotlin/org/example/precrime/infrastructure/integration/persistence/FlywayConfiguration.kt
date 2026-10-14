@@ -13,8 +13,8 @@ class FlywayConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "precrime.flyway", name = ["clean-on-validation-error"])
-    fun flywayMigrationStrategy(): FlywayMigrationStrategy {
-        return FlywayMigrationStrategy { flyway ->
+    fun flywayMigrationStrategy(): FlywayMigrationStrategy =
+        FlywayMigrationStrategy { flyway ->
             try {
                 flyway.migrate()
             } catch (e: FlywayException) {
@@ -23,5 +23,4 @@ class FlywayConfiguration {
                 flyway.migrate() // 2nd try after clean
             }
         }
-    }
 }

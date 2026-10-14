@@ -4,15 +4,17 @@ import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.types.Identifier
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 @AggregateRoot
 data class AuditEntry(
     @Identity val id: AuditEntryId = AuditEntryId(),
     val eventType: String,
     val payload: String,
-    val recordedAt: OffsetDateTime = OffsetDateTime.now()
+    val recordedAt: OffsetDateTime = OffsetDateTime.now(),
 )
 
 @JvmInline
-value class AuditEntryId(val value: UUID = UUID.randomUUID()) : Identifier
+value class AuditEntryId(
+    val value: UUID = UUID.randomUUID(),
+) : Identifier

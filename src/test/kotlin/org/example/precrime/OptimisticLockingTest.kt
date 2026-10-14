@@ -9,9 +9,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @IntegrationTest
 class OptimisticLockingTest(
-    @Autowired private val statisticRepository: StatisticRepository
+    @Autowired private val statisticRepository: StatisticRepository,
 ) {
-
     @Test
     @Transactional
     fun `concurrent update should throw OptimisticLockingException`() {

@@ -1,15 +1,19 @@
 package org.example.precrime
 
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.domain.perpetrator.Perpetrator
 import org.example.precrime.domain.perpetrator.PerpetratorRepository
 import org.example.precrime.domain.prearrest.PreArrestRepository
-import org.example.precrime.domain.vision.*
+import org.example.precrime.domain.vision.CrimeForeseenEvent
+import org.example.precrime.domain.vision.CrimeType
+import org.example.precrime.domain.vision.Vision
+import org.example.precrime.domain.vision.VisionId
+import org.example.precrime.domain.vision.VisionRepository
 import org.example.precrime.infrastructure.facade.event.KafkaDomainEventConsumer
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 @org.springframework.transaction.annotation.Transactional
@@ -17,21 +21,21 @@ class IdempotenceIntegrationTest(
     @Autowired private val consumer: KafkaDomainEventConsumer,
     @Autowired private val preArrestRepository: PreArrestRepository,
     @Autowired private val perpetratorRepository: PerpetratorRepository,
-    @Autowired private val visionRepository: VisionRepository
+    @Autowired private val visionRepository: VisionRepository,
 ) {
-
     @Test
     fun `duplicate events should be processed only once`() {
         // GIVEN
         val visionId = VisionId()
         val perpetrator = Perpetrator(firstName = "Unknown", lastName = "Suspect")
         perpetratorRepository.create(perpetrator)
-        val vision = Vision(
-            id = visionId,
-            perpetratorId = perpetrator.id,
-            crimeType = CrimeType.THEFT,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                id = visionId,
+                perpetratorId = perpetrator.id,
+                crimeType = CrimeType.THEFT,
+                foreseenAt = OffsetDateTime.now(),
+            )
         visionRepository.create(vision)
 
         val event = CrimeForeseenEvent(visionId, perpetrator.id, CrimeType.THEFT, OffsetDateTime.now())

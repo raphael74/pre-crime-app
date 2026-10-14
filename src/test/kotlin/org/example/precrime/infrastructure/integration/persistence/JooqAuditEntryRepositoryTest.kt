@@ -1,8 +1,8 @@
 package org.example.precrime.infrastructure.integration.persistence
 
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.IntegrationTest
 import org.example.precrime.domain.audit.AuditEntry
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -12,22 +12,23 @@ import java.time.temporal.ChronoUnit
 @IntegrationTest
 @Transactional
 class JooqAuditEntryRepositoryTest(
-    @Autowired private var repository: JooqAuditEntryRepository
+    @Autowired private var repository: JooqAuditEntryRepository,
 ) {
-
     @Test
     fun `should save and find all audit entries`() {
         // GIVEN
-        val entry1 = AuditEntry(
-            eventType = "CrimeForeseen",
-            payload = "{\"perpetrator\":\"Alice\"}",
-            recordedAt = OffsetDateTime.now().minusMinutes(1).truncatedTo(ChronoUnit.MILLIS)
-        )
-        val entry2 = AuditEntry(
-            eventType = "PreArrestExecuted",
-            payload = "{\"perpetrator\":\"Alice\"}",
-            recordedAt = OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS)
-        )
+        val entry1 =
+            AuditEntry(
+                eventType = "CrimeForeseen",
+                payload = "{\"perpetrator\":\"Alice\"}",
+                recordedAt = OffsetDateTime.now().minusMinutes(1).truncatedTo(ChronoUnit.MILLIS),
+            )
+        val entry2 =
+            AuditEntry(
+                eventType = "PreArrestExecuted",
+                payload = "{\"perpetrator\":\"Alice\"}",
+                recordedAt = OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS),
+            )
 
         // WHEN
         repository.create(entry1)

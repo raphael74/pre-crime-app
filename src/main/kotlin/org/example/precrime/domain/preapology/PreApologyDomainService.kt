@@ -9,9 +9,11 @@ import org.jmolecules.ddd.annotation.Service
 class PreApologyDomainService(
     private val preApologyLetterService: PreApologyLetterService,
 ) {
-
-    fun generatePreApology(preArrestId: PreArrestId, perpetratorId: PerpetratorId, crimeType: CrimeType): PreApology {
-
+    fun generatePreApology(
+        preArrestId: PreArrestId,
+        perpetratorId: PerpetratorId,
+        crimeType: CrimeType,
+    ): PreApology {
         val compensation = CompensationFactory.createCompensation(crimeType)
 
         val letterText = preApologyLetterService.generateLetterText(preArrestId, compensation)
@@ -20,7 +22,7 @@ class PreApologyDomainService(
             preArrestId = preArrestId,
             perpetratorId = perpetratorId,
             compensation = compensation,
-            apologyLetter = ApologyLetter(letterText)
+            apologyLetter = ApologyLetter(letterText),
         )
     }
 }

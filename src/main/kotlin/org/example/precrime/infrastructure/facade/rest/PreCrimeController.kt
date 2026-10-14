@@ -5,7 +5,12 @@ import org.example.precrime.application.PreCrimeApplicationService
 import org.example.precrime.domain.prearrest.PreArrestId
 import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.infrastructure.facade.rest.api.PreCrimeApi
-import org.example.precrime.infrastructure.facade.rest.model.*
+import org.example.precrime.infrastructure.facade.rest.model.ArrestCancelRequest
+import org.example.precrime.infrastructure.facade.rest.model.ArrestExecutedRequest
+import org.example.precrime.infrastructure.facade.rest.model.CreateVisionRequest
+import org.example.precrime.infrastructure.facade.rest.model.CreateVisionResponse
+import org.example.precrime.infrastructure.facade.rest.model.PreApologyResponse
+import org.example.precrime.infrastructure.facade.rest.model.PreArrestResponse
 import org.example.precrime.infrastructure.facade.security.SecurityConfiguration.Companion.USER_ROLE
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,9 +20,9 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api")
-class PreCrimeController(private val applicationService: PreCrimeApplicationService) : PreCrimeApi {
-
-
+class PreCrimeController(
+    private val applicationService: PreCrimeApplicationService,
+) : PreCrimeApi {
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun arrestExecuted(arrestExecutedRequest: ArrestExecutedRequest): ResponseEntity<Unit> {
         applicationService.executePreArrest(PreArrestId(arrestExecutedRequest.preArrestId))
@@ -32,74 +37,76 @@ class PreCrimeController(private val applicationService: PreCrimeApplicationServ
 
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun getArrestsExecuted(): ResponseEntity<List<PreArrestResponse>> {
-        val arrests = applicationService.getAllExecutedPreArrests().map { (arrest, perpetrator) ->
-            PreArrestResponse(
-                id = arrest.id.value,
-                visionId = arrest.visionId.value,
-                perpetratorId = arrest.perpetratorId.value,
-                firstName = perpetrator.firstName,
-                lastName = perpetrator.lastName,
-                preArrestIssuedDate = arrest.preArrestIssuedDate,
-                preArrestDate = arrest.preArrestDate,
-                status = PreArrestResponse.Status.valueOf(arrest.status.name)
-            )
-        }
+        val arrests =
+            applicationService.getAllExecutedPreArrests().map { (arrest, perpetrator) ->
+                PreArrestResponse(
+                    id = arrest.id.value,
+                    visionId = arrest.visionId.value,
+                    perpetratorId = arrest.perpetratorId.value,
+                    firstName = perpetrator.firstName,
+                    lastName = perpetrator.lastName,
+                    preArrestIssuedDate = arrest.preArrestIssuedDate,
+                    preArrestDate = arrest.preArrestDate,
+                    status = PreArrestResponse.Status.valueOf(arrest.status.name),
+                )
+            }
         return ResponseEntity.ok(arrests)
     }
 
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun getArrestsPending(): ResponseEntity<List<PreArrestResponse>> {
-        val arrests = applicationService.getAllPendingPreArrests().map { (arrest, perpetrator) ->
-            PreArrestResponse(
-                id = arrest.id.value,
-                visionId = arrest.visionId.value,
-                perpetratorId = arrest.perpetratorId.value,
-                firstName = perpetrator.firstName,
-                lastName = perpetrator.lastName,
-                preArrestIssuedDate = arrest.preArrestIssuedDate,
-                preArrestDate = arrest.preArrestDate,
-                status = PreArrestResponse.Status.valueOf(arrest.status.name)
-            )
-        }
+        val arrests =
+            applicationService.getAllPendingPreArrests().map { (arrest, perpetrator) ->
+                PreArrestResponse(
+                    id = arrest.id.value,
+                    visionId = arrest.visionId.value,
+                    perpetratorId = arrest.perpetratorId.value,
+                    firstName = perpetrator.firstName,
+                    lastName = perpetrator.lastName,
+                    preArrestIssuedDate = arrest.preArrestIssuedDate,
+                    preArrestDate = arrest.preArrestDate,
+                    status = PreArrestResponse.Status.valueOf(arrest.status.name),
+                )
+            }
         return ResponseEntity.ok(arrests)
     }
 
     @PreAuthorize("hasRole('$USER_ROLE')")
-    override fun getStats(): ResponseEntity<Int> {
-        return ResponseEntity.ok(applicationService.getPreventedCrimesCount())
-    }
+    override fun getStats(): ResponseEntity<Int> = ResponseEntity.ok(applicationService.getPreventedCrimesCount())
 
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun getApologies(): ResponseEntity<List<PreApologyResponse>> {
-        val apologies = applicationService.getAllApologies().map { (apology, perpetrator) ->
-            PreApologyResponse(
-                id = apology.id.value,
-                preArrestId = apology.preArrestId.value,
-                perpetratorId = apology.perpetratorId.value,
-                lastName = perpetrator.lastName,
-                firstName = perpetrator.firstName,
-                baseAmount = java.math.BigDecimal.valueOf(apology.compensation.baseAmount),
-                jetpackFuelDeduction = java.math.BigDecimal.valueOf(apology.compensation.jetpackFuelDeduction),
-                haloRentalFee = java.math.BigDecimal.valueOf(apology.compensation.haloRentalFee),
-                netPayout = java.math.BigDecimal.valueOf(apology.compensation.netPayout),
-                apologyText = apology.apologyLetter.text
-            )
-        }
+        val apologies =
+            applicationService.getAllApologies().map { (apology, perpetrator) ->
+                PreApologyResponse(
+                    id = apology.id.value,
+                    preArrestId = apology.preArrestId.value,
+                    perpetratorId = apology.perpetratorId.value,
+                    lastName = perpetrator.lastName,
+                    firstName = perpetrator.firstName,
+                    baseAmount = java.math.BigDecimal.valueOf(apology.compensation.baseAmount),
+                    jetpackFuelDeduction = java.math.BigDecimal.valueOf(apology.compensation.jetpackFuelDeduction),
+                    haloRentalFee = java.math.BigDecimal.valueOf(apology.compensation.haloRentalFee),
+                    netPayout = java.math.BigDecimal.valueOf(apology.compensation.netPayout),
+                    apologyText = apology.apologyLetter.text,
+                )
+            }
         return ResponseEntity.ok(apologies)
     }
 
     @PreAuthorize("hasRole('$USER_ROLE')")
     override fun createVision(createVisionRequest: CreateVisionRequest): ResponseEntity<CreateVisionResponse> {
-        val cmd = CreateVisionCommand(
-            createVisionRequest.perpetratorFirstName,
-            createVisionRequest.perpetratorLastName,
-            CrimeType.valueOf(createVisionRequest.crimeType.value)
-        )
+        val cmd =
+            CreateVisionCommand(
+                createVisionRequest.perpetratorFirstName,
+                createVisionRequest.perpetratorLastName,
+                CrimeType.valueOf(createVisionRequest.crimeType.value),
+            )
         val visionId = applicationService.triggerVision(cmd)
         return ResponseEntity.status(HttpStatus.CREATED).body(
             CreateVisionResponse(
                 visionId = visionId.value,
-            )
+            ),
         )
     }
 }

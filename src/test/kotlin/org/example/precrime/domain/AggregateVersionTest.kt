@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class AggregateVersionTest {
-
     @Test
     fun `default version should be zero`() {
         val version = AggregateVersion()

@@ -10,7 +10,7 @@ import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 @AggregateRoot
 class PreArrest(
@@ -20,18 +20,19 @@ class PreArrest(
     val perpetratorId: PerpetratorId,
     val preArrestIssuedDate: OffsetDateTime = OffsetDateTime.now(),
     var preArrestDate: OffsetDateTime? = null,
-    var status: PreArrestStatus = PreArrestStatus.PENDING
+    var status: PreArrestStatus = PreArrestStatus.PENDING,
 ) {
-    private var _publisher: DomainEventPublisher? = null
+    private var eventPublisher: DomainEventPublisher? = null
 
     fun injectPublisher(publisher: DomainEventPublisher) {
-        this._publisher = publisher
+        this.eventPublisher = publisher
     }
 
     private val publisher: DomainEventPublisher
-        get() = requireNotNull(_publisher) {
-            "DomainEventPublisher has not been injected into PreArrest $id"
-        }
+        get() =
+            requireNotNull(eventPublisher) {
+                "DomainEventPublisher has not been injected into PreArrest $id"
+            }
 
     fun executePreArrest() {
         status = PreArrestStatus.ARRESTED_BEFORE_CRIME
@@ -49,23 +50,24 @@ class PreArrest(
 enum class PreArrestStatus {
     PENDING,
     ARRESTED_BEFORE_CRIME,
-    CANCELLED
+    CANCELLED,
 }
 
 @JvmInline
-value class PreArrestId(val value: UUID = UUID.randomUUID()) : Identifier
+value class PreArrestId(
+    val value: UUID = UUID.randomUUID(),
+) : Identifier
 
 @DomainEvent
 data class PreArrestExecutedEvent(
     val preArrestId: PreArrestId,
     val visionId: VisionId,
-    val perpetratorId: PerpetratorId
+    val perpetratorId: PerpetratorId,
 )
 
 @DomainEvent
 data class PreArrestCancelledEvent(
     val preArrestId: PreArrestId,
     val visionId: VisionId,
-    val perpetratorId: PerpetratorId
+    val perpetratorId: PerpetratorId,
 )
-

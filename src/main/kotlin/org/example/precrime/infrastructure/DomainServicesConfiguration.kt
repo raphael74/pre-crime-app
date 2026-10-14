@@ -7,11 +7,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class DomainServicesConfiguration {
-
     @Bean
-    fun preEmptiveApologyDomainService(
-        preApologyLetterService: PreApologyLetterService
-    ): PreApologyDomainService {
-        return PreApologyDomainService(preApologyLetterService)
-    }
+    fun preEmptiveApologyDomainService(preApologyLetterService: PreApologyLetterService): PreApologyDomainService =
+        PreApologyDomainService(preApologyLetterService)
 }

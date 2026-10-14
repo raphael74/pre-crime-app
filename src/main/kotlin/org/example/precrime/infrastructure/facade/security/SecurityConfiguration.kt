@@ -14,7 +14,6 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration {
-
     companion object {
         const val USER_ROLE = "USER"
     }
@@ -45,11 +44,13 @@ class SecurityConfiguration {
     @Bean
     fun userDetailsService(): UserDetailsService {
         @Suppress("DEPRECATION")
-        val userDetails = User.withDefaultPasswordEncoder()
-            .username("precog")
-            .password("agatha")
-            .roles(USER_ROLE)
-            .build()
+        val userDetails =
+            User
+                .withDefaultPasswordEncoder()
+                .username("precog")
+                .password("agatha")
+                .roles(USER_ROLE)
+                .build()
         return InMemoryUserDetailsManager(userDetails)
     }
 }

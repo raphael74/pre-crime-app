@@ -1,5 +1,6 @@
 package org.example.precrime.infrastructure.integration.persistence
 
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.IntegrationTest
 import org.example.precrime.domain.perpetrator.Perpetrator
 import org.example.precrime.domain.perpetrator.PerpetratorRepository
@@ -12,12 +13,11 @@ import org.example.precrime.domain.prearrest.PreArrestRepository
 import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.domain.vision.Vision
 import org.example.precrime.domain.vision.VisionRepository
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 @Transactional
@@ -25,9 +25,8 @@ class JooqPreApologyRepositoryTest(
     @Autowired private var repository: JooqPreApologyRepository,
     @Autowired private var perpetratorRepository: PerpetratorRepository,
     @Autowired private val preArrestRepository: PreArrestRepository,
-    @Autowired private val visionRepository: VisionRepository
+    @Autowired private val visionRepository: VisionRepository,
 ) {
-
     @Test
     fun `should persist and retrieve pre-emptive apology`() {
         // GIVEN
@@ -35,18 +34,20 @@ class JooqPreApologyRepositoryTest(
         val perpetrator = Perpetrator(firstName = "Danny", lastName = "Witwer")
         perpetratorRepository.create(perpetrator)
 
-        val vision = Vision(
-            perpetratorId = perpetrator.id,
-            crimeType = CrimeType.THEFT,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                perpetratorId = perpetrator.id,
+                crimeType = CrimeType.THEFT,
+                foreseenAt = OffsetDateTime.now(),
+            )
         visionRepository.create(vision)
 
-        val preArrest = PreArrest(
-            visionId = vision.id,
-            perpetratorId = perpetrator.id,
-            preArrestDate = OffsetDateTime.now()
-        )
+        val preArrest =
+            PreArrest(
+                visionId = vision.id,
+                perpetratorId = perpetrator.id,
+                preArrestDate = OffsetDateTime.now(),
+            )
         preArrestRepository.create(preArrest)
 
         val compensation = Compensation(10000.0, 450.0, 250.0, 9300.0)
@@ -94,30 +95,33 @@ class JooqPreApologyRepositoryTest(
         preArrestRepository.create(pa3)
 
         val now = OffsetDateTime.now()
-        val apology1 = PreApology(
-            id = PreApologyId(),
-            preArrestId = pa1.id,
-            perpetratorId = p1.id,
-            compensation = Compensation(100.0, 0.0, 0.0, 100.0),
-            apologyLetter = ApologyLetter("Sorry 1"),
-            createdAt = now.minusDays(2)
-        )
-        val apology2 = PreApology(
-            id = PreApologyId(),
-            preArrestId = pa2.id,
-            perpetratorId = p2.id,
-            compensation = Compensation(100.0, 0.0, 0.0, 100.0),
-            apologyLetter = ApologyLetter("Sorry 2"),
-            createdAt = now
-        )
-        val apology3 = PreApology(
-            id = PreApologyId(),
-            preArrestId = pa3.id,
-            perpetratorId = p3.id,
-            compensation = Compensation(100.0, 0.0, 0.0, 100.0),
-            apologyLetter = ApologyLetter("Sorry 3"),
-            createdAt = now.minusDays(1)
-        )
+        val apology1 =
+            PreApology(
+                id = PreApologyId(),
+                preArrestId = pa1.id,
+                perpetratorId = p1.id,
+                compensation = Compensation(100.0, 0.0, 0.0, 100.0),
+                apologyLetter = ApologyLetter("Sorry 1"),
+                createdAt = now.minusDays(2),
+            )
+        val apology2 =
+            PreApology(
+                id = PreApologyId(),
+                preArrestId = pa2.id,
+                perpetratorId = p2.id,
+                compensation = Compensation(100.0, 0.0, 0.0, 100.0),
+                apologyLetter = ApologyLetter("Sorry 2"),
+                createdAt = now,
+            )
+        val apology3 =
+            PreApology(
+                id = PreApologyId(),
+                preArrestId = pa3.id,
+                perpetratorId = p3.id,
+                compensation = Compensation(100.0, 0.0, 0.0, 100.0),
+                apologyLetter = ApologyLetter("Sorry 3"),
+                createdAt = now.minusDays(1),
+            )
 
         repository.create(apology1)
         repository.create(apology2)
@@ -149,20 +153,22 @@ class JooqPreApologyRepositoryTest(
         preArrestRepository.create(pa1)
         preArrestRepository.create(pa2)
 
-        val apology1 = PreApology(
-            id = PreApologyId(),
-            preArrestId = pa1.id,
-            perpetratorId = p1.id,
-            compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
-            apologyLetter = ApologyLetter("Sorry 1")
-        )
-        val apology2 = PreApology(
-            id = PreApologyId(),
-            preArrestId = pa2.id,
-            perpetratorId = p2.id,
-            compensation = Compensation(50.0, 450.0, 250.0, -650.0),
-            apologyLetter = ApologyLetter("Sorry 2")
-        )
+        val apology1 =
+            PreApology(
+                id = PreApologyId(),
+                preArrestId = pa1.id,
+                perpetratorId = p1.id,
+                compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
+                apologyLetter = ApologyLetter("Sorry 1"),
+            )
+        val apology2 =
+            PreApology(
+                id = PreApologyId(),
+                preArrestId = pa2.id,
+                perpetratorId = p2.id,
+                compensation = Compensation(50.0, 450.0, 250.0, -650.0),
+                apologyLetter = ApologyLetter("Sorry 2"),
+            )
 
         repository.create(apology1)
         repository.create(apology2)

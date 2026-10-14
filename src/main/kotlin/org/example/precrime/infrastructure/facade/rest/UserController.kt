@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api")
 class UserController : UserApi {
-
     override fun getCurrentUser(): ResponseEntity<UserResponse> {
         val authentication = SecurityContextHolder.getContext().authentication
         return ResponseEntity.ok(UserResponse(username = authentication?.name ?: "anonymous"))

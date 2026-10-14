@@ -1,4 +1,4 @@
-# Pre-Crime Application: Antigravity Context
+# Pre-Crime Application: AI Agent Context
 
 This project is a reference implementation of **Domain-Driven Design (DDD)** and **Onion Architecture** using a modern
 Kotlin/Spring Boot backend and an Angular frontend. It is themed around a futuristic "Pre-Crime" department.
@@ -60,6 +60,8 @@ Run the Spring Boot application:
 
 Tests: `./mvnw test`
 
+Lint: `./mvnw ktlint:check` (auto-fix with `./mvnw ktlint:format`)
+
 ### Frontend
 
 Navigate to the `ui` directory and start the dev server:
@@ -86,6 +88,9 @@ The UI will be available at `http://localhost:4200` (proxied to `/api` on `local
   `@openapitools/openapi-generator-cli`.
 - **Kotlin Style**: Use idiomatic Kotlin (data classes, expressions, null safety). Avoid `!!` and prefer `val` over
   `var`.
+- **Kotlin Linting**: Formatting and code style are enforced by **ktlint** through `ktlint-maven-plugin` (bound to the
+  Maven `validate` phase and configured in `.editorconfig`). Run `./mvnw ktlint:check` to verify, or
+  `./mvnw ktlint:format` to auto-fix violations.
 - **UI Architecture**: Angular components should be standalone. Use `HttpClient` for backend interactions via the
   configured proxy.
 

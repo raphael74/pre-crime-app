@@ -1,18 +1,17 @@
 package org.example.precrime.infrastructure.integration.persistence
 
-import org.example.precrime.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
+import org.example.precrime.IntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 @Transactional
 class JooqInboxRepositoryTest(
-    @Autowired private var repository: JooqInboxRepository
+    @Autowired private var repository: JooqInboxRepository,
 ) {
-
     @Test
     fun `insertIfNotExists should return true for new id`() {
         // GIVEN

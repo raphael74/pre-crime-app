@@ -1,19 +1,18 @@
 package org.example.precrime.domain.preapology
 
+import io.mockk.every
+import io.mockk.mockk
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.domain.perpetrator.PerpetratorId
 import org.example.precrime.domain.prearrest.PreArrestId
 import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.domain.vision.Vision
 import org.example.precrime.domain.vision.VisionId
 import org.example.precrime.infrastructure.integration.template.ThymeleafPreApologyLetterService
-import io.mockk.every
-import io.mockk.mockk
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 
 class PreApologyDomainServiceTest {
-
     private val letterService = mockk<ThymeleafPreApologyLetterService>()
     private val service = PreApologyDomainService(letterService)
 
@@ -22,12 +21,13 @@ class PreApologyDomainServiceTest {
         // GIVEN
         val perpetratorId = PerpetratorId()
         val preArrestId = PreArrestId()
-        val vision = Vision(
-            id = VisionId(),
-            perpetratorId = perpetratorId,
-            crimeType = CrimeType.MURDER,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                id = VisionId(),
+                perpetratorId = perpetratorId,
+                crimeType = CrimeType.MURDER,
+                foreseenAt = OffsetDateTime.now(),
+            )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN
@@ -47,12 +47,13 @@ class PreApologyDomainServiceTest {
         // GIVEN
         val perpetratorId = PerpetratorId()
         val preArrestId = PreArrestId()
-        val vision = Vision(
-            id = VisionId(),
-            perpetratorId = perpetratorId,
-            crimeType = CrimeType.JAYWALKING,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                id = VisionId(),
+                perpetratorId = perpetratorId,
+                crimeType = CrimeType.JAYWALKING,
+                foreseenAt = OffsetDateTime.now(),
+            )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN
@@ -72,12 +73,13 @@ class PreApologyDomainServiceTest {
         // GIVEN
         val perpetratorId = PerpetratorId()
         val preArrestId = PreArrestId()
-        val vision = Vision(
-            id = VisionId(),
-            perpetratorId = perpetratorId,
-            crimeType = CrimeType.LARCENY,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                id = VisionId(),
+                perpetratorId = perpetratorId,
+                crimeType = CrimeType.LARCENY,
+                foreseenAt = OffsetDateTime.now(),
+            )
         every { letterService.generateLetterText(any(), any()) } returns "Dummy letter"
 
         // WHEN

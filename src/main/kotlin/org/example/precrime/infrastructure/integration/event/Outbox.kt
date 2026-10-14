@@ -1,14 +1,16 @@
 package org.example.precrime.infrastructure.integration.event
 
-import java.util.*
+import java.util.UUID
 
 data class Outbox(
     val id: OutboxId,
     val event: Any,
-    val status: OutboxState
+    val status: OutboxState,
 )
 
 @JvmInline
-value class OutboxId(val value: UUID = UUID.randomUUID())
+value class OutboxId(
+    val value: UUID = UUID.randomUUID(),
+)
 
 enum class OutboxState { PENDING, PROCESSED, INVALID }

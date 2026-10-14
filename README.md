@@ -249,6 +249,8 @@ Run the Spring Boot application:
 
 Tests: `./mvnw test`
 
+Lint: `./mvnw ktlint:check` (auto-fix with `./mvnw ktlint:format`)
+
 ### Frontend
 
 The frontend features a "HUD" (Heads-Up Display) aesthetic. Navigate to the `ui` directory and start the dev server:
@@ -285,3 +287,6 @@ npx antora antora-playbook.yml
 - **OpenAPI First**: The REST API is defined in `openapi.yaml`. Backend controller interfaces and DTOs are generated
   using the `openapi-generator-maven-plugin`.
 - **Kotlin Style**: Use idiomatic Kotlin (data classes, expressions, null safety).
+- **Kotlin Linting**: Formatting and code style are enforced by **ktlint** through `ktlint-maven-plugin` (bound to the
+  Maven `validate` phase and configured in `.editorconfig`). Run `./mvnw ktlint:check` to verify, or
+  `./mvnw ktlint:format` to auto-fix violations.

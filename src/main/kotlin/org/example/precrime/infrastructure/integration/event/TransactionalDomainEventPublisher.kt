@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class TransactionalDomainEventPublisher(
-    private val outboxRepository: OutboxRepository
+    private val outboxRepository: OutboxRepository,
 ) : DomainEventPublisher {
     private val logger = LoggerFactory.getLogger(javaClass)
 

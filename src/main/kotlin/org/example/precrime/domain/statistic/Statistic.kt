@@ -4,7 +4,7 @@ import org.example.precrime.domain.AggregateVersion
 import org.jmolecules.ddd.annotation.AggregateRoot
 import org.jmolecules.ddd.annotation.Identity
 import org.jmolecules.ddd.types.Identifier
-import java.util.*
+import java.util.UUID
 
 @AggregateRoot
 class Statistic(
@@ -18,4 +18,6 @@ class Statistic(
 }
 
 @JvmInline
-value class StatisticId(val value: UUID = UUID.randomUUID()) : Identifier
+value class StatisticId(
+    val value: UUID = UUID.randomUUID(),
+) : Identifier

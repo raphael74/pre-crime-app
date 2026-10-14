@@ -1,5 +1,7 @@
 package org.example.precrime.infrastructure.integration.persistence
 
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.example.precrime.IntegrationTest
 import org.example.precrime.domain.perpetrator.Perpetrator
 import org.example.precrime.domain.perpetrator.PerpetratorRepository
@@ -9,42 +11,41 @@ import org.example.precrime.domain.prearrest.PreArrestStatus
 import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.domain.vision.Vision
 import org.example.precrime.domain.vision.VisionRepository
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 @Transactional
 class JooqPreArrestRepositoryTest(
     @Autowired private var repository: JooqPreArrestRepository,
     @Autowired private var perpetratorRepository: PerpetratorRepository,
-    @Autowired private val visionRepository: VisionRepository
+    @Autowired private val visionRepository: VisionRepository,
 ) {
-
     @Test
     fun `should save and find pre-arrest`() {
         // GIVEN
         val perpetrator = Perpetrator(firstName = "John", lastName = "Doe")
         perpetratorRepository.create(perpetrator)
 
-        val vision = Vision(
-            perpetratorId = perpetrator.id,
-            crimeType = CrimeType.THEFT,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision =
+            Vision(
+                perpetratorId = perpetrator.id,
+                crimeType = CrimeType.THEFT,
+                foreseenAt = OffsetDateTime.now(),
+            )
         visionRepository.create(vision)
 
         val preArrestDate = OffsetDateTime.now()
-        val preArrest = PreArrest(
-            visionId = vision.id,
-            perpetratorId = perpetrator.id,
-            preArrestDate = preArrestDate
-        )
+        val preArrest =
+            PreArrest(
+                visionId = vision.id,
+                perpetratorId = perpetrator.id,
+                preArrestDate = preArrestDate,
+            )
 
         // WHEN
         repository.create(preArrest)
@@ -67,31 +68,35 @@ class JooqPreArrestRepositoryTest(
         perpetratorRepository.create(p1)
         perpetratorRepository.create(p2)
 
-        val vision1 = Vision(
-            perpetratorId = p1.id,
-            crimeType = CrimeType.THEFT,
-            foreseenAt = OffsetDateTime.now()
-        )
-        val vision2 = Vision(
-            perpetratorId = p2.id,
-            crimeType = CrimeType.THEFT,
-            foreseenAt = OffsetDateTime.now()
-        )
+        val vision1 =
+            Vision(
+                perpetratorId = p1.id,
+                crimeType = CrimeType.THEFT,
+                foreseenAt = OffsetDateTime.now(),
+            )
+        val vision2 =
+            Vision(
+                perpetratorId = p2.id,
+                crimeType = CrimeType.THEFT,
+                foreseenAt = OffsetDateTime.now(),
+            )
         visionRepository.create(vision1)
         visionRepository.create(vision2)
 
-        val preArrest1 = PreArrest(
-            visionId = vision1.id,
-            perpetratorId = p1.id,
-            preArrestDate = OffsetDateTime.now().minusDays(1),
-            status = PreArrestStatus.ARRESTED_BEFORE_CRIME
-        )
-        val preArrest2 = PreArrest(
-            visionId = vision2.id,
-            perpetratorId = p2.id,
-            preArrestDate = OffsetDateTime.now(),
-            status = PreArrestStatus.ARRESTED_BEFORE_CRIME
-        )
+        val preArrest1 =
+            PreArrest(
+                visionId = vision1.id,
+                perpetratorId = p1.id,
+                preArrestDate = OffsetDateTime.now().minusDays(1),
+                status = PreArrestStatus.ARRESTED_BEFORE_CRIME,
+            )
+        val preArrest2 =
+            PreArrest(
+                visionId = vision2.id,
+                perpetratorId = p2.id,
+                preArrestDate = OffsetDateTime.now(),
+                status = PreArrestStatus.ARRESTED_BEFORE_CRIME,
+            )
         repository.create(preArrest1)
         repository.create(preArrest2)
 

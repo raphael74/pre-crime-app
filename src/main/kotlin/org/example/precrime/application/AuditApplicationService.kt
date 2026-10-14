@@ -11,19 +11,20 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class AuditApplicationService(
-    private val auditEntryRepository: AuditEntryRepository
+    private val auditEntryRepository: AuditEntryRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @DomainEventHandler
-    fun logEvent(eventType: String, payload: String) {
+    fun logEvent(
+        eventType: String,
+        payload: String,
+    ) {
         logger.info("[Audit] Logging $eventType")
         val entry = AuditEntry(eventType = eventType, payload = payload)
         auditEntryRepository.create(entry)
     }
 
     @Transactional(readOnly = true)
-    fun getAuditLogs(): List<AuditEntry> {
-        return auditEntryRepository.findAll()
-    }
+    fun getAuditLogs(): List<AuditEntry> = auditEntryRepository.findAll()
 }

@@ -1,25 +1,25 @@
 package org.example.precrime.domain.preapology
 
-import org.example.precrime.domain.DomainEventPublisher
-import org.example.precrime.domain.perpetrator.PerpetratorId
-import org.example.precrime.domain.prearrest.PreArrestId
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.example.precrime.domain.DomainEventPublisher
+import org.example.precrime.domain.perpetrator.PerpetratorId
+import org.example.precrime.domain.prearrest.PreArrestId
 import org.junit.jupiter.api.Test
 
 class PreApologyTest {
-
     @Test
     fun `issue should publish PreApologyIssuedEvent`() {
         val publisher = mockk<DomainEventPublisher>(relaxed = true)
-        val preApology = PreApology(
-            preArrestId = PreArrestId(),
-            perpetratorId = PerpetratorId(),
-            compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
-            apologyLetter = ApologyLetter("Dear family...")
-        ).apply { injectPublisher(publisher) }
+        val preApology =
+            PreApology(
+                preArrestId = PreArrestId(),
+                perpetratorId = PerpetratorId(),
+                compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
+                apologyLetter = ApologyLetter("Dear family..."),
+            ).apply { injectPublisher(publisher) }
 
         preApology.issue()
 
@@ -27,22 +27,23 @@ class PreApologyTest {
             publisher.publish(
                 match<PreApologyIssuedEvent> {
                     it.apologyId == preApology.id &&
-                            it.preArrestId == preApology.preArrestId &&
-                            it.perpetratorId == preApology.perpetratorId &&
-                            it.netPayout == preApology.compensation.netPayout
-                }
+                        it.preArrestId == preApology.preArrestId &&
+                        it.perpetratorId == preApology.perpetratorId &&
+                        it.netPayout == preApology.compensation.netPayout
+                },
             )
         }
     }
 
     @Test
     fun `issue should throw when publisher not injected`() {
-        val preApology = PreApology(
-            preArrestId = PreArrestId(),
-            perpetratorId = PerpetratorId(),
-            compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
-            apologyLetter = ApologyLetter("Dear family...")
-        )
+        val preApology =
+            PreApology(
+                preArrestId = PreArrestId(),
+                perpetratorId = PerpetratorId(),
+                compensation = Compensation(10000.0, 450.0, 250.0, 9300.0),
+                apologyLetter = ApologyLetter("Dear family..."),
+            )
 
         assertThatThrownBy { preApology.issue() }
             .isInstanceOf(IllegalArgumentException::class.java)

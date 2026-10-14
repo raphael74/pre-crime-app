@@ -1,5 +1,6 @@
 package org.example.precrime.infrastructure.integration.persistence
 
+import org.assertj.core.api.Assertions.assertThat
 import org.example.precrime.domain.AggregateVersion
 import org.example.precrime.domain.audit.AuditEntryId
 import org.example.precrime.domain.perpetrator.PerpetratorId
@@ -8,12 +9,10 @@ import org.example.precrime.domain.prearrest.PreArrestId
 import org.example.precrime.domain.statistic.StatisticId
 import org.example.precrime.domain.vision.VisionId
 import org.example.precrime.infrastructure.integration.event.OutboxId
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 class JooqConvertersTest {
-
     @Test
     fun `AggregateVersionConverter should convert Long to AggregateVersion and back`() {
         val converter = AggregateVersionConverter()

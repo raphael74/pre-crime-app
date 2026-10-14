@@ -11,7 +11,7 @@ import org.jmolecules.ddd.annotation.ValueObject
 import org.jmolecules.ddd.types.Identifier
 import org.jmolecules.event.annotation.DomainEvent
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 @AggregateRoot
 class PreApology(
@@ -20,18 +20,19 @@ class PreApology(
     val perpetratorId: PerpetratorId,
     val compensation: Compensation,
     val apologyLetter: ApologyLetter,
-    val createdAt: OffsetDateTime = OffsetDateTime.now()
+    val createdAt: OffsetDateTime = OffsetDateTime.now(),
 ) {
-    private var _publisher: DomainEventPublisher? = null
+    private var eventPublisher: DomainEventPublisher? = null
 
     fun injectPublisher(publisher: DomainEventPublisher) {
-        this._publisher = publisher
+        this.eventPublisher = publisher
     }
 
     private val publisher: DomainEventPublisher
-        get() = requireNotNull(_publisher) {
-            "DomainEventPublisher has not been injected into PreApology $id"
-        }
+        get() =
+            requireNotNull(eventPublisher) {
+                "DomainEventPublisher has not been injected into PreApology $id"
+            }
 
     fun issue() {
         publisher.publish(
@@ -39,21 +40,23 @@ class PreApology(
                 apologyId = id,
                 preArrestId = preArrestId,
                 perpetratorId = perpetratorId,
-                netPayout = compensation.netPayout
-            )
+                netPayout = compensation.netPayout,
+            ),
         )
     }
 }
 
 @JvmInline
-value class PreApologyId(val value: UUID = UUID.randomUUID()) : Identifier
+value class PreApologyId(
+    val value: UUID = UUID.randomUUID(),
+) : Identifier
 
 @ValueObject
 data class Compensation(
     val baseAmount: Double,
     val jetpackFuelDeduction: Double,
     val haloRentalFee: Double,
-    val netPayout: Double
+    val netPayout: Double,
 ) {
     fun isBillableToFamily(): Boolean = netPayout < 0
 }
@@ -62,16 +65,16 @@ data class Compensation(
 class CompensationFactory {
     companion object {
         fun createCompensation(crimeType: CrimeType): Compensation {
-
-            val baseAmount = when (crimeType) {
-                CrimeType.MURDER -> 10000.0
-                CrimeType.GRAND_THEFT_AUTO -> 5000.0
-                CrimeType.JAYWALKING -> 50.0
-                else -> 1000.0
-            }
+            val baseAmount =
+                when (crimeType) {
+                    CrimeType.MURDER -> 10000.0
+                    CrimeType.GRAND_THEFT_AUTO -> 5000.0
+                    CrimeType.JAYWALKING -> 50.0
+                    else -> 1000.0
+                }
 
             val jetpackFuelDeduction = 450.0 // Standard deployment fee
-            val haloRentalFee = 250.0       // Stasis halo overnight fee
+            val haloRentalFee = 250.0 // Stasis halo overnight fee
             val netPayout = baseAmount - jetpackFuelDeduction - haloRentalFee
 
             return Compensation(baseAmount, jetpackFuelDeduction, haloRentalFee, netPayout)
@@ -80,7 +83,9 @@ class CompensationFactory {
 }
 
 @ValueObject
-data class ApologyLetter(val text: String) {
+data class ApologyLetter(
+    val text: String,
+) {
     init {
         require(text.isNotBlank()) { "Letter text cannot be blank" }
     }
@@ -91,5 +96,5 @@ data class PreApologyIssuedEvent(
     val apologyId: PreApologyId,
     val preArrestId: PreArrestId,
     val perpetratorId: PerpetratorId,
-    val netPayout: Double
+    val netPayout: Double,
 )

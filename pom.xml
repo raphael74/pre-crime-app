@@ -160,6 +160,57 @@
         </dependency>
     </dependencies>
 
+    <!--
+      Some third-party POMs (e.g. org.flywaydb:flyway-parent) declare their own repositories. Maven then tries to
+      fetch plugin-prefix metadata from them during the build, which fails with HTTP 401 and pollutes the build log.
+      We never consume artifacts from these repositories, so override them here as disabled to keep the build quiet.
+    -->
+    <repositories>
+        <repository>
+            <id>flyway-community-db-support</id>
+            <url>https://maven.pkg.github.com/flyway/flyway-community-db-support</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>MavenFeed</id>
+            <url>https://red-gate.pkgs.visualstudio.com/MavenFeed/_packaging/MavenFeed/maven/v1/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-libs-milestone</id>
+            <url>https://repo.spring.io/libs-milestone</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-libs-milestone</id>
+            <url>https://repo.spring.io/libs-milestone</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <finalName>pre-crime-app</finalName>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
@@ -214,6 +265,8 @@
                     <argLine>
                         -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
                         -Xshare:off
+                        -XX:+EnableDynamicAgentLoading
+                        --sun-misc-unsafe-memory-access=allow
                     </argLine>
                 </configuration>
             </plugin>
@@ -236,6 +289,9 @@
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <useTags>true</useTags>
                                 <enumPropertyNaming>UPPERCASE</enumPropertyNaming>
+                                <!-- Keep the pre-7.24.0 output (no field-level Jackson annotations) and silence the generator warnings. -->
+                                <generateJsonIncludeAnnotations>false</generateJsonIncludeAnnotations>
+                                <generateJsonSetterNullsAnnotations>false</generateJsonSetterNullsAnnotations>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -296,6 +352,7 @@
                         <configuration>
                             <executable>java</executable>
                             <arguments>
+                                <argument>--sun-misc-unsafe-memory-access=allow</argument>
                                 <argument>-jar</argument>
                                 <argument>${project.build.directory}/detekt/detekt-cli.jar</argument>
                                 <argument>--config</argument>

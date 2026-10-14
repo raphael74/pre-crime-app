@@ -6,5 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping
 @Controller
 class SpaController {
     @GetMapping("/login")
-    fun spaFallback(): String = "forward:/index.html"
+    fun spaFallback(): String = INDEX_FORWARD
+
+    companion object {
+        private const val INDEX_FORWARD = "forward:/index.html"
+    }
 }

@@ -26,6 +26,22 @@ jobs:
           chmod +x mvnw
           ./mvnw -B ktlint:check
 
+      - name: Static Analysis (detekt)
+        run: |
+          chmod +x mvnw
+          # detekt is bound to the Maven `verify` phase; tests are skipped here and run in the build step below.
+          ./mvnw -B -DskipTests verify
+
+      - name: Upload detekt Report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: detekt-report
+          path: |
+            target/detekt.sarif
+            target/detekt.html
+          if-no-files-found: ignore
+
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:

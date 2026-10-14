@@ -35,8 +35,8 @@ class JooqInboxRepository(
                     .set(INBOX.PROCESSED_AT, OffsetDateTime.now())
                     .execute()
                 true
-            } catch (e: Exception) {
-                // In case of race condition between fetchExists and insert
+            } catch (expected: Exception) {
+                // Race condition between fetchExists and insert: the record was inserted concurrently.
                 false
             }
     }

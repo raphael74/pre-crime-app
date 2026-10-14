@@ -15,10 +15,10 @@ import org.example.precrime.domain.prearrest.PreArrestId
 import org.example.precrime.domain.vision.CrimeForeseenEvent
 import org.example.precrime.domain.vision.CrimeType
 import org.example.precrime.domain.vision.VisionId
-import org.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORESEEN_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_APOLOGY_ISSUED_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_CANCELLED_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.CRIME_FORESEEN_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_APOLOGY_ISSUED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_ARREST_CANCELLED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_ARREST_EXECUTED_EVENT_TOPIC
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.transaction.PlatformTransactionManager

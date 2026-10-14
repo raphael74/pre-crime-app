@@ -1,0 +1,12 @@
+# detekt configuration for the Pre-Crime application.
+#
+# This file is a *supplemental* configuration: it is combined with detekt's
+# default rule set via `--build-upon-default-config`, so only the rules that
+# need to be tuned for this project have to be listed here.
+#
+# Full rule reference: https://detekt.dev/docs/rules/
+# Run locally: ./mvnw verify   (detekt is bound to the `verify` phase)
+style:
+  MaxLineLength:
+    # Aligned with .editorconfig (ktlint enforces the same limit for this project).
+    maxLineLength: 140

@@ -220,6 +220,7 @@ sequenceDiagram
 | **Persistence**      | PostgreSQL 18, jOOQ, Flyway              |
 | **Messaging**        | Kafka 4.2.0                              |
 | **Testing**          | JUnit 5, ArchUnit, jMolecules-test       |
+| **Code Quality**     | detekt, ktlint                           |
 | **Containerization** | Docker Compose                           |
 
 ## Building and Running
@@ -250,6 +251,8 @@ Run the Spring Boot application:
 Tests: `./mvnw test`
 
 Lint: `./mvnw ktlint:check` (auto-fix with `./mvnw ktlint:format`)
+
+Static analysis: `./mvnw verify` (runs **detekt**; HTML report at `target/detekt.html`, SARIF at `target/detekt.sarif`)
 
 ### Frontend
 
@@ -290,3 +293,7 @@ npx antora antora-playbook.yml
 - **Kotlin Linting**: Formatting and code style are enforced by **ktlint** through `ktlint-maven-plugin` (bound to the
   Maven `validate` phase and configured in `.editorconfig`). Run `./mvnw ktlint:check` to verify, or
   `./mvnw ktlint:format` to auto-fix violations.
+- **Kotlin Static Analysis**: Code smells and potential bugs are detected by **detekt** (configured in `detekt.yml`,
+  supplemental to detekt's default rule set). It is bound to the Maven `verify` phase, so `./mvnw verify` fails the
+  build on findings. The CI pipeline runs it in the `Static Analysis (detekt)` step and uploads the report as a build
+  artifact.

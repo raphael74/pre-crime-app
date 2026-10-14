@@ -1,9 +1,9 @@
 package org.example.precrime
 
-import org.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORESEEN_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_APOLOGY_ISSUED_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_CANCELLED_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.CRIME_FORESEEN_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_APOLOGY_ISSUED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_ARREST_CANCELLED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_ARREST_EXECUTED_EVENT_TOPIC
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext

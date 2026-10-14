@@ -15,12 +15,16 @@ class Perpetrator(
 ) {
     init {
         require(firstName.isNotBlank()) { "Perpetrator first name cannot be blank" }
-        require(firstName.length <= 80) { "Perpetrator first name cannot exceed 80 characters" }
+        require(firstName.length <= MAX_NAME_LENGTH) { "Perpetrator first name cannot exceed $MAX_NAME_LENGTH characters" }
         require(lastName.isNotBlank()) { "Perpetrator last name cannot be blank" }
-        require(lastName.length <= 80) { "Perpetrator last name cannot exceed 80 characters" }
+        require(lastName.length <= MAX_NAME_LENGTH) { "Perpetrator last name cannot exceed $MAX_NAME_LENGTH characters" }
     }
 
     val fullName: String get() = "$firstName $lastName"
+
+    companion object {
+        private const val MAX_NAME_LENGTH = 80
+    }
 }
 
 @JvmInline

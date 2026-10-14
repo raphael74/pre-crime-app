@@ -24,13 +24,13 @@ class ThymeleafPreApologyLetterService(
     ): String {
         val preArrest =
             preArrestRepository.findById(preArrestId)
-                ?: throw IllegalStateException("PreArrest $preArrestId not found")
+                ?: error("PreArrest $preArrestId not found")
         val perpetrator =
             perpetratorRepository.findById(preArrest.perpetratorId)
-                ?: throw IllegalStateException("Perpetrator ${preArrest.perpetratorId} not found")
+                ?: error("Perpetrator ${preArrest.perpetratorId} not found")
         val vision =
             visionRepository.findById(preArrest.visionId)
-                ?: throw IllegalStateException("Vision ${preArrest.visionId} not found")
+                ?: error("Vision ${preArrest.visionId} not found")
 
         val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
         val context =

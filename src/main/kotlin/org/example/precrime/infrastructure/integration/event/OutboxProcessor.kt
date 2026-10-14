@@ -5,10 +5,10 @@ import org.example.precrime.domain.preapology.PreApologyIssuedEvent
 import org.example.precrime.domain.prearrest.PreArrestCancelledEvent
 import org.example.precrime.domain.prearrest.PreArrestExecutedEvent
 import org.example.precrime.domain.vision.CrimeForeseenEvent
-import org.example.precrime.infrastructure.KafkaTopics.Companion.CRIME_FORESEEN_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_APOLOGY_ISSUED_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_CANCELLED_EVENT_TOPIC
-import org.example.precrime.infrastructure.KafkaTopics.Companion.PRE_ARREST_EXECUTED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.CRIME_FORESEEN_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_APOLOGY_ISSUED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_ARREST_CANCELLED_EVENT_TOPIC
+import org.example.precrime.infrastructure.KafkaTopics.PRE_ARREST_EXECUTED_EVENT_TOPIC
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.scheduling.annotation.Scheduled
@@ -36,6 +36,8 @@ class OutboxProcessor(
         outboxRecords.forEach { sendEvent(it.id, it.event) }
     }
 
+    // Broad exception handling is intentional: a single unsendable event must not abort the whole batch.
+    @Suppress("TooGenericExceptionCaught")
     private fun sendEvent(
         outboxId: OutboxId,
         event: Any,
@@ -50,9 +52,10 @@ class OutboxProcessor(
             }
             if (record != null) {
                 try {
-                    logger.info(
-                        "Sending Kafka event ${event::class.simpleName} with id ${outboxId.value} to topic ${record.topic()} with key ${record.key()}",
-                    )
+                    val eventDescription =
+                        "Sending Kafka event ${event::class.simpleName} with id ${outboxId.value} " +
+                            "to topic ${record.topic()} with key ${record.key()}"
+                    logger.info(eventDescription)
                     kafkaTemplate.send(record).get()
                     outboxRepository.markAsProcessed(outboxId)
                 } catch (e: Exception) {

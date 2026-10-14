@@ -32,6 +32,9 @@
         <jmolecules.version>2.0.1</jmolecules.version>
         <jmolecules.integrations.version>0.33.0</jmolecules.integrations.version>
         <ktlint-maven-plugin.version>3.7.1</ktlint-maven-plugin.version>
+        <detekt.version>2.0.0-alpha.6</detekt.version>
+        <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
+        <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -249,6 +252,68 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>detekt-cli</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>dev.detekt</groupId>
+                                    <artifactId>detekt-cli</artifactId>
+                                    <version>${detekt.version}</version>
+                                    <classifier>all</classifier>
+                                    <type>jar</type>
+                                    <outputDirectory>${project.build.directory}/detekt</outputDirectory>
+                                    <destFileName>detekt-cli.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>detekt</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>${project.build.directory}/detekt/detekt-cli.jar</argument>
+                                <argument>--config</argument>
+                                <argument>${project.basedir}/detekt.yml</argument>
+                                <argument>--build-upon-default-config</argument>
+                                <argument>--input</argument>
+                                <argument>${project.basedir}/src/main/kotlin</argument>
+                                <argument>--input</argument>
+                                <argument>${project.basedir}/src/test/kotlin</argument>
+                                <argument>--base-path</argument>
+                                <argument>${project.basedir}</argument>
+                                <argument>--report</argument>
+                                <argument>sarif:${project.build.directory}/detekt.sarif</argument>
+                                <argument>--report</argument>
+                                <argument>html:${project.build.directory}/detekt.html</argument>
+                                <argument>--parallel</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

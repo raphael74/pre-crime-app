@@ -62,23 +62,21 @@ data class Compensation(
 }
 
 @Factory
-class CompensationFactory {
-    companion object {
-        fun createCompensation(crimeType: CrimeType): Compensation {
-            val baseAmount =
-                when (crimeType) {
-                    CrimeType.MURDER -> 10000.0
-                    CrimeType.GRAND_THEFT_AUTO -> 5000.0
-                    CrimeType.JAYWALKING -> 50.0
-                    else -> 1000.0
-                }
+object CompensationFactory {
+    fun createCompensation(crimeType: CrimeType): Compensation {
+        val baseAmount =
+            when (crimeType) {
+                CrimeType.MURDER -> 10000.0
+                CrimeType.GRAND_THEFT_AUTO -> 5000.0
+                CrimeType.JAYWALKING -> 50.0
+                else -> 1000.0
+            }
 
-            val jetpackFuelDeduction = 450.0 // Standard deployment fee
-            val haloRentalFee = 250.0 // Stasis halo overnight fee
-            val netPayout = baseAmount - jetpackFuelDeduction - haloRentalFee
+        val jetpackFuelDeduction = 450.0 // Standard deployment fee
+        val haloRentalFee = 250.0 // Stasis halo overnight fee
+        val netPayout = baseAmount - jetpackFuelDeduction - haloRentalFee
 
-            return Compensation(baseAmount, jetpackFuelDeduction, haloRentalFee, netPayout)
-        }
+        return Compensation(baseAmount, jetpackFuelDeduction, haloRentalFee, netPayout)
     }
 }
 

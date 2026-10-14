@@ -65,21 +65,19 @@ enum class CrimeType(
 }
 
 @Factory
-class VisionFactory {
-    companion object {
-        fun createVision(
-            perpetratorId: PerpetratorId,
-            crimeType: CrimeType,
-        ): Vision {
-            val visionId = VisionId()
-            val foreseenAt = OffsetDateTime.now().plusHours(2)
-            return Vision(
-                id = visionId,
-                perpetratorId = perpetratorId,
-                crimeType = crimeType,
-                foreseenAt = foreseenAt,
-            )
-        }
+object VisionFactory {
+    fun createVision(
+        perpetratorId: PerpetratorId,
+        crimeType: CrimeType,
+    ): Vision {
+        val visionId = VisionId()
+        val foreseenAt = OffsetDateTime.now().plusHours(2)
+        return Vision(
+            id = visionId,
+            perpetratorId = perpetratorId,
+            crimeType = crimeType,
+            foreseenAt = foreseenAt,
+        )
     }
 }
 

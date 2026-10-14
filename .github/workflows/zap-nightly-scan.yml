@@ -1,0 +1,150 @@
+name: Nightly OWASP ZAP Scan
+
+on:
+  schedule:
+    # Every night at 02:00 UTC.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Build Frontend
+        run: |
+          cd ui
+          npm ci
+          npm run generate-api
+          npm run build
+
+      - name: Bundle Frontend into Backend
+        run: |
+          mkdir -p src/main/resources/static
+          cp -r ui/dist/precrime-ui/browser/* src/main/resources/static/
+
+      - name: Build Backend JAR
+        run: |
+          chmod +x mvnw
+          # Tests are covered by the main CI workflow; here we only need a runnable app.
+          ./mvnw -B -DskipTests clean package
+
+      - name: Start Infrastructure (PostgreSQL + Kafka)
+        run: |
+          cd docker
+          docker compose up -d --wait
+
+      - name: Start Backend
+        run: |
+          java -jar target/pre-crime-app.jar --spring.profiles.active=local > backend.log 2>&1 &
+          for _ in $(seq 1 60); do
+            if curl -sf http://localhost:8080/actuator/health | grep -q '"status":"UP"'; then
+              echo "Backend is ready"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Backend did not become healthy in time" >&2
+          tail -n 200 backend.log >&2
+          exit 1
+
+      - name: Run OWASP ZAP Full Scan
+        id: zap
+        # ZAP returns a non-zero exit code when it finds alerts; we inspect the report
+        # in the following steps instead of failing here so that the reports are uploaded.
+        continue-on-error: true
+        run: |
+          mkdir -p zap-reports
+          chmod a+w zap-reports
+          set +e
+          docker run --rm \
+            --network host \
+            -v "$PWD/zap-reports:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py \
+              -t http://localhost:8080/ \
+              -j \
+              -J report_json.json \
+              -w report_md.md \
+              -r report_html.html \
+              -x report_xml.xml
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: zap-report
+          path: zap-reports/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Summarize ZAP Findings
+        if: always()
+        run: |
+          report=zap-reports/report_json.json
+          if [ ! -f "$report" ]; then
+            echo "No ZAP report was generated." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo "## OWASP ZAP Full Scan"
+            echo ""
+            echo "| Risk | Alerts |"
+            echo "| --- | --- |"
+            for pair in "3:High" "2:Medium" "1:Low" "0:Informational"; do
+              code=${pair%%:*}
+              name=${pair##*:}
+              count=$(jq --arg code "$code" \
+                '[.site[].alerts[]? | select((.riskcode | tonumber) == ($code | tonumber))] | length' \
+                "$report")
+              echo "| $name | $count |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail If Scan Did Not Complete
+        if: always() && steps.zap.outputs.exit_code == '3'
+        run: |
+          echo "::error::OWASP ZAP scan failed to complete (exit code 3). Check the zap-report artifact."
+          exit 1
+
+      - name: Fail On High-Risk Findings
+        if: always() && steps.zap.outputs.exit_code != '3'
+        run: |
+          report=zap-reports/report_json.json
+          if [ ! -f "$report" ]; then
+            echo "::error::OWASP ZAP report is missing."
+            exit 1
+          fi
+          high=$(jq '[.site[].alerts[]? | select((.riskcode | tonumber) == 3)] | length' "$report")
+          echo "High-risk alerts: $high"
+          if [ "$high" -gt 0 ]; then
+            echo "::error::OWASP ZAP found $high high-risk alert(s). See the zap-report artifact."
+            exit 1
+          fi
+
+      - name: Tear Down Infrastructure
+        if: always()
+        run: |
+          cd docker
+          docker compose down -v

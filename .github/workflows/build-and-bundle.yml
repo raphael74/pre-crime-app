@@ -41,6 +41,7 @@ jobs:
             target/detekt.sarif
             target/detekt.html
           if-no-files-found: ignore
+          retention-days: 30
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -73,6 +74,7 @@ jobs:
           name: pre-crime-app
           path: target/pre-crime-app.jar
           if-no-files-found: error
+          retention-days: 14
 
   e2e:
     needs: build

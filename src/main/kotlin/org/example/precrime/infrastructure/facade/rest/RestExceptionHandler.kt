@@ -16,14 +16,16 @@ class RestExceptionHandler {
         ex: Exception,
         request: HttpServletRequest?,
     ): ResponseEntity<Any> {
+        // Full details are logged server-side only; a generic message is returned to the
+        // client to avoid disclosing internal implementation details (e.g. stack traces,
+        // SQL errors, class names) which security scanners such as OWASP ZAP flag as
+        // information disclosure.
         logger.warn("Exception in call ${request?.requestURI}:", ex)
 
-        var message = ex.message
-        if (ex.cause != null) {
-            message += " - "
-            message += ex.cause!!.message
-        }
+        return ResponseEntity(GENERIC_ERROR_MESSAGE, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 
-        return ResponseEntity(message, HttpStatus.INTERNAL_SERVER_ERROR)
+    companion object {
+        private const val GENERIC_ERROR_MESSAGE = "An unexpected error occurred. Please contact the administrator."
     }
 }

@@ -10,12 +10,14 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration {
     companion object {
         const val USER_ROLE = "USER"
+        private const val HSTS_MAX_AGE_SECONDS = 31536000L // 1 year in seconds
     }
 
     @Bean
@@ -23,6 +25,30 @@ class SecurityConfiguration {
         http {
             csrf {
                 disable()
+            }
+            headers {
+                frameOptions {
+                    deny = true
+                }
+                contentTypeOptions { }
+                xssProtection {
+                    headerValue = HeaderValue.DISABLED
+                }
+                referrerPolicy {
+                    policy =
+                        org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy
+                            .STRICT_ORIGIN_WHEN_CROSS_ORIGIN
+                }
+                httpStrictTransportSecurity {
+                    includeSubDomains = true
+                    maxAgeInSeconds = HSTS_MAX_AGE_SECONDS
+                    preload = true
+                }
+                contentSecurityPolicy {
+                    policyDirectives =
+                        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
+                            "img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self'"
+                }
             }
             authorizeHttpRequests {
                 authorize("/api/**", authenticated)

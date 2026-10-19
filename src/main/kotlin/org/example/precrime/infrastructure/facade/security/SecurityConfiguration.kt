@@ -47,7 +47,7 @@ class SecurityConfiguration {
                 contentSecurityPolicy {
                     policyDirectives =
                         "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
-                            "img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self'"
+                        "img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self'"
                 }
             }
             authorizeHttpRequests {

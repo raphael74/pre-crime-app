@@ -33,7 +33,7 @@
         <jmolecules.integrations.version>0.33.0</jmolecules.integrations.version>
         <ktlint-maven-plugin.version>3.7.1</ktlint-maven-plugin.version>
         <detekt.version>2.0.0-alpha.6</detekt.version>
-        <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
+        <exec-maven-plugin.version>3.7.0</exec-maven-plugin.version>
         <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
     </properties>
     <dependencies>

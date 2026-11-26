@@ -216,7 +216,7 @@ sequenceDiagram
 | Component            | Technology                               |
 |----------------------|------------------------------------------|
 | **Backend**          | Kotlin 2.4.0, Java 25, Spring Boot 4.0.6 |
-| **Frontend**         | Angular 21, TypeScript, Vanilla CSS      |
+| **Frontend**         | Angular 22, TypeScript, Vanilla CSS      |
 | **Persistence**      | PostgreSQL 18, jOOQ, Flyway              |
 | **Messaging**        | Kafka 4.2.0                              |
 | **Testing**          | JUnit 5, ArchUnit, jMolecules-test       |

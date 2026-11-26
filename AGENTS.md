@@ -8,7 +8,7 @@ Kotlin/Spring Boot backend and an Angular frontend. It is themed around a futuri
 - **Purpose**: Demonstrate clean architecture, reliable event-driven communication (Transactional Outbox), and modern
   tech stacks.
 - **Backend**: Kotlin 2.3.20, Java 25, Spring Boot 4.0.5.
-- **Frontend**: Angular 21 with a "HUD" (Heads-Up Display) aesthetic.
+- **Frontend**: Angular 22 with a "HUD" (Heads-Up Display) aesthetic.
 - **Architecture**:
   - **Onion Architecture**: Strict separation between `domain`, `application`, and `infrastructure` layers.
   - **DDD**: Uses jMolecules for DDD primitives (Aggregates, Entities, Value Objects, Domain Events).
